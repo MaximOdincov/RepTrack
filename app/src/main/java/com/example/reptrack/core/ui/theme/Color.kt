@@ -1,4 +1,4 @@
-package com.example.reptrack.ui.theme
+package com.example.reptrack.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
