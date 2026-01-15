@@ -1,4 +1,4 @@
-package com.example.reptrack.core.ui.theme
+package com.example.reptrack.core.presentaion.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
