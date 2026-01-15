@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.mvikotlin.coroutines)
 
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("io.insert-koin:koin-android:3.5.3")

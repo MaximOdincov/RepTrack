@@ -34,4 +34,10 @@ interface UserDao {
 
     @Query("UPDATE users SET deletedAt = (strftime('%s','now') * 1000), updatedAt = (strftime('%s','now') * 1000) WHERE id = :userId")
     suspend fun deleteUser(userId: String)
+
+    @Query("SELECT * FROM users")
+    suspend fun getAllUsers(): List<UserDb>
+
+    @Query("SELECT * FROM gdpr_consent")
+    suspend fun getAllConsents(): List<GdprConsentDb>
 }

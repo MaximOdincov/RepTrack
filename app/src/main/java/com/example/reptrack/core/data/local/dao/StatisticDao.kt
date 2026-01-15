@@ -61,5 +61,17 @@ interface StatisticDao {
     suspend fun getExerciseLineTemplates(
         userId: String
     ): List<ExerciseLineTemplate>
+
+    @Query("SELECT * FROM chart_templates")
+    suspend fun getAllTemplates(): List<ChartTemplateDb>
+
+    @Query("SELECT * FROM friend_configs")
+    suspend fun getAllFriendConfigs(): List<FriendConfigDb>
+
+    @Query("SELECT * FROM exercise_line_configs")
+    suspend fun getAllExerciseLineConfigs(): List<ExerciseLineConfigDb>
+
+    @Query("SELECT * FROM set_configs")
+    suspend fun getAllSetConfigs(): List<SetConfigDb>
 }
 

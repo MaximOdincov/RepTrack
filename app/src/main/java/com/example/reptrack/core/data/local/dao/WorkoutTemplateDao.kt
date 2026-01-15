@@ -40,4 +40,10 @@ interface WorkoutTemplateDao {
             }
         )
     }
+
+    @Query("SELECT * FROM workout_templates")
+    suspend fun getAllTemplates(): List<WorkoutTemplateDb>
+
+    @Query("SELECT * FROM template_exercises")
+    suspend fun getAllTemplateExercises(): List<TemplateExerciseDb>
 }

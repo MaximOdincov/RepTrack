@@ -25,4 +25,7 @@ interface ExerciseDao {
 
     @Delete
     suspend fun delete(exercise: ExerciseDb)
+
+    @Query("SELECT * FROM exercise")
+    suspend fun getAllExercises(): List<ExerciseDb>
 }

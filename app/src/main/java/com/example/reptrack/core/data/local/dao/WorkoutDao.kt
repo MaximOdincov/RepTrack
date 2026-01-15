@@ -38,7 +38,12 @@ interface WorkoutDao {
         insertSets(sets)
     }
 
-    @Query("DELETE FROM workout_sessions WHERE id = :sessionId")
     @Query("UPDATE workout_sessions SET deletedAt = (strftime('%s','now') * 1000), updatedAt = (strftime('%s','now') * 1000) WHERE id = :sessionId")
     suspend fun deleteSession(sessionId: String)
+
+    @Query("SELECT * FROM workout_sets")
+    suspend fun getAllSets(): List<WorkoutSetDb>
+
+    @Query("SELECT * FROM workout_exercises")
+    suspend fun getAllExercises(): List<WorkoutExerciseDb>
 }
