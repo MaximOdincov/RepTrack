@@ -35,7 +35,9 @@ object FriendConfigMapper {
                 updatedAt = doc.getLong(FirestoreConstants.FIELD_UPDATED_AT)
                     ?.let { TimestampMapper.fromTimestamp(it) } ?: java.time.LocalDateTime.now(),
                 deletedAt = doc.getLong(FirestoreConstants.FIELD_DELETED_AT)
-                    ?.let { TimestampMapper.fromTimestamp(it) }
+                    ?.let { TimestampMapper.fromTimestamp(it) },
+                userId = doc.getString(FirestoreConstants.FIELD_USER_ID) ?: return null
+
             )
         } catch (e: Exception) {
             null

@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface StatisticDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTemplate(template: ChartTemplateDb): Long
+    suspend fun insertTemplate(template: ChartTemplateDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFriendConfigs(configs: List<FriendConfigDb>)

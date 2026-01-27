@@ -19,7 +19,8 @@ object WeightRecordMapper {
                 date = LocalDateTime.parse(dateStr),
                 value = (doc.getDouble("value") ?: 0.0).toFloat(),
                 updatedAt = timestampToLocalDateTime(doc.getLong("updatedAt")),
-                deletedAt = doc.getLong("deletedAt")?.let { timestampToLocalDateTime(it) }
+                deletedAt = doc.getLong("deletedAt")?.let { timestampToLocalDateTime(it) },
+                userId = doc.getString("userId")?: ""
             )
         } catch (e: Exception) {
             null
