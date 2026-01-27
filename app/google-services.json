@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1039455213076",
+    "project_id": "reptrack-9937c",
+    "storage_bucket": "reptrack-9937c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039455213076:android:b4466a5c12c397d529f901",
+        "android_client_info": {
+          "package_name": "com.example.reptrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1039455213076-8ajd9e4l1o52p61end7mkvrd2n7fdhjr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.reptrack",
+            "certificate_hash": "2253d396492cfd3bf4d795ead70ceb625b31c5b7"
+          }
+        },
+        {
+          "client_id": "1039455213076-paodgppat2epferpmkk30ve4emck7pl9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc8F059jzFVn72ygRcCwuRLCJcHpaMdn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1039455213076-paodgppat2epferpmkk30ve4emck7pl9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
