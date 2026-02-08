@@ -3,8 +3,8 @@ package com.example.reptrack.data.backup.mapper
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.ExerciseDb
-import com.example.reptrack.domain.backup.ExerciseType
-import com.example.reptrack.domain.backup.MuscleGroup
+import com.example.reptrack.domain.workout.ExerciseType
+import com.example.reptrack.domain.workout.MuscleGroup
 import com.google.firebase.firestore.DocumentSnapshot
 import java.time.Instant
 import java.time.LocalDateTime

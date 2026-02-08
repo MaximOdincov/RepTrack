@@ -1,15 +1,11 @@
-package com.example.reptrack.feature_backup.data
+package com.example.reptrack.data.backup
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import com.example.reptrack.core.data.local.dao.*
-import com.example.reptrack.core.data.local.models.ExerciseDb
-import com.example.reptrack.core.data.local.models.UserDb
-import com.example.reptrack.core.data.local.models.WorkoutSessionDb
-import com.example.reptrack.core.data.local.models.WorkoutExerciseDb
-import com.example.reptrack.core.data.local.models.WorkoutSetDb
-import com.example.reptrack.core.data.local.models.WorkoutTemplateDb
-import com.example.reptrack.feature_backup.data.mapper.*
+import com.example.reptrack.data.local.dao.ExerciseDao
+import com.example.reptrack.data.local.dao.StatisticDao
+import com.example.reptrack.data.local.dao.UserDao
+import com.example.reptrack.data.local.dao.WorkoutDao
+import com.example.reptrack.data.local.dao.WorkoutTemplateDao
+import com.google.firebase.firestore.QuerySnapshot
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -308,7 +304,7 @@ class BackupRepositoryTest {
         coEvery { statisticDao.getAllSetConfigs() } returns emptyList()
 
         // Mock all firebase calls
-        val mockQuerySnapshot = mockk<com.google.firebase.firestore.QuerySnapshot> {
+        val mockQuerySnapshot = mockk<QuerySnapshot> {
             every { documents } returns emptyList()
         }
         coEvery { firebaseDataSource.listDocuments(any(), any()) } returns mockQuerySnapshot

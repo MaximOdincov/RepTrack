@@ -1,13 +1,9 @@
-package com.example.reptrack.feature_auth.domain.usecases
+package com.example.reptrack.domain
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import com.example.reptrack.core.domain.entities.GdprConsent
-import com.example.reptrack.core.domain.entities.User
-import com.example.reptrack.feature_auth.data.toDomain
-import com.example.reptrack.feature_auth.domain.AuthRepository
-import com.example.reptrack.feature_auth.domain.AuthUser
-import com.example.reptrack.feature_profile.domain.usecases.AddUserUseCase
+import com.example.reptrack.domain.auth.AuthRepository
+import com.example.reptrack.domain.auth.AuthUser
+import com.example.reptrack.domain.auth.usecases.SignUpUseCase
+import com.example.reptrack.domain.profile.usecases.AddUserUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -17,7 +13,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SignUpUseCaseTest {

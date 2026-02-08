@@ -1,5 +1,7 @@
 package com.example.reptrack.data.local.mappers
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.ExerciseDb
 import com.example.reptrack.data.local.models.WorkoutTemplateDb
 import com.example.reptrack.domain.workout.Exercise
@@ -19,8 +21,8 @@ object DomainMapper {
     fun ExerciseDb.toDomain(): Exercise = Exercise(
         id = id,
         name = name,
-        muscleGroup = MuscleGroup.valueOf(this.muscleGroup),
-        type = ExerciseType.valueOf(this.type),
+        muscleGroup = this.muscleGroup,
+        type = this.type,
         iconUrl = iconUrl,
         iconColor = iconColor,
         backgroundImageUrl = backgroundImageUrl,
@@ -28,11 +30,12 @@ object DomainMapper {
         isCustom = isCustom
     )
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun Exercise.toDb(): ExerciseDb = ExerciseDb(
         id = id,
         name = name,
-        muscleGroup = muscleGroup.name,
-        type = type.name,
+        muscleGroup = muscleGroup,
+        type = type,
         iconUrl = iconUrl,
         iconColor = iconColor,
         backgroundImageUrl = backgroundImageUrl,
@@ -48,6 +51,7 @@ object DomainMapper {
         schedule = parseSchedule(week1Days, week2Days)
     )
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun WorkoutTemplate.toDb(): WorkoutTemplateDb = WorkoutTemplateDb(
         id = id,
         name = name,

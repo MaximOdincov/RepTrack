@@ -3,7 +3,7 @@ package com.example.reptrack.data.backup.mapper
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.WorkoutSessionDb
-import com.example.reptrack.domain.backup.WorkoutStatus
+import com.example.reptrack.domain.workout.WorkoutStatus
 import com.google.firebase.firestore.DocumentSnapshot
 import java.time.Instant
 import java.time.LocalDateTime

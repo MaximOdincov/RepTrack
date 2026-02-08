@@ -1,5 +1,5 @@
 package com.example.reptrack.presentation.main.screens
-
+/*
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -17,13 +17,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.extensions.coroutines.states
-import com.example.reptrack.presentation.components.Calendar
-import com.example.reptrack.presentation.screens.main.MainScreenStore.Intent
+import com.example.reptrack.presentation.main.stores.MainScreenStore
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(store: Store<Intent, MainScreenStore.State, MainScreenStore.Label>) {
+fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>) {
     val state = store.states.collectAsState(MainScreenStore.State())
 
     Column(
@@ -140,3 +139,4 @@ private fun WorkoutDetails(
         }
     }
 }
+ */

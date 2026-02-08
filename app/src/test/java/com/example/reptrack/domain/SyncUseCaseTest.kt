@@ -1,7 +1,8 @@
-package com.example.reptrack.feature_backup.domain
+package com.example.reptrack.domain
 
-import com.example.reptrack.feature_backup.data.BackupRepository
-import com.example.reptrack.feature_backup.data.SyncPreferences
+import com.example.reptrack.data.backup.BackupRepository
+import com.example.reptrack.data.backup.SyncPreferences
+import com.example.reptrack.domain.backup.SyncUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

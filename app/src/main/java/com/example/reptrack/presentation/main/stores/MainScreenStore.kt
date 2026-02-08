@@ -1,5 +1,7 @@
 package com.example.reptrack.presentation.main.stores
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -8,9 +10,9 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.example.reptrack.domain.workout.CalendarMonth
 import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.domain.workout.WorkoutSession
-import com.example.reptrack.presentation.screens.main.MainScreenStore.Intent
-import com.example.reptrack.presentation.screens.main.MainScreenStore.Label
-import com.example.reptrack.presentation.screens.main.MainScreenStore.State
+import com.example.reptrack.presentation.main.stores.MainScreenStore.Intent
+import com.example.reptrack.presentation.main.stores.MainScreenStore.Label
+import com.example.reptrack.presentation.main.stores.MainScreenStore.State
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -25,7 +27,7 @@ internal interface MainScreenStore : Store<Intent, State, Label> {
         object CollapseCalendar : Intent
     }
 
-    data class State(
+    data class State @RequiresApi(Build.VERSION_CODES.O) constructor(
         val currentDate: LocalDate = LocalDate.now(),
         val displayDate: LocalDate = LocalDate.now(),
         val weekCalendar: CalendarWeek? = null,
@@ -47,6 +49,7 @@ internal class MainScreenStoreFactory(
 ) {
 
     fun create(): MainScreenStore =
+        @RequiresApi(Build.VERSION_CODES.O)
         object : MainScreenStore, Store<Intent, State, Label> by storeFactory.create(
             name = "MainScreenStore",
             initialState = State(),
@@ -72,6 +75,7 @@ internal class MainScreenStoreFactory(
     }
 
     private class BootstrapperImpl : CoroutineBootstrapper<Action>() {
+        @RequiresApi(Build.VERSION_CODES.O)
         override fun invoke() {
             dispatch(Action.LoadWeekCalendar(LocalDate.now()))
             dispatch(Action.LoadMonthCalendar(LocalDate.now()))
@@ -82,6 +86,7 @@ internal class MainScreenStoreFactory(
         private val calendarUseCase: CalendarUseCase
     ) : CoroutineExecutor<Intent, Action, State, Msg, Label>() {
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override fun executeIntent(intent: Intent, getState: () -> State) {
             when (intent) {
                 is Intent.SelectDate -> {
@@ -181,6 +186,7 @@ internal class MainScreenStoreFactory(
     }
 
     private object ReducerImpl : Reducer<State, Msg> {
+        @RequiresApi(Build.VERSION_CODES.O)
         override fun State.reduce(message: Msg): State =
             when (message) {
                 is Msg.CalendarWeekLoaded -> copy(weekCalendar = message.calendar)
