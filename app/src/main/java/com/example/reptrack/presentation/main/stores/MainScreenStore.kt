@@ -8,9 +8,9 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.example.reptrack.domain.workout.CalendarMonth
 import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.domain.workout.WorkoutSession
-import com.example.reptrack.presentation.screens.main.MainScreenStore.Intent
-import com.example.reptrack.presentation.screens.main.MainScreenStore.Label
-import com.example.reptrack.presentation.screens.main.MainScreenStore.State
+import com.example.reptrack.presentation.main.stores.MainScreenStore.Intent
+import com.example.reptrack.presentation.main.stores.MainScreenStore.Label
+import com.example.reptrack.presentation.main.stores.MainScreenStore.State
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -25,7 +25,7 @@ internal interface MainScreenStore : Store<Intent, State, Label> {
         object CollapseCalendar : Intent
     }
 
-    data class State(
+    data class State constructor(
         val currentDate: LocalDate = LocalDate.now(),
         val displayDate: LocalDate = LocalDate.now(),
         val weekCalendar: CalendarWeek? = null,

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.reptrack"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -77,6 +77,7 @@ dependencies {
 
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     implementation(libs.room.core)
     ksp(libs.room.compiler)

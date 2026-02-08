@@ -1,7 +1,5 @@
 package com.example.reptrack.domain.auth.usecases
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.example.reptrack.domain.workout.GdprConsent
 import com.example.reptrack.domain.workout.User
@@ -16,7 +14,6 @@ class SignUpUseCase(
     private val repository: AuthRepository,
     private val addUserUseCase: AddUserUseCase
 ) {
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke(email: String, password: String, username: String, dataConsent: Boolean): Result<User> {
         return repository.signUp(email, password)
             .fold(

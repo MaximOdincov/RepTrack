@@ -1,6 +1,5 @@
-package com.example.reptrack.feature_auth.data
+package com.example.reptrack.data.auth
 
-import com.example.reptrack.feature_auth.domain.AuthUser
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.coEvery
 import io.mockk.coVerify

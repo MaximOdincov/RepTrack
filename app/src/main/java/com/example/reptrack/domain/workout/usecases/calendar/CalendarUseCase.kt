@@ -1,7 +1,5 @@
 package com.example.reptrack.domain.workout.usecases.calendar
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.domain.workout.CalendarDay
 import com.example.reptrack.domain.workout.CalendarMonth
 import com.example.reptrack.domain.workout.CalendarWeek
@@ -24,7 +22,6 @@ class CalendarUseCase(
      * Получить неделю календаря для указанной даты
      * @param date Дата для получения недели (используется для определения текущей недели)
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getWeekCalendar(date: LocalDate): Result<CalendarWeek> = try {
         val mondayOfWeek = date.with(DayOfWeek.MONDAY)
         val daysInWeek = (0L..6L).map { mondayOfWeek.plusDays(it) }
@@ -47,7 +44,6 @@ class CalendarUseCase(
      * Получить месячный вид календаря
      * @param date Дата для определения месяца
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getMonthCalendar(date: LocalDate): Result<CalendarMonth> = try {
         val yearMonth = YearMonth.of(date.year, date.month)
         val firstDay = yearMonth.atDay(1)
@@ -89,7 +85,6 @@ class CalendarUseCase(
     /**
      * Получить информацию о тренировке для конкретного дня
      */
-    @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun getCalendarDay(date: LocalDate): CalendarDay {
         val sessionResult = sessionRepository.getSessionByDate(date)
         val session = sessionResult.getOrNull()

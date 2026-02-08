@@ -1,4 +1,4 @@
-package com.example.reptrack.feature_auth.data
+package com.example.reptrack.data.auth
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -11,8 +11,10 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlin.test.fail
 
 class FirebaseAuthDataSourceTest {
 
@@ -54,7 +56,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signUp(email, password)
-            kotlin.test.fail("Should have thrown exception")
+            fail("Should have thrown exception")
         } catch (e: Exception) {
             assertTrue(e.message?.contains("Invalid email") ?: true)
         }
@@ -71,7 +73,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signUp(email, password)
-            kotlin.test.fail("Should have thrown IllegalStateException")
+            fail("Should have thrown IllegalStateException")
         } catch (e: IllegalStateException) {
             assertEquals("Sign up error - user is null", e.message)
         }
@@ -107,7 +109,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signIn(email, password)
-            kotlin.test.fail("Should have thrown exception")
+            fail("Should have thrown exception")
         } catch (e: Exception) {
             assertEquals("Wrong password", e.message)
         }
@@ -122,7 +124,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signIn(email, password)
-            kotlin.test.fail("Should have thrown exception")
+            fail("Should have thrown exception")
         } catch (e: Exception) {
             assertEquals("User not found", e.message)
         }
@@ -139,7 +141,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signIn(email, password)
-            kotlin.test.fail("Should have thrown IllegalStateException")
+            fail("Should have thrown IllegalStateException")
         } catch (e: IllegalStateException) {
             assertEquals("Sign in error - user is null", e.message)
         }
@@ -173,7 +175,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signInAsGuest()
-            kotlin.test.fail("Should have thrown IllegalStateException")
+            fail("Should have thrown IllegalStateException")
         } catch (e: IllegalStateException) {
             assertEquals("Sign In Anonymously error - user is null", e.message)
         }
@@ -186,7 +188,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signInAsGuest()
-            kotlin.test.fail("Should have thrown exception")
+            fail("Should have thrown exception")
         } catch (e: Exception) {
             assertEquals("Anonymous sign in failed", e.message)
         }
@@ -210,7 +212,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.resetPassword(email)
-            kotlin.test.fail("Should have thrown exception")
+            fail("Should have thrown exception")
         } catch (e: Exception) {
             assertEquals("User not found", e.message)
         }
@@ -255,7 +257,7 @@ class FirebaseAuthDataSourceTest {
         }
         
         mockkStatic(GoogleAuthProvider::class)
-        val mockCredential = mockk<com.google.firebase.auth.AuthCredential>()
+        val mockCredential = mockk<AuthCredential>()
         every { GoogleAuthProvider.getCredential(idToken, null) } returns mockCredential
         every { firebaseAuth.signInWithCredential(mockCredential) } returns Tasks.forResult(authResult)
 
@@ -270,7 +272,7 @@ class FirebaseAuthDataSourceTest {
         val idToken = "invalid_token"
         
         mockkStatic(GoogleAuthProvider::class)
-        val mockCredential = mockk<com.google.firebase.auth.AuthCredential>()
+        val mockCredential = mockk<AuthCredential>()
         every { GoogleAuthProvider.getCredential(idToken, null) } returns mockCredential
         
         val exception = Exception("Invalid token")
@@ -278,7 +280,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signInWithGoogle(idToken)
-            kotlin.test.fail("Should have thrown exception")
+            fail("Should have thrown exception")
         } catch (e: Exception) {
             assertEquals("Invalid token", e.message)
         }
@@ -289,7 +291,7 @@ class FirebaseAuthDataSourceTest {
         val idToken = "valid_google_token"
 
         mockkStatic(GoogleAuthProvider::class)
-        val mockCredential = mockk<com.google.firebase.auth.AuthCredential>()
+        val mockCredential = mockk<AuthCredential>()
         every { GoogleAuthProvider.getCredential(idToken, null) } returns mockCredential
 
         val authResult = mockk<AuthResult> {
@@ -299,7 +301,7 @@ class FirebaseAuthDataSourceTest {
 
         try {
             firebaseAuthDataSource.signInWithGoogle(idToken)
-            kotlin.test.fail("Should have thrown IllegalStateException")
+            fail("Should have thrown IllegalStateException")
         } catch (e: IllegalStateException) {
             assertEquals("Sign in error - user is null", e.message)
         }

@@ -1,6 +1,4 @@
-package com.example.reptrack.data.local.convectors
-import android.os.Build
-import androidx.annotation.RequiresApi
+package com.example.reptrack.data.local.converters
 import androidx.room.TypeConverter
 import java.time.Instant
 import java.time.LocalDateTime
@@ -8,7 +6,6 @@ import java.time.ZoneId
 
 class DateTimeConverters {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @TypeConverter
     fun fromTimestamp(value: Long?): LocalDateTime? {
         return value?.let {
@@ -18,7 +15,6 @@ class DateTimeConverters {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @TypeConverter
     fun localDateTimeToTimestamp(date: LocalDateTime?): Long? {
         return date?.atZone(ZoneId.systemDefault())

@@ -1,7 +1,6 @@
-package com.example.reptrack.feature_auth.data
+package com.example.reptrack.data.auth
 
-import com.example.reptrack.core.domain.entities.User
-import com.example.reptrack.feature_auth.domain.AuthUser
+import com.example.reptrack.domain.auth.AuthUser
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.mockk
 import io.mockk.every

@@ -1,7 +1,5 @@
 package com.example.reptrack.data.backup.mapper
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.GdprConsentDb
 import com.example.reptrack.data.backup.FirestoreConstants
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,7 +10,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
  */
 object GdprConsentMapper {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun toFirestore(consent: GdprConsentDb): Map<String, Any?> {
         return mapOf(
             FirestoreConstants.FIELD_USER_ID to consent.userId,
@@ -23,7 +20,6 @@ object GdprConsentMapper {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fromFirestore(doc: DocumentSnapshot): GdprConsentDb? {
         return try {
             GdprConsentDb(
@@ -40,7 +36,6 @@ object GdprConsentMapper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fromFirestore(doc: QueryDocumentSnapshot): GdprConsentDb? {
         return fromFirestore(doc as DocumentSnapshot)
     }

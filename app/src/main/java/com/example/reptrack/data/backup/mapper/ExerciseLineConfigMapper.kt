@@ -1,7 +1,5 @@
 package com.example.reptrack.data.backup.mapper
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.statistics.ExerciseLineConfigDb
 import com.example.reptrack.data.backup.FirestoreConstants
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,7 +10,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
  */
 object ExerciseLineConfigMapper {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun toFirestore(config: ExerciseLineConfigDb): Map<String, Any?> {
         return mapOf(
             "id" to config.id,
@@ -23,7 +20,6 @@ object ExerciseLineConfigMapper {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fromFirestore(doc: DocumentSnapshot): ExerciseLineConfigDb? {
         return try {
             ExerciseLineConfigDb(
@@ -40,7 +36,6 @@ object ExerciseLineConfigMapper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fromFirestore(doc: QueryDocumentSnapshot): ExerciseLineConfigDb? {
         return fromFirestore(doc as DocumentSnapshot)
     }
