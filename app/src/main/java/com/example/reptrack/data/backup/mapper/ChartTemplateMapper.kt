@@ -1,7 +1,5 @@
 package com.example.reptrack.data.backup.mapper
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.statistics.ChartTemplateDb
 import com.example.reptrack.data.backup.FirestoreConstants
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,7 +10,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
  */
 object ChartTemplateMapper {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun toFirestore(template: ChartTemplateDb): Map<String, Any?> {
         return mapOf(
             "id" to template.id,
@@ -26,7 +23,6 @@ object ChartTemplateMapper {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fromFirestore(doc: DocumentSnapshot): ChartTemplateDb? {
         return try {
             ChartTemplateDb(

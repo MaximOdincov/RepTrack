@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.reptrack.data.local.Database
+import com.example.reptrack.data.local.MIGRATION_2_3
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -49,7 +50,7 @@ val databaseModule = module {
             "workout_db"
         )
             .fallbackToDestructiveMigration(false)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .createFromAsset("workout_db_prepopulated.db")
             .build()
     }

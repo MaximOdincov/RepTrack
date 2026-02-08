@@ -8,7 +8,9 @@ import java.time.LocalDateTime
 @Entity(tableName = "exercise_line_configs",
     foreignKeys = [ForeignKey(
         entity = ChartTemplateDb::class,
-        parentColumns = ["id"], childColumns = ["templateId"]
+        parentColumns = ["id"],
+        childColumns = ["templateId"],
+        onDelete = ForeignKey.CASCADE
     )]
 )
 data class ExerciseLineConfigDb(

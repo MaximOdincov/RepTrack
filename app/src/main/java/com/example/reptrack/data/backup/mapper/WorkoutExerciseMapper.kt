@@ -20,8 +20,8 @@ object WorkoutExerciseMapper {
                 workoutSessionId = doc.getString("workoutSessionId") ?: return null,
                 exerciseId = doc.getString("exerciseId") ?: return null,
                 restTimerSeconds = (doc.getLong("restTimerSeconds") ?: 0L).toInt(),
-                updatedAt = timestampToLocalDateTime(doc.getLong("updatedAt")),
-                deletedAt = doc.getLong("deletedAt")?.let { timestampToLocalDateTime(it) }
+                updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
+                deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) }
             )
         } catch (e: Exception) {
             null
@@ -34,22 +34,8 @@ object WorkoutExerciseMapper {
             "workoutSessionId" to exercise.workoutSessionId,
             "exerciseId" to exercise.exerciseId,
             "restTimerSeconds" to exercise.restTimerSeconds.toLong(),
-            "updatedAt" to localDateTimeToTimestamp(exercise.updatedAt),
-            "deletedAt" to exercise.deletedAt?.let { localDateTimeToTimestamp(it) }
+            "updatedAt" to TimestampMapper.toTimestamp(exercise.updatedAt),
+            "deletedAt" to exercise.deletedAt?.let { TimestampMapper.toTimestamp(it) }
         )
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun timestampToLocalDateTime(timestamp: Long?): LocalDateTime {
-        return if (timestamp != null && timestamp > 0) {
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
-        } else {
-            LocalDateTime.now()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun localDateTimeToTimestamp(ldt: LocalDateTime): Long {
-        return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
 }

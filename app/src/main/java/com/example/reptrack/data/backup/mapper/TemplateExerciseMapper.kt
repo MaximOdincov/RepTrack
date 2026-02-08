@@ -18,8 +18,8 @@ object TemplateExerciseMapper {
             TemplateExerciseDb(
                 templateId = doc.getString("templateId") ?: return null,
                 exerciseId = doc.getString("exerciseId") ?: return null,
-                updatedAt = timestampToLocalDateTime(doc.getLong("updatedAt")),
-                deletedAt = doc.getLong("deletedAt")?.let { timestampToLocalDateTime(it) }
+                updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
+                deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) }
             )
         } catch (e: Exception) {
             null
@@ -30,22 +30,8 @@ object TemplateExerciseMapper {
         return mapOf(
             "templateId" to templateExercise.templateId,
             "exerciseId" to templateExercise.exerciseId,
-            "updatedAt" to localDateTimeToTimestamp(templateExercise.updatedAt),
-            "deletedAt" to templateExercise.deletedAt?.let { localDateTimeToTimestamp(it) }
+            "updatedAt" to TimestampMapper.toTimestamp(templateExercise.updatedAt),
+            "deletedAt" to templateExercise.deletedAt?.let { TimestampMapper.toTimestamp(it) }
         )
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun timestampToLocalDateTime(timestamp: Long?): LocalDateTime {
-        return if (timestamp != null && timestamp > 0) {
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault())
-        } else {
-            LocalDateTime.now()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun localDateTimeToTimestamp(ldt: LocalDateTime): Long {
-        return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
 }

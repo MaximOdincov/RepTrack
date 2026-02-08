@@ -1,7 +1,5 @@
 package com.example.reptrack.presentation.main.stores
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -27,7 +25,7 @@ internal interface MainScreenStore : Store<Intent, State, Label> {
         object CollapseCalendar : Intent
     }
 
-    data class State @RequiresApi(Build.VERSION_CODES.O) constructor(
+    data class State constructor(
         val currentDate: LocalDate = LocalDate.now(),
         val displayDate: LocalDate = LocalDate.now(),
         val weekCalendar: CalendarWeek? = null,
@@ -49,7 +47,6 @@ internal class MainScreenStoreFactory(
 ) {
 
     fun create(): MainScreenStore =
-        @RequiresApi(Build.VERSION_CODES.O)
         object : MainScreenStore, Store<Intent, State, Label> by storeFactory.create(
             name = "MainScreenStore",
             initialState = State(),
@@ -75,7 +72,6 @@ internal class MainScreenStoreFactory(
     }
 
     private class BootstrapperImpl : CoroutineBootstrapper<Action>() {
-        @RequiresApi(Build.VERSION_CODES.O)
         override fun invoke() {
             dispatch(Action.LoadWeekCalendar(LocalDate.now()))
             dispatch(Action.LoadMonthCalendar(LocalDate.now()))
@@ -86,7 +82,6 @@ internal class MainScreenStoreFactory(
         private val calendarUseCase: CalendarUseCase
     ) : CoroutineExecutor<Intent, Action, State, Msg, Label>() {
 
-        @RequiresApi(Build.VERSION_CODES.O)
         override fun executeIntent(intent: Intent, getState: () -> State) {
             when (intent) {
                 is Intent.SelectDate -> {
@@ -186,7 +181,6 @@ internal class MainScreenStoreFactory(
     }
 
     private object ReducerImpl : Reducer<State, Msg> {
-        @RequiresApi(Build.VERSION_CODES.O)
         override fun State.reduce(message: Msg): State =
             when (message) {
                 is Msg.CalendarWeekLoaded -> copy(weekCalendar = message.calendar)

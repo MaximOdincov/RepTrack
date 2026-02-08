@@ -1,7 +1,5 @@
 package com.example.reptrack.presentation.main.screens
 /*
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +18,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.presentation.main.stores.MainScreenStore
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>) {
     val state = store.states.collectAsState(MainScreenStore.State())
@@ -77,7 +74,6 @@ fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainS
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun WorkoutDetails(
     workout: com.example.reptrack.domain.workout.WorkoutSession,

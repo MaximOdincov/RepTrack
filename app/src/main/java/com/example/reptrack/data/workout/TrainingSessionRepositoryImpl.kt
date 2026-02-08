@@ -1,5 +1,6 @@
 package com.example.reptrack.data.workout.repositories
 
+import android.os.Build
 import com.example.reptrack.data.local.dao.WorkoutDao
 import com.example.reptrack.data.local.mappers.DomainMapper
 import com.example.reptrack.domain.workout.WorkoutSession
@@ -36,7 +37,11 @@ class TrainingSessionRepositoryImpl(
     override suspend fun getSessionByDate(date: LocalDate): Result<WorkoutSession?> {
         return try {
             // Получаем день в виде LocalDateTime (начало и конец дня)
-            val startOfDay = date.atStartOfDay()
+            val startOfDay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                date.atStartOfDay()
+            } else {
+                TODO("VERSION.SDK_INT < O")
+            }
             val endOfDay = date.atTime(LocalTime.MAX)
 
             // TODO: В реальной реализации нужно запросить из БД по диапазону дат

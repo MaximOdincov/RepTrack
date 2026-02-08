@@ -1,7 +1,5 @@
 package com.example.reptrack.data.local.models
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.reptrack.domain.workout.ExerciseType
@@ -9,7 +7,7 @@ import com.example.reptrack.domain.workout.MuscleGroup
 import java.time.LocalDateTime
 
 @Entity(tableName = "exercise")
-data class ExerciseDb @RequiresApi(Build.VERSION_CODES.O) constructor(
+data class ExerciseDb(
     @PrimaryKey val id: String,
     val name: String,
     val muscleGroup: MuscleGroup,

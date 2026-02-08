@@ -1,7 +1,5 @@
 package com.example.reptrack.data.backup.mapper
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.WeightRecordDb
 import com.google.firebase.firestore.DocumentSnapshot
 import java.time.Instant
@@ -10,7 +8,6 @@ import java.time.ZoneId
 
 object WeightRecordMapper {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun fromFirestore(doc: DocumentSnapshot): WeightRecordDb? {
         return try {
             val dateStr = doc.getString("date") ?: return null
@@ -18,8 +15,8 @@ object WeightRecordMapper {
                 id = doc.id,
                 date = LocalDateTime.parse(dateStr),
                 value = (doc.getDouble("value") ?: 0.0).toFloat(),
-                updatedAt = timestampToLocalDateTime(doc.getLong("updatedAt")),
-                deletedAt = doc.getLong("deletedAt")?.let { timestampToLocalDateTime(it) },
+                updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
+                deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) },
                 userId = doc.getString("userId")?: ""
             )
         } catch (e: Exception) {
@@ -27,32 +24,13 @@ object WeightRecordMapper {
         }
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.O)
     fun toFirestore(record: WeightRecordDb): Map<String, Any?> {
         return mapOf(
             "id" to record.id,
             "date" to record.date.toString(),
             "value" to record.value.toDouble(),
-            "updatedAt" to localDateTimeToTimestamp(record.updatedAt),
-            "deletedAt" to record.deletedAt?.let { localDateTimeToTimestamp(it) }
+            "updatedAt" to TimestampMapper.toTimestamp(record.updatedAt),
+            "deletedAt" to record.deletedAt?.let { TimestampMapper.toTimestamp(it) }
         )
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun timestampToLocalDateTime(timestamp: Long?): LocalDateTime {
-        return if (timestamp != null && timestamp > 0) {
-            LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(timestamp),
-                ZoneId.systemDefault()
-            )
-        } else {
-            LocalDateTime.now()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun localDateTimeToTimestamp(ldt: LocalDateTime): Long {
-        return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
 }

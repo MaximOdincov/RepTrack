@@ -3,7 +3,7 @@ package com.example.reptrack.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.reptrack.data.local.convectors.DateTimeConverters
+import com.example.reptrack.data.local.converters.DateTimeConverters
 import com.example.reptrack.data.local.dao.ExerciseDao
 import com.example.reptrack.data.local.dao.StatisticDao
 import com.example.reptrack.data.local.dao.UserDao
@@ -39,7 +39,7 @@ import com.example.reptrack.data.local.models.statistics.SetConfigDb
         FriendConfigDb::class,
         SetConfigDb::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(DateTimeConverters::class)

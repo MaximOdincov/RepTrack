@@ -1,13 +1,13 @@
 package com.example.reptrack.data.local.mappers
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.ExerciseDb
+import com.example.reptrack.data.local.models.WorkoutSetDb
 import com.example.reptrack.data.local.models.WorkoutTemplateDb
 import com.example.reptrack.domain.workout.Exercise
 import com.example.reptrack.domain.workout.ExerciseType
 import com.example.reptrack.domain.workout.MuscleGroup
 import com.example.reptrack.domain.workout.TemplateSchedule
+import com.example.reptrack.domain.workout.WorkoutSet
 import com.example.reptrack.domain.workout.WorkoutTemplate
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -30,7 +30,6 @@ object DomainMapper {
         isCustom = isCustom
     )
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun Exercise.toDb(): ExerciseDb = ExerciseDb(
         id = id,
         name = name,
@@ -51,7 +50,6 @@ object DomainMapper {
         schedule = parseSchedule(week1Days, week2Days)
     )
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun WorkoutTemplate.toDb(): WorkoutTemplateDb = WorkoutTemplateDb(
         id = id,
         name = name,
@@ -59,6 +57,25 @@ object DomainMapper {
         week1Days = serializeSchedule(schedule?.week1Days),
         week2Days = serializeSchedule(schedule?.week2Days),
         updatedAt = java.time.LocalDateTime.now()
+    )
+
+    fun WorkoutSetDb.toDomain(): WorkoutSet = WorkoutSet(
+        id = id,
+        index = setOrder,
+        weight = weight,
+        reps = reps,
+        isCompleted = isCompleted
+    )
+
+    fun WorkoutSet.toDb(workoutExerciseId: String): WorkoutSetDb = WorkoutSetDb(
+        id = id,
+        workoutExerciseId = workoutExerciseId,
+        setOrder = index,
+        weight = weight,
+        reps = reps,
+        isCompleted = isCompleted,
+        updatedAt = java.time.LocalDateTime.now(),
+        deletedAt = null
     )
 
     /**

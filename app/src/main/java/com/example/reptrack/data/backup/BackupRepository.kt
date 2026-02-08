@@ -1,7 +1,5 @@
 package com.example.reptrack.data.backup
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.dao.*
 import com.example.reptrack.data.local.models.*
 import com.example.reptrack.data.backup.mapper.*
@@ -9,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-@RequiresApi(Build.VERSION_CODES.O)
 class BackupRepository(
     private val firebaseDataSource: FirebaseBackupDataSource,
     private val exerciseDao: ExerciseDao,

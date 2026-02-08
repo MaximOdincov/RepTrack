@@ -1,7 +1,5 @@
 package com.example.reptrack.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,7 +12,6 @@ import com.example.reptrack.presentation.auth.splash.SplashScreen
 import com.example.reptrack.presentation.auth.splash.SplashStore
 import org.koin.compose.getKoin
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavGraph(){
     val navController = rememberNavController()
