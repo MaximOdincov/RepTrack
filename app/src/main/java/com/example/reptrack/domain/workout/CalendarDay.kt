@@ -6,9 +6,9 @@ import java.time.LocalDate
  * Статус тренировки на день
  */
 enum class DayWorkoutStatus {
-    SKIPPED,      // Тренировка пропущена (красная точка)
-    COMPLETED,    // Тренировка завершена (чёрная точка)
-    PLANNED       // Тренировка планируется (оранжевая точка)
+    SKIPPED,
+    COMPLETED,
+    PLANNED
 }
 
 /**

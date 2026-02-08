@@ -11,25 +11,61 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = DarkAccentOrange,
+    onPrimary = DarkTextOnAccent,
+    primaryContainer = DarkAccentOrange,
+    onPrimaryContainer = DarkTextPrimary,
+
+    secondary = DarkAccentRed,
+    onSecondary = DarkTextOnAccent,
+    secondaryContainer = DarkAccentRed,
+    onSecondaryContainer = DarkTextPrimary,
+
+    tertiary = DarkAccentGreen,
+    onTertiary = DarkTextOnAccent,
+    tertiaryContainer = DarkAccentGreen,
+    onTertiaryContainer = DarkTextPrimary,
+
+    background = DarkBackground,
+    onBackground = DarkTextPrimary,
+
+    surface = DarkCard,
+    onSurface = DarkTextPrimary,
+    surfaceVariant = DarkCardElevated,
+    onSurfaceVariant = DarkTextSecondary,
+
+    outline = DarkTextSecondary,
+    error = DarkAccentRed,
+    onError = DarkTextOnAccent
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = LightAccentOrange,
+    onPrimary = LightTextOnAccent,
+    primaryContainer = LightAccentOrange,
+    onPrimaryContainer = LightTextPrimary,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = LightAccentRed,
+    onSecondary = LightTextOnAccent,
+    secondaryContainer = LightAccentRed,
+    onSecondaryContainer = LightTextPrimary,
+
+    tertiary = LightAccentGreen,
+    onTertiary = LightTextOnAccent,
+    tertiaryContainer = LightAccentGreen,
+    onTertiaryContainer = LightTextPrimary,
+
+    background = LightBackground,
+    onBackground = LightTextPrimary,
+
+    surface = LightCard,
+    onSurface = LightTextPrimary,
+    surfaceVariant = LightCard,
+    onSurfaceVariant = LightTextSecondary,
+
+    outline = LightTextSecondary,
+    error = LightAccentRed,
+    onError = LightTextOnAccent
 )
 
 @Composable

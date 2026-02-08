@@ -1,6 +1,7 @@
 package com.example.reptrack.presentation.main.screens
-/*
+
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -15,33 +16,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.extensions.coroutines.states
+import com.example.reptrack.presentation.main.components.Calendar
 import com.example.reptrack.presentation.main.stores.MainScreenStore
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>) {
+internal fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>) {
     val state = store.states.collectAsState(MainScreenStore.State())
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(vertical = 16.dp)
     ) {
-        Text(
-            "My Workouts",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Calendar(
             currentDate = state.value.currentDate,
+            displayDate = state.value.displayDate,
             weekCalendar = state.value.weekCalendar,
             monthCalendar = state.value.monthCalendar,
+            isCalendarExpanded = state.value.isCalendarExpanded,
             onDateSelected = { selectedDate ->
-                store.accept(Intent.SelectDate(selectedDate))
+                store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
+            },
+            onNavigateWeek = { offset ->
+                store.accept(MainScreenStore.Intent.NavigateWeek(offset))
+            },
+            onNavigateMonth = { offset ->
+                store.accept(MainScreenStore.Intent.NavigateMonth(offset))
+            },
+            onExpandCalendar = {
+                store.accept(MainScreenStore.Intent.ExpandCalendar)
+            },
+            onCollapseCalendar = {
+                store.accept(MainScreenStore.Intent.CollapseCalendar)
             }
         )
 
@@ -62,7 +71,7 @@ fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainS
             )
         }
 
-        // Обработка ошибок
+        // Error handling
         if (state.value.error != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -135,4 +144,3 @@ private fun WorkoutDetails(
         }
     }
 }
- */

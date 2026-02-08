@@ -10,6 +10,8 @@ import com.example.reptrack.presentation.auth.signUp.SignUpScreen
 import com.example.reptrack.presentation.auth.signUp.SignUpStore
 import com.example.reptrack.presentation.auth.splash.SplashScreen
 import com.example.reptrack.presentation.auth.splash.SplashStore
+import com.example.reptrack.presentation.main.screens.MainScreen
+import com.example.reptrack.presentation.main.stores.MainScreenStore
 import org.koin.compose.getKoin
 
 @Composable
@@ -65,7 +67,8 @@ fun AppNavGraph(){
         }
 
         composable(Screen.Main.route) {
-            //MainScreen()
+            val store: MainScreenStore = getKoin().get()
+            MainScreen(store)
         }
     }
 }

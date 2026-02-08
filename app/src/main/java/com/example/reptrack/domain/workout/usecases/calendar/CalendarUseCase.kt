@@ -99,13 +99,22 @@ class CalendarUseCase(
         val templates = templatesResult.getOrNull() ?: emptyList()
 
         val hasWorkout = session != null || templates.isNotEmpty()
+        val now = LocalDate.now()
+
         val status = session?.status?.let { workoutStatus ->
             when (workoutStatus.toString()) {
                 "COMPLETED" -> DayWorkoutStatus.COMPLETED
                 "SKIPPED", "CANCELLED" -> DayWorkoutStatus.SKIPPED
                 else -> DayWorkoutStatus.PLANNED
             }
-        } ?: if (templates.isNotEmpty()) DayWorkoutStatus.PLANNED else null
+        } ?: when {
+            // If date is in the past and has templates but no session -> SKIPPED
+            templates.isNotEmpty() && date.isBefore(now) -> DayWorkoutStatus.SKIPPED
+            // If date is today/future and has templates -> PLANNED
+            templates.isNotEmpty() -> DayWorkoutStatus.PLANNED
+            // No workout at all
+            else -> null
+        }
 
         return CalendarDay(
             date = date,
