@@ -1,7 +1,6 @@
 package com.example.reptrack.presentation.main.screens
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -9,20 +8,48 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.extensions.coroutines.states
+import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.presentation.main.components.Calendar
 import com.example.reptrack.presentation.main.stores.MainScreenStore
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Saver for LocalDate to enable rememberSaveable
+ */
+private val LocalDateSaver = Saver<LocalDate, String>(
+    save = { it.toString() },
+    restore = { LocalDate.parse(it) }
+)
+
 @Composable
-internal fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>) {
-    val state = store.states.collectAsState(MainScreenStore.State())
+internal fun MainScreen(
+    store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>,
+    loadWeekCalendar: suspend (LocalDate) -> CalendarWeek?
+) {
+    val state by store.states.collectAsState(MainScreenStore.State())
+
+    // Save selected date locally to survive screen rotation
+    var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
+        mutableStateOf(state.currentDate)
+    }
+
+    // Load workout when selected date changes
+    LaunchedEffect(selectedDate) {
+        store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
+    }
 
     Column(
         modifier = Modifier
@@ -32,31 +59,17 @@ internal fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.Sta
         Spacer(modifier = Modifier.height(16.dp))
 
         Calendar(
-            currentDate = state.value.currentDate,
-            displayDate = state.value.displayDate,
-            weekCalendar = state.value.weekCalendar,
-            monthCalendar = state.value.monthCalendar,
-            isCalendarExpanded = state.value.isCalendarExpanded,
-            onDateSelected = { selectedDate ->
-                store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
+            initialDate = selectedDate,
+            selectedDate = selectedDate,
+            onDateSelected = { newDate ->
+                selectedDate = newDate
             },
-            onNavigateWeek = { offset ->
-                store.accept(MainScreenStore.Intent.NavigateWeek(offset))
-            },
-            onNavigateMonth = { offset ->
-                store.accept(MainScreenStore.Intent.NavigateMonth(offset))
-            },
-            onExpandCalendar = {
-                store.accept(MainScreenStore.Intent.ExpandCalendar)
-            },
-            onCollapseCalendar = {
-                store.accept(MainScreenStore.Intent.CollapseCalendar)
-            }
+            loadWeekCalendar = loadWeekCalendar
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val selectedWorkout = state.value.selectedWorkout
+        val selectedWorkout = state.selectedWorkout
         if (selectedWorkout != null) {
             WorkoutDetails(
                 workout = selectedWorkout,
@@ -71,11 +84,10 @@ internal fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.Sta
             )
         }
 
-        // Error handling
-        if (state.value.error != null) {
+        if (state.error != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Error: ${state.value.error}",
+                "Error: ${state.error}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error
             )

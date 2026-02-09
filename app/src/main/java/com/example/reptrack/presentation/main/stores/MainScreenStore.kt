@@ -29,7 +29,11 @@ internal interface MainScreenStore : Store<Intent, State, Label> {
         val currentDate: LocalDate = LocalDate.now(),
         val displayDate: LocalDate = LocalDate.now(),
         val weekCalendar: CalendarWeek? = null,
+        val weekCalendarPrev: CalendarWeek? = null,
+        val weekCalendarNext: CalendarWeek? = null,
         val monthCalendar: CalendarMonth? = null,
+        val monthCalendarPrev: CalendarMonth? = null,
+        val monthCalendarNext: CalendarMonth? = null,
         val selectedWorkout: WorkoutSession? = null,
         val isCalendarExpanded: Boolean = false,
         val isLoading: Boolean = false,
@@ -63,7 +67,11 @@ internal class MainScreenStoreFactory(
 
     private sealed interface Msg {
         data class CalendarWeekLoaded(val calendar: CalendarWeek) : Msg
+        data class CalendarWeekPrevLoaded(val calendar: CalendarWeek) : Msg
+        data class CalendarWeekNextLoaded(val calendar: CalendarWeek) : Msg
         data class CalendarMonthLoaded(val calendar: CalendarMonth) : Msg
+        data class CalendarMonthPrevLoaded(val calendar: CalendarMonth) : Msg
+        data class CalendarMonthNextLoaded(val calendar: CalendarMonth) : Msg
         data class WorkoutSelected(val workout: WorkoutSession?) : Msg
         data class DateChanged(val newDate: LocalDate) : Msg
         data class ExpandedChanged(val expanded: Boolean) : Msg
@@ -133,10 +141,23 @@ internal class MainScreenStoreFactory(
             dispatch(Msg.LoadingChanged(true))
             scope.launch {
                 try {
+                    // Load current week
                     val result = calendarUseCase.getWeekCalendar(date)
                     result.onSuccess { calendar ->
                         dispatch(Msg.CalendarWeekLoaded(calendar))
                         dispatch(Msg.LoadingChanged(false))
+
+                        // Load previous week
+                        val prevDate = date.minusDays(7)
+                        calendarUseCase.getWeekCalendar(prevDate).onSuccess { prevCalendar ->
+                            dispatch(Msg.CalendarWeekPrevLoaded(prevCalendar))
+                        }
+
+                        // Load next week
+                        val nextDate = date.plusDays(7)
+                        calendarUseCase.getWeekCalendar(nextDate).onSuccess { nextCalendar ->
+                            dispatch(Msg.CalendarWeekNextLoaded(nextCalendar))
+                        }
                     }
                     result.onFailure { exception ->
                         dispatch(Msg.ErrorOccurred(exception.message ?: "Unknown error"))
@@ -152,9 +173,22 @@ internal class MainScreenStoreFactory(
         private fun loadMonthCalendar(date: LocalDate) {
             scope.launch {
                 try {
+                    // Load current month
                     val result = calendarUseCase.getMonthCalendar(date)
                     result.onSuccess { calendar ->
                         dispatch(Msg.CalendarMonthLoaded(calendar))
+
+                        // Load previous month
+                        val prevDate = date.minusMonths(1)
+                        calendarUseCase.getMonthCalendar(prevDate).onSuccess { prevCalendar ->
+                            dispatch(Msg.CalendarMonthPrevLoaded(prevCalendar))
+                        }
+
+                        // Load next month
+                        val nextDate = date.plusMonths(1)
+                        calendarUseCase.getMonthCalendar(nextDate).onSuccess { nextCalendar ->
+                            dispatch(Msg.CalendarMonthNextLoaded(nextCalendar))
+                        }
                     }
                     result.onFailure { exception ->
                         dispatch(Msg.ErrorOccurred(exception.message ?: "Unknown error"))
@@ -184,7 +218,11 @@ internal class MainScreenStoreFactory(
         override fun State.reduce(message: Msg): State =
             when (message) {
                 is Msg.CalendarWeekLoaded -> copy(weekCalendar = message.calendar)
+                is Msg.CalendarWeekPrevLoaded -> copy(weekCalendarPrev = message.calendar)
+                is Msg.CalendarWeekNextLoaded -> copy(weekCalendarNext = message.calendar)
                 is Msg.CalendarMonthLoaded -> copy(monthCalendar = message.calendar)
+                is Msg.CalendarMonthPrevLoaded -> copy(monthCalendarPrev = message.calendar)
+                is Msg.CalendarMonthNextLoaded -> copy(monthCalendarNext = message.calendar)
                 is Msg.WorkoutSelected -> copy(selectedWorkout = message.workout)
                 is Msg.DateChanged -> copy(currentDate = message.newDate, displayDate = message.newDate)
                 is Msg.ExpandedChanged -> copy(isCalendarExpanded = message.expanded)
