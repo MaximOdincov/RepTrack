@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.extensions.coroutines.states
-import com.example.reptrack.domain.workout.CalendarWeek
+import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.presentation.main.components.Calendar
 import com.example.reptrack.presentation.main.stores.MainScreenStore
 import java.time.LocalDate
@@ -36,8 +36,8 @@ private val LocalDateSaver = Saver<LocalDate, String>(
 
 @Composable
 internal fun MainScreen(
-    store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>,
-    loadWeekCalendar: suspend (LocalDate) -> CalendarWeek?
+    store: Store<MainScreenStore.Intent, MainScreenStore.State, Nothing>,
+    calendarUseCase: CalendarUseCase
 ) {
     val state by store.states.collectAsState(MainScreenStore.State())
 
@@ -46,7 +46,13 @@ internal fun MainScreen(
         mutableStateOf(state.currentDate)
     }
 
-    // Load workout when selected date changes
+    // Observe calendar week to get the selected workout
+    val weekCalendar by calendarUseCase.observeWeekCalendar(selectedDate).collectAsState(
+        initial = null
+    )
+    val selectedWorkout = weekCalendar?.days?.find { it.date == selectedDate }?.workoutSession
+
+    // Update store when selected date changes
     LaunchedEffect(selectedDate) {
         store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
     }
@@ -64,12 +70,11 @@ internal fun MainScreen(
             onDateSelected = { newDate ->
                 selectedDate = newDate
             },
-            loadWeekCalendar = loadWeekCalendar
+            calendarUseCase = calendarUseCase
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val selectedWorkout = state.selectedWorkout
         if (selectedWorkout != null) {
             WorkoutDetails(
                 workout = selectedWorkout,
@@ -81,15 +86,6 @@ internal fun MainScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        if (state.error != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Error: ${state.error}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
             )
         }
     }

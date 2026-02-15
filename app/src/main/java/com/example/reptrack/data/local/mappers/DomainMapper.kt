@@ -3,12 +3,18 @@ package com.example.reptrack.data.local.mappers
 import com.example.reptrack.data.local.models.ExerciseDb
 import com.example.reptrack.data.local.models.WorkoutSetDb
 import com.example.reptrack.data.local.models.WorkoutTemplateDb
+import com.example.reptrack.data.local.aggregates.WorkoutSessionWithExercises
+import com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets
+import com.example.reptrack.data.local.models.WorkoutSessionDb
+import com.example.reptrack.data.local.models.WorkoutExerciseDb
 import com.example.reptrack.domain.workout.Exercise
 import com.example.reptrack.domain.workout.ExerciseType
 import com.example.reptrack.domain.workout.MuscleGroup
 import com.example.reptrack.domain.workout.TemplateSchedule
 import com.example.reptrack.domain.workout.WorkoutSet
 import com.example.reptrack.domain.workout.WorkoutTemplate
+import com.example.reptrack.domain.workout.WorkoutSession
+import com.example.reptrack.domain.workout.WorkoutExercise
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -111,4 +117,47 @@ object DomainMapper {
             null
         }
     }
+
+
+    fun WorkoutSessionWithExercises.toDomain(): WorkoutSession {
+        val now = java.time.LocalDateTime.now()
+        return WorkoutSession(
+            id = session.id,
+            userId = session.userId,
+            date = session.date,
+            status = session.status,
+            name = session.name,
+            durationSeconds = session.durationSeconds,
+            exercises = exercises.map { it.toDomain() },
+            comment = session.comment
+        )
+    }
+
+    fun WorkoutSession.toDb(): WorkoutSessionDb = WorkoutSessionDb(
+        id = id,
+        userId = userId,
+        date = date,
+        status = status,
+        name = name,
+        durationSeconds = durationSeconds,
+        comment = comment,
+        updatedAt = java.time.LocalDateTime.now(),
+        deletedAt = null
+    )
+
+    fun WorkoutExerciseWithSets.toDomain(): WorkoutExercise = WorkoutExercise(
+        id = exercise.id,
+        exerciseId = exercise.exerciseId,
+        sets = sets.map { it.toDomain() },
+        restTimerSeconds = exercise.restTimerSeconds
+    )
+
+    fun WorkoutExercise.toDb(workoutSessionId: String): WorkoutExerciseDb = WorkoutExerciseDb(
+        id = id,
+        workoutSessionId = workoutSessionId,
+        exerciseId = exerciseId,
+        restTimerSeconds = restTimerSeconds,
+        updatedAt = java.time.LocalDateTime.now(),
+        deletedAt = null
+    )
 }

@@ -3,20 +3,21 @@ package com.example.reptrack.domain.workout.repositories
 import com.example.reptrack.domain.workout.Exercise
 import com.example.reptrack.domain.workout.WorkoutExercise
 import com.example.reptrack.domain.workout.WorkoutSet
+import kotlinx.coroutines.flow.Flow
 
 interface ExerciseRepository {
-    suspend fun getExerciseById(exerciseId: String): Result<Exercise>
+    suspend fun observeExerciseById(exerciseId: String): Flow<Result<Exercise>>
 
-    suspend fun getAllExercises(): Result<List<Exercise>>
+    suspend fun observeAllExercises(): Flow<Result<List<Exercise>>>
 
     suspend fun createExercise(exercise: Exercise): Result<Unit>
 
-    suspend fun updateExercise(exercise:  Exercise): Result<Unit>
+    suspend fun updateExercise(exercise: Exercise): Result<Unit>
 
     suspend fun deleteExercise(exerciseId: String): Result<Unit>
 
 
-    suspend fun getWorkoutExerciseById(exerciseId: String): Result<WorkoutExercise>
+    suspend fun observeWorkoutExerciseById(exerciseId: String): Flow<Result<WorkoutExercise>>
 
     suspend fun createWorkoutExercise(exercise: WorkoutExercise): Result<Unit>
 

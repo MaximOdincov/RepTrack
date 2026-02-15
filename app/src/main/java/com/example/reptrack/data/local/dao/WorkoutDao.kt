@@ -10,13 +10,46 @@ import com.example.reptrack.data.local.models.WorkoutExerciseDb
 import com.example.reptrack.data.local.models.WorkoutSessionDb
 import com.example.reptrack.data.local.models.WorkoutSetDb
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 interface WorkoutDao {
 
     @Transaction
-    @Query("SELECT * FROM workout_sessions WHERE userId = :userId ORDER BY date DESC")
+    @Query("SELECT * FROM workout_sessions WHERE userId = :userId AND deletedAt IS NULL ORDER BY date DESC")
     fun observeSessions(userId: String): Flow<List<WorkoutSessionWithExercises>>
+
+    @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId AND deletedAt IS NULL LIMIT 1")
+    fun observeSessionById(sessionId: String): Flow<WorkoutSessionWithExercises?>
+
+    @Transaction
+    @Query("""
+        SELECT * FROM workout_sessions
+        WHERE userId = :userId
+        AND date BETWEEN :fromDate AND :toDate
+        AND deletedAt IS NULL
+        ORDER BY date DESC
+    """)
+    fun observeSessionsInRange(
+        userId: String,
+        fromDate: LocalDateTime,
+        toDate: LocalDateTime
+    ): Flow<List<WorkoutSessionWithExercises>>
+
+    @Transaction
+    @Query("""
+        SELECT * FROM workout_sessions
+        WHERE userId = :userId
+        AND date BETWEEN :startOfDay AND :endOfDay
+        AND deletedAt IS NULL
+        LIMIT 1
+    """)
+    fun observeSessionByDate(
+        userId: String,
+        startOfDay: LocalDateTime,
+        endOfDay: LocalDateTime
+    ): Flow<WorkoutSessionWithExercises?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: WorkoutSessionDb)
@@ -38,8 +71,14 @@ interface WorkoutDao {
         insertSets(sets)
     }
 
-    @Query("UPDATE workout_sessions SET deletedAt = (strftime('%s','now') * 1000), updatedAt = (strftime('%s','now') * 1000) WHERE id = :sessionId")
-    suspend fun deleteSession(sessionId: String)
+    @Query("UPDATE workout_sessions SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :sessionId")
+    suspend fun deleteSession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+
+    @Query("UPDATE workout_exercises SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE workoutSessionId = :sessionId")
+    suspend fun deleteExercisesBySession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+
+    @Query("UPDATE workout_sets SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE workoutExerciseId IN (SELECT id FROM workout_exercises WHERE workoutSessionId = :sessionId)")
+    suspend fun deleteSetsBySession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
 
     @Query("SELECT * FROM workout_sets")
     suspend fun getAllSets(): List<WorkoutSetDb>

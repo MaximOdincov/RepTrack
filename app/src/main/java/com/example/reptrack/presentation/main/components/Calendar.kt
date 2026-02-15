@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.reptrack.domain.workout.CalendarDay
 import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.domain.workout.DayWorkoutStatus
+import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import java.time.LocalDate
 
 /**
@@ -45,7 +46,7 @@ fun Calendar(
     initialDate: LocalDate,
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
-    loadWeekCalendar: suspend (LocalDate) -> CalendarWeek?
+    calendarUseCase: CalendarUseCase
 ) {
     var currentDisplayDate by rememberSaveable(stateSaver = LocalDateSaver) {
         mutableStateOf(initialDate)
@@ -73,7 +74,7 @@ fun Calendar(
             initialDate = initialDate,
             selectedDate = selectedDate,
             onDateSelected = onDateSelected,
-            loadWeekCalendar = loadWeekCalendar,
+            calendarUseCase = calendarUseCase,
             onDisplayDateChanged = { newDate -> currentDisplayDate = newDate }
         )
     }
@@ -88,7 +89,7 @@ private fun WeekView(
     initialDate: LocalDate,
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
-    loadWeekCalendar: suspend (LocalDate) -> CalendarWeek?,
+    calendarUseCase: CalendarUseCase,
     onDisplayDateChanged: (LocalDate) -> Unit
 ) {
     val baseDate = rememberSaveable { mutableStateOf(initialDate) }
@@ -110,11 +111,9 @@ private fun WeekView(
         modifier = Modifier.fillMaxWidth()
     ) { page ->
         val pageDate = baseDate.value.plusWeeks((page - middlePage).toLong())
-        var weekCalendar by remember { mutableStateOf<CalendarWeek?>(null) }
-
-        LaunchedEffect(pageDate) {
-            weekCalendar = loadWeekCalendar(pageDate)
-        }
+        val weekCalendar by calendarUseCase.observeWeekCalendar(pageDate).collectAsState(
+            initial = null
+        )
 
         val calendar = weekCalendar
         if (calendar != null) {

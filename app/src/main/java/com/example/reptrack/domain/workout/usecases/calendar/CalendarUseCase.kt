@@ -1,103 +1,72 @@
 package com.example.reptrack.domain.workout.usecases.calendar
 
 import com.example.reptrack.domain.workout.CalendarDay
-import com.example.reptrack.domain.workout.CalendarMonth
 import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.domain.workout.DayWorkoutStatus
-import com.example.reptrack.domain.workout.repositories.TrainingSessionRepository
-import com.example.reptrack.domain.workout.repositories.TrainingTemplateRepository
+import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
+import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarDateUtils.getDayOfWeekIndex
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarDateUtils.isSecondWeekInMonth
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.YearMonth
 
-
+/**
+ * Use case для работы с календарём тренировок.
+ * Все методы возвращают Flow для реактивного обновления UI.
+ */
 class CalendarUseCase(
-    private val sessionRepository: TrainingSessionRepository,
-    private val templateRepository: TrainingTemplateRepository
+    private val sessionRepository: WorkoutSessionRepository,
+    private val templateRepository: WorkoutTemplateRepository
 ) {
 
     /**
-     * Получить неделю календаря для указанной даты
+     * Наблюдает за неделей календаря для указанной даты
      * @param date Дата для получения недели (используется для определения текущей недели)
      */
-    suspend fun getWeekCalendar(date: LocalDate): Result<CalendarWeek> = try {
+    fun observeWeekCalendar(date: LocalDate): Flow<CalendarWeek> {
         val mondayOfWeek = date.with(DayOfWeek.MONDAY)
         val daysInWeek = (0L..6L).map { mondayOfWeek.plusDays(it) }
 
-        val calendarDays = daysInWeek.map { dayDate ->
-            getCalendarDay(dayDate)
+        // Создаём Flow для каждого дня недели и комбинируем их
+        val dayFlows = daysInWeek.map { dayDate ->
+            observeCalendarDay(dayDate)
         }
 
-        Result.success(
+        // Комбинируем все Flow дней в один Flow недели
+        return combine(dayFlows) { calendarDays ->
             CalendarWeek(
-                days = calendarDays,
+                days = calendarDays.toList(),
                 weekStartDate = mondayOfWeek
             )
-        )
-    } catch (e: Exception) {
-        Result.failure(e)
-    }
-
-    /**
-     * Получить месячный вид календаря
-     * @param date Дата для определения месяца
-     */
-    suspend fun getMonthCalendar(date: LocalDate): Result<CalendarMonth> = try {
-        val yearMonth = YearMonth.of(date.year, date.month)
-        val firstDay = yearMonth.atDay(1)
-        val lastDay = yearMonth.atEndOfMonth()
-
-        val startDate = firstDay.with(DayOfWeek.MONDAY)
-        val endDate = lastDay.with(DayOfWeek.SUNDAY)
-
-        val weeks = mutableListOf<CalendarWeek>()
-        var currentDate = startDate
-
-        while (currentDate <= endDate) {
-            val weekDays = (0L..6L).map { currentDate.plusDays(it) }
-            val calendarDays = weekDays.map { dayDate ->
-                getCalendarDay(dayDate)
-            }
-
-            weeks.add(
-                CalendarWeek(
-                    days = calendarDays,
-                    weekStartDate = currentDate
-                )
-            )
-            currentDate = currentDate.plusDays(7)
         }
-
-        Result.success(
-            CalendarMonth(
-                weeks = weeks,
-                monthIndex = yearMonth.monthValue - 1,
-                year = yearMonth.year,
-                displayName = yearMonth.month.toString().replaceFirstChar { it.uppercase() } + " ${yearMonth.year}"
-            )
-        )
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
     /**
-     * Получить информацию о тренировке для конкретного дня
+     * Наблюдает за информацией о тренировке для конкретного дня
      */
-    private suspend fun getCalendarDay(date: LocalDate): CalendarDay {
-        val sessionResult = sessionRepository.getSessionByDate(date)
-        val session = sessionResult.getOrNull()
-
+    private fun observeCalendarDay(date: LocalDate): Flow<CalendarDay> {
         val dayOfWeekValue = getDayOfWeekIndex(date)
         val isSecondWeek = isSecondWeekInMonth(date)
 
-        val templatesResult = templateRepository.getTemplatesByDayOfWeek(
-            dayOfWeekValue,
-            isSecondWeek
-        )
-        val templates = templatesResult.getOrNull() ?: emptyList()
+        // Подписываемся на сессию и шаблоны параллельно
+        return combine(
+            sessionRepository.observeSessionByDate(date),
+            templateRepository.observeTemplatesByDayOfWeek(dayOfWeekValue, isSecondWeek)
+        ) { session, templates ->
+            createCalendarDay(date, session, templates)
+        }
+    }
 
+    /**
+     * Создаёт CalendarDay на основе данных сессии и шаблонов
+     */
+    private fun createCalendarDay(
+        date: LocalDate,
+        session: com.example.reptrack.domain.workout.WorkoutSession?,
+        templates: List<com.example.reptrack.domain.workout.WorkoutTemplate>
+    ): CalendarDay {
         val hasWorkout = session != null || templates.isNotEmpty()
         val now = LocalDate.now()
 

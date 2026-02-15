@@ -1,4 +1,11 @@
-package com.example.reptrack.domain.workout.usecases
+package com.example.reptrack.domain.workout.usecases.templates
 
-class DeleteWorkoutTemplate {
+import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
+
+class DeleteWorkoutTemplateUseCase(
+    private val templateRepository: WorkoutTemplateRepository
+) {
+    suspend operator fun invoke(templateId: String): Result<Unit> {
+        return templateRepository.deleteTemplate(templateId)
+    }
 }

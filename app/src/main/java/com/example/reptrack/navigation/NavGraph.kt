@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.presentation.auth.signIn.SignInScreen
 import com.example.reptrack.presentation.auth.signIn.SignInStore
@@ -74,9 +73,7 @@ fun AppNavGraph(){
 
             MainScreen(
                 store = store,
-                loadWeekCalendar = { date ->
-                    calendarUseCase.getWeekCalendar(date).getOrNull()
-                }
+                calendarUseCase = calendarUseCase
             )
         }
     }

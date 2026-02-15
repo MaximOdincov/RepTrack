@@ -2,12 +2,13 @@ package com.example.reptrack.domain.workout.usecases.sessions
 
 import com.example.reptrack.domain.workout.WorkoutSession
 import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
+import kotlinx.coroutines.flow.Flow
 
 
-class UpdateWorkoutSessionUseCase(
+class ObserveWorkoutSessionByIdUseCase(
     private val sessionRepository: WorkoutSessionRepository
 ) {
-    suspend operator fun invoke(session: WorkoutSession): Result<Unit> {
-        return sessionRepository.updateSession(session)
+    operator fun invoke(sessionId: String): Flow<WorkoutSession?> {
+        return sessionRepository.observeSessionById(sessionId)
     }
 }
