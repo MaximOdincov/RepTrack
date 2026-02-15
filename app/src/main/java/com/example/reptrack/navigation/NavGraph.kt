@@ -4,12 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.presentation.auth.signIn.SignInScreen
 import com.example.reptrack.presentation.auth.signIn.SignInStore
 import com.example.reptrack.presentation.auth.signUp.SignUpScreen
 import com.example.reptrack.presentation.auth.signUp.SignUpStore
 import com.example.reptrack.presentation.auth.splash.SplashScreen
 import com.example.reptrack.presentation.auth.splash.SplashStore
+import com.example.reptrack.presentation.main.screens.MainScreen
+import com.example.reptrack.presentation.main.stores.MainScreenStore
 import org.koin.compose.getKoin
 
 @Composable
@@ -65,7 +68,13 @@ fun AppNavGraph(){
         }
 
         composable(Screen.Main.route) {
-            //MainScreen()
+            val store: MainScreenStore = getKoin().get()
+            val calendarUseCase: CalendarUseCase = getKoin().get()
+
+            MainScreen(
+                store = store,
+                calendarUseCase = calendarUseCase
+            )
         }
     }
 }

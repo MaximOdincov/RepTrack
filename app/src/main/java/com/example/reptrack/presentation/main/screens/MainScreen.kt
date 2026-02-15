@@ -1,5 +1,5 @@
 package com.example.reptrack.presentation.main.screens
-/*
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,46 +8,73 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.extensions.coroutines.states
+import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
+import com.example.reptrack.presentation.main.components.Calendar
 import com.example.reptrack.presentation.main.stores.MainScreenStore
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Saver for LocalDate to enable rememberSaveable
+ */
+private val LocalDateSaver = Saver<LocalDate, String>(
+    save = { it.toString() },
+    restore = { LocalDate.parse(it) }
+)
+
 @Composable
-fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label>) {
-    val state = store.states.collectAsState(MainScreenStore.State())
+internal fun MainScreen(
+    store: Store<MainScreenStore.Intent, MainScreenStore.State, Nothing>,
+    calendarUseCase: CalendarUseCase
+) {
+    val state by store.states.collectAsState(MainScreenStore.State())
+
+    // Save selected date locally to survive screen rotation
+    var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
+        mutableStateOf(state.currentDate)
+    }
+
+    // Observe calendar week to get the selected workout
+    val weekCalendar by calendarUseCase.observeWeekCalendar(selectedDate).collectAsState(
+        initial = null
+    )
+    val selectedWorkout = weekCalendar?.days?.find { it.date == selectedDate }?.workoutSession
+
+    // Update store when selected date changes
+    LaunchedEffect(selectedDate) {
+        store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(vertical = 16.dp)
     ) {
-        Text(
-            "My Workouts",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Calendar(
-            currentDate = state.value.currentDate,
-            weekCalendar = state.value.weekCalendar,
-            monthCalendar = state.value.monthCalendar,
-            onDateSelected = { selectedDate ->
-                store.accept(Intent.SelectDate(selectedDate))
-            }
+            initialDate = selectedDate,
+            selectedDate = selectedDate,
+            onDateSelected = { newDate ->
+                selectedDate = newDate
+            },
+            calendarUseCase = calendarUseCase
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        val selectedWorkout = state.value.selectedWorkout
         if (selectedWorkout != null) {
             WorkoutDetails(
                 workout = selectedWorkout,
@@ -59,16 +86,6 @@ fun MainScreen(store: Store<MainScreenStore.Intent, MainScreenStore.State, MainS
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        // Обработка ошибок
-        if (state.value.error != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Error: ${state.value.error}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
             )
         }
     }
@@ -135,4 +152,3 @@ private fun WorkoutDetails(
         }
     }
 }
- */

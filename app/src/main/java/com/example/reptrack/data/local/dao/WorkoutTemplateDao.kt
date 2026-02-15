@@ -9,13 +9,18 @@ import com.example.reptrack.data.local.aggregates.WorkoutTemplateWithExercises
 import com.example.reptrack.data.local.models.TemplateExerciseDb
 import com.example.reptrack.data.local.models.WorkoutTemplateDb
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 @Dao
 interface WorkoutTemplateDao {
 
     @Transaction
-    @Query("SELECT * FROM workout_templates")
+    @Query("SELECT * FROM workout_templates WHERE deletedAt IS NULL ORDER BY name ASC")
     fun observeTemplates(): Flow<List<WorkoutTemplateWithExercises>>
+
+    @Transaction
+    @Query("SELECT * FROM workout_templates WHERE id = :templateId AND deletedAt IS NULL LIMIT 1")
+    fun observeTemplateById(templateId: String): Flow<WorkoutTemplateWithExercises?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTemplate(template: WorkoutTemplateDb)
@@ -46,4 +51,10 @@ interface WorkoutTemplateDao {
 
     @Query("SELECT * FROM template_exercises")
     suspend fun getAllTemplateExercises(): List<TemplateExerciseDb>
+
+    @Query("UPDATE workout_templates SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :templateId")
+    suspend fun deleteTemplate(templateId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+
+    @Query("DELETE FROM template_exercises WHERE templateId = :templateId")
+    suspend fun deleteTemplateExercises(templateId: String)
 }

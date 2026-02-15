@@ -1,10 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
+    <!-- Base colors -->
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+
+    <!-- Light Theme Colors -->
+    <!-- Backgrounds -->
+    <color name="light_background">#FFF3F3F3</color>
+    <color name="light_card">#FFFDFDFD</color>
+
+    <!-- Text colors -->
+    <color name="light_text_primary">#FF000000</color>
+    <color name="light_text_secondary">#FFA2A2A2</color>
+    <color name="light_text_on_accent">#FFFFFFFF</color>
+
+    <!-- Accent colors -->
+    <color name="light_accent_orange">#FFF3670A</color>
+    <color name="light_accent_red">#FFB40000</color>
+    <color name="light_accent_green">#FF127005</color>
+
+    <!-- Dark Theme Colors -->
+    <!-- Backgrounds -->
+    <color name="dark_background">#FF121212</color>
+    <color name="dark_card">#FF1E1E1E</color>
+    <color name="dark_card_elevated">#FF2C2C2C</color>
+
+    <!-- Text colors -->
+    <color name="dark_text_primary">#FFFFFFFF</color>
+    <color name="dark_text_secondary">#FFB0B0B0</color>
+    <color name="dark_text_on_accent">#FFFFFFFF</color>
+
+    <!-- Accent colors (lighter for dark mode) -->
+    <color name="dark_accent_orange">#FFFF8C42</color>
+    <color name="dark_accent_red">#FFFF5252</color>
+    <color name="dark_accent_green">#FF4CAF50</color>
+
+    <!-- Theme color aliases (will be overridden in values-night) -->
+    <color name="background">@color/light_background</color>
+    <color name="card">@color/light_card</color>
+    <color name="card_elevated">@color/light_card</color>
+    <color name="text_primary">@color/light_text_primary</color>
+    <color name="text_secondary">@color/light_text_secondary</color>
+    <color name="text_on_accent">@color/light_text_on_accent</color>
+    <color name="accent_orange">@color/light_accent_orange</color>
+    <color name="accent_red">@color/light_accent_red</color>
+    <color name="accent_green">@color/light_accent_green</color>
 </resources>

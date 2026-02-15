@@ -78,6 +78,7 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.0")
 
     implementation(libs.room.core)
     ksp(libs.room.compiler)

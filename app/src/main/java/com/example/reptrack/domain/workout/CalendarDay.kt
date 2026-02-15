@@ -6,9 +6,9 @@ import java.time.LocalDate
  * Статус тренировки на день
  */
 enum class DayWorkoutStatus {
-    SKIPPED,      // Тренировка пропущена (красная точка)
-    COMPLETED,    // Тренировка завершена (чёрная точка)
-    PLANNED       // Тренировка планируется (оранжевая точка)
+    SKIPPED,
+    COMPLETED,
+    PLANNED
 }
 
 /**
@@ -38,13 +38,3 @@ data class CalendarWeek(
         return days.indexOfFirst { it.date == today }
     }
 }
-
-/**
- * Расширенный вид календаря (месячный вид)
- */
-data class CalendarMonth(
-    val weeks: List<CalendarWeek>,
-    val monthIndex: Int,
-    val year: Int,
-    val displayName: String // Например "January 2026"
-)

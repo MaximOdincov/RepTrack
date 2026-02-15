@@ -1,311 +1,260 @@
 package com.example.reptrack.presentation.main.components
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.reptrack.domain.workout.CalendarDay
-import com.example.reptrack.domain.workout.CalendarMonth
 import com.example.reptrack.domain.workout.CalendarWeek
 import com.example.reptrack.domain.workout.DayWorkoutStatus
+import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.TextStyle
-import java.util.*
 
 /**
- * Календарь с поддержкой недельного и месячного вида с плавными анимациями
+ * Saver for LocalDate to enable rememberSaveable
+ */
+private val LocalDateSaver = Saver<LocalDate, String>(
+    save = { it.toString() },
+    restore = { LocalDate.parse(it) }
+)
+
+/**
+ * Calendar component with week view using HorizontalPager
  */
 @Composable
 fun Calendar(
-    currentDate: LocalDate = LocalDate.now(),
-    weekCalendar: CalendarWeek? = null,
-    monthCalendar: CalendarMonth? = null,
-    onDateSelected: (LocalDate) -> Unit = {}
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize(animationSpec = spring(stiffness = Spring.StiffnessMedium))
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        if (isExpanded && monthCalendar != null) {
-            ExpandedCalendarView(
-                monthCalendar = monthCalendar,
-                currentDate = currentDate,
-                onDateSelected = onDateSelected,
-                onCollapse = { isExpanded = false }
-            )
-        } else if (weekCalendar != null) {
-            WeekCalendarView(
-                weekCalendar = weekCalendar,
-                currentDate = currentDate,
-                onDateSelected = onDateSelected,
-                onExpand = { isExpanded = true }
-            )
-        }
-    }
-}
-
-/**
- * Недельный вид календаря с жестами свайпа
- */
-@Composable
-private fun WeekCalendarView(
-    weekCalendar: CalendarWeek,
-    currentDate: LocalDate,
+    initialDate: LocalDate,
+    selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
-    onExpand: () -> Unit
+    calendarUseCase: CalendarUseCase
 ) {
+    var currentDisplayDate by rememberSaveable(stateSaver = LocalDateSaver) {
+        mutableStateOf(initialDate)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { change, dragAmount ->
-                    if (dragAmount > 50) {
-                        onExpand()
-                    }
-                    change.consume()
-                }
-            }
+            .background(Color.White)
     ) {
-        // Заголовок с месяцем
-        val yearMonth = YearMonth.from(weekCalendar.weekStartDate)
         Text(
-            text = yearMonth.month.getDisplayName(
-                TextStyle.FULL,
-                Locale.getDefault()
-            ).replaceFirstChar { it.uppercase() } + " ${yearMonth.year}",
+            text = getMonthDisplayName(currentDisplayDate),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            fontSize = 18.sp
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Дни недели
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            val dayNames = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
-            dayNames.forEachIndexed { index, dayName ->
-                WeekDayCell(
-                    dayName = dayName,
-                    calendarDay = weekCalendar.days.getOrNull(index),
-                    isSelected = weekCalendar.days.getOrNull(index)?.date == currentDate,
-                    onDateSelected = onDateSelected
-                )
-            }
-        }
-    }
-}
-
-/**
- * Ячейка дня недели
- */
-@Composable
-private fun RowScope.WeekDayCell(
-    dayName: String,
-    calendarDay: CalendarDay?,
-    isSelected: Boolean,
-    onDateSelected: (LocalDate) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .clickable(enabled = calendarDay != null) {
-                calendarDay?.let { onDateSelected(it.date) }
-            }
-            .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Статус индикатор
-        if (calendarDay?.status != null) {
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .clip(CircleShape)
-                    .background(
-                        when (calendarDay.status) {
-                            DayWorkoutStatus.SKIPPED -> Color.Red
-                            DayWorkoutStatus.COMPLETED -> Color.Black
-                            DayWorkoutStatus.PLANNED -> Color(0xFFFFA500)
-                        }
-                    )
-            )
-        } else {
-            Spacer(modifier = Modifier.size(6.dp))
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = dayName,
-            style = MaterialTheme.typography.bodySmall,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Medium
-        )
-
-        Spacer(modifier = Modifier.height(2.dp))
-
-        Box(
+            fontSize = 24.sp,
             modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(
-                    if (isSelected) Color(0xFFFFA500) else Color.Transparent
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = calendarDay?.date?.dayOfMonth?.toString() ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) Color.White else Color.Unspecified,
-                fontSize = 12.sp
-            )
-        }
-    }
-}
-
-/**
- * Расширенный (месячный) вид календаря
- */
-@Composable
-private fun ExpandedCalendarView(
-    monthCalendar: CalendarMonth,
-    currentDate: LocalDate,
-    onDateSelected: (LocalDate) -> Unit,
-    onCollapse: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize(animationSpec = spring(stiffness = Spring.StiffnessMedium))
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { change, dragAmount ->
-                    if (dragAmount < -50) {
-                        onCollapse()
-                    }
-                    change.consume()
-                }
-            }
-    ) {
-        // Заголовок
-        Text(
-            text = monthCalendar.displayName,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            fontSize = 18.sp
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Сетка календаря
-        monthCalendar.weeks.forEach { week ->
-            Row(
+        WeekView(
+            initialDate = initialDate,
+            selectedDate = selectedDate,
+            onDateSelected = onDateSelected,
+            calendarUseCase = calendarUseCase,
+            onDisplayDateChanged = { newDate -> currentDisplayDate = newDate }
+        )
+    }
+}
+
+/**
+ * Week view with HorizontalPager for smooth swipe animations
+ * Day names are static, only numbers and dots swipe
+ */
+@Composable
+private fun WeekView(
+    initialDate: LocalDate,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    calendarUseCase: CalendarUseCase,
+    onDisplayDateChanged: (LocalDate) -> Unit
+) {
+    val baseDate = rememberSaveable { mutableStateOf(initialDate) }
+
+    val middlePage = Int.MAX_VALUE / 2
+    val pagerState = rememberPagerState(
+        initialPage = middlePage,
+        pageCount = { Int.MAX_VALUE }
+    )
+
+    LaunchedEffect(pagerState.currentPage) {
+        val weeksDiff = pagerState.currentPage - middlePage
+        val newDate = baseDate.value.plusWeeks(weeksDiff.toLong())
+        onDisplayDateChanged(newDate)
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.fillMaxWidth()
+    ) { page ->
+        val pageDate = baseDate.value.plusWeeks((page - middlePage).toLong())
+        val weekCalendar by calendarUseCase.observeWeekCalendar(pageDate).collectAsState(
+            initial = null
+        )
+
+        val calendar = weekCalendar
+        if (calendar != null) {
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val dayNames = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
-                week.days.forEachIndexed { index, day ->
-                    ExpandedDayCell(
-                        dayName = dayNames[index],
-                        calendarDay = day,
-                        isSelected = day.date == currentDate,
-                        onDateSelected = onDateSelected
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    calendar.days.forEach { calendarDay ->
+                        DayNameHeader(
+                            dayName = calendarDay.date.dayOfWeek.name.take(3),
+                            modifier = Modifier.width(52.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    calendar.days.forEach { calendarDay ->
+                        NumberCell(
+                            calendarDay = calendarDay,
+                            isSelected = calendarDay.date == selectedDate,
+                            onDateSelected = onDateSelected
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
 /**
- * Ячейка дня в месячном виде
+ * Static day name header (for week view)
  */
 @Composable
-private fun RowScope.ExpandedDayCell(
+private fun DayNameHeader(
     dayName: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = dayName,
+        style = MaterialTheme.typography.labelSmall,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier
+            .wrapContentWidth(align = Alignment.CenterHorizontally),
+        textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Number cell with dot and number only (for week view)
+ */
+@Composable
+private fun NumberCell(
     calendarDay: CalendarDay,
     isSelected: Boolean,
     onDateSelected: (LocalDate) -> Unit
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.15f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+        label = "scale"
+    )
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+        label = "background_color"
+    )
+
     Column(
         modifier = Modifier
-            .weight(1f)
-            .clickable { onDateSelected(calendarDay.date) }
+            .width(52.dp)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onDateSelected(calendarDay.date)
+            }
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = dayName,
-            style = MaterialTheme.typography.labelSmall,
-            fontSize = 9.sp
+        val dotScale by animateFloatAsState(
+            targetValue = if (calendarDay.status != null) 1f else 0f,
+            animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
+            label = "dot_scale"
+        )
+
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .scale(dotScale)
+                .clip(CircleShape)
+                .background(
+                    when (calendarDay.status) {
+                        DayWorkoutStatus.SKIPPED -> MaterialTheme.colorScheme.secondaryContainer
+                        DayWorkoutStatus.COMPLETED -> MaterialTheme.colorScheme.tertiary
+                        DayWorkoutStatus.PLANNED -> MaterialTheme.colorScheme.primaryContainer
+                        null -> Color.Transparent
+                    }
+                )
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(42.dp)
                 .clip(CircleShape)
-                .background(
-                    if (isSelected) Color(0xFFFFA500) else Color.Transparent
-                ),
+                .background(backgroundColor)
+                .scale(scale),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (calendarDay.status != null) {
-                    Box(
-                        modifier = Modifier
-                            .size(4.dp)
-                            .clip(CircleShape)
-                            .background(
-                                when (calendarDay.status) {
-                                    DayWorkoutStatus.SKIPPED -> Color.Red
-                                    DayWorkoutStatus.COMPLETED -> Color.Black
-                                    DayWorkoutStatus.PLANNED -> Color(0xFFFFA500)
-                                }
-                            )
-                    )
-                    Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = calendarDay.date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontSize = 20.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                color = if (isSelected) {
+                    Color.White
+                } else {
+                    MaterialTheme.colorScheme.onSurface
                 }
-
-                Text(
-                    text = calendarDay.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) Color.White else Color.Unspecified,
-                    fontSize = 11.sp
-                )
-            }
+            )
         }
     }
 }
 
+/**
+ * Get month display name from date
+ */
+private fun getMonthDisplayName(date: LocalDate): String {
+    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
+    return "$monthName ${date.year}"
+}
