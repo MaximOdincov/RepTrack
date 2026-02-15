@@ -14,6 +14,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.builtins.SetSerializer
+import kotlinx.serialization.builtins.serializer
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDateTime
@@ -390,7 +392,7 @@ class WorkoutTemplateRepositoryImplTest {
         id = id,
         name = "Exercise $id",
         muscleGroup = MuscleGroup.CHEST,
-        type = ExerciseType.STRENGTH,
+        type = ExerciseType.WEIGHT_REPS,
         iconUrl = null,
         iconColor = null,
         backgroundImageUrl = null,
@@ -408,6 +410,6 @@ class WorkoutTemplateRepositoryImplTest {
 
     private fun serializeSet(set: Set<Int>): String {
         val json = kotlinx.serialization.json.Json { prettyPrint = false }
-        return json.encodeToString(set)
+        return json.encodeToString(SetSerializer(Int.serializer()), set)
     }
 }
