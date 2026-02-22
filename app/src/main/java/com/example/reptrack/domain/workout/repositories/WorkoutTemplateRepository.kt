@@ -1,6 +1,6 @@
 package com.example.reptrack.domain.workout.repositories
 
-import com.example.reptrack.domain.workout.WorkoutTemplate
+import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import kotlinx.coroutines.flow.Flow
 
 interface WorkoutTemplateRepository {

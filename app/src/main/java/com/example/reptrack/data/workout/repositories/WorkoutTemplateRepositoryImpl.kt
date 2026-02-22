@@ -1,11 +1,11 @@
 package com.example.reptrack.data.workout.repositories
 
 import com.example.reptrack.data.local.dao.WorkoutTemplateDao
-import com.example.reptrack.data.local.mappers.DomainMapper.toDb
-import com.example.reptrack.data.local.mappers.DomainMapper.toDomain
+import com.example.reptrack.data.local.mappers.parseSchedule
 import com.example.reptrack.data.local.mappers.toDb
-import com.example.reptrack.domain.workout.TemplateSchedule
-import com.example.reptrack.domain.workout.WorkoutTemplate
+import com.example.reptrack.data.local.mappers.toDomain
+import com.example.reptrack.domain.workout.entities.TemplateSchedule
+import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -103,29 +103,10 @@ class WorkoutTemplateRepositoryImpl(
         dayOfWeek: Int,
         isSecondWeek: Boolean
     ): Boolean {
-        val schedule = parseScheduleFromDb(templateDb.week1Days, templateDb.week2Days)
+        val schedule = parseSchedule(templateDb.week1Days, templateDb.week2Days)
             ?: return false
 
         val targetDays = if (isSecondWeek) schedule.week2Days else schedule.week1Days
         return targetDays.contains(dayOfWeek)
-    }
-
-    /**
-     * Парсит JSON строку расписания из БД в TemplateSchedule
-     * Дублирует логику из DomainMapper для использования внутри репозитория
-     */
-    private fun parseScheduleFromDb(week1Str: String?, week2Str: String?): TemplateSchedule? {
-        return if (week1Str != null && week2Str != null) {
-            try {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-                val week1 = json.decodeFromString<Set<Int>>(week1Str)
-                val week2 = json.decodeFromString<Set<Int>>(week2Str)
-                TemplateSchedule(week1Days = week1, week2Days = week2)
-            } catch (e: Exception) {
-                null
-            }
-        } else {
-            null
-        }
     }
 }

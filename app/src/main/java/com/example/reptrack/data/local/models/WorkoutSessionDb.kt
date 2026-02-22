@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.reptrack.domain.workout.WorkoutStatus
+import com.example.reptrack.domain.workout.entities.WorkoutStatus
 import java.time.LocalDateTime
 
 @Entity(

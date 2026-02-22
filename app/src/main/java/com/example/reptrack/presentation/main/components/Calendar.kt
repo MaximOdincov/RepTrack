@@ -24,9 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.reptrack.domain.workout.CalendarDay
-import com.example.reptrack.domain.workout.CalendarWeek
-import com.example.reptrack.domain.workout.DayWorkoutStatus
+import com.example.reptrack.domain.workout.entities.CalendarDay
+import com.example.reptrack.domain.workout.entities.DayWorkoutStatus
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import java.time.LocalDate
 

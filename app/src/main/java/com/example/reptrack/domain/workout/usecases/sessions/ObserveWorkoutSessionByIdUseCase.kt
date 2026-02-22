@@ -1,6 +1,6 @@
 package com.example.reptrack.domain.workout.usecases.sessions
 
-import com.example.reptrack.domain.workout.WorkoutSession
+import com.example.reptrack.domain.workout.entities.WorkoutSession
 import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import kotlinx.coroutines.flow.Flow
 

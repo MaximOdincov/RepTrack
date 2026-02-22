@@ -2,11 +2,12 @@ package com.example.reptrack.domain.workout.usecases.exercises
 
 import com.example.reptrack.domain.workout.entities.WorkoutExercise
 import com.example.reptrack.domain.workout.repositories.ExerciseRepository
+import kotlinx.coroutines.flow.Flow
 
-class CreateWorkoutExerciseUseCase(
+class ObserveWorkoutExerciseByIdUseCase(
     private val exerciseRepository: ExerciseRepository
 ) {
-    suspend operator fun invoke(exercise: WorkoutExercise, workoutSessionId: String): Result<Unit> {
-        return exerciseRepository.createWorkoutExercise(exercise, workoutSessionId)
+    suspend operator fun invoke(exerciseId: String): Flow<WorkoutExercise> {
+        return exerciseRepository.observeWorkoutExerciseById(exerciseId)
     }
 }

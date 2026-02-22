@@ -1,4 +1,4 @@
-package com.example.reptrack.domain.workout
+package com.example.reptrack.domain.workout.entities
 
 enum class MuscleGroup {
     CHEST,

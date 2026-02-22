@@ -4,10 +4,10 @@ import com.example.reptrack.data.local.aggregates.WorkoutTemplateWithExercises
 import com.example.reptrack.data.local.dao.WorkoutTemplateDao
 import com.example.reptrack.data.local.models.ExerciseDb
 import com.example.reptrack.data.local.models.WorkoutTemplateDb
-import com.example.reptrack.domain.workout.MuscleGroup
-import com.example.reptrack.domain.workout.TemplateSchedule
-import com.example.reptrack.domain.workout.WorkoutTemplate
-import com.example.reptrack.domain.workout.ExerciseType
+import com.example.reptrack.domain.workout.entities.MuscleGroup
+import com.example.reptrack.domain.workout.entities.TemplateSchedule
+import com.example.reptrack.domain.workout.entities.WorkoutTemplate
+import com.example.reptrack.domain.workout.entities.ExerciseType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

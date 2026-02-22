@@ -1,12 +1,9 @@
 package com.example.reptrack.data.backup.mapper
 
 import com.example.reptrack.data.local.models.ExerciseDb
-import com.example.reptrack.domain.workout.ExerciseType
-import com.example.reptrack.domain.workout.MuscleGroup
+import com.example.reptrack.domain.workout.entities.ExerciseType
+import com.example.reptrack.domain.workout.entities.MuscleGroup
 import com.google.firebase.firestore.DocumentSnapshot
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 
 object ExerciseMapper {
 

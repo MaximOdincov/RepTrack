@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets
 import com.example.reptrack.data.local.aggregates.WorkoutSessionWithExercises
 import com.example.reptrack.data.local.models.WorkoutExerciseDb
 import com.example.reptrack.data.local.models.WorkoutSessionDb
@@ -80,9 +81,36 @@ interface WorkoutDao {
     @Query("UPDATE workout_sets SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE workoutExerciseId IN (SELECT id FROM workout_exercises WHERE workoutSessionId = :sessionId)")
     suspend fun deleteSetsBySession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExercise(exercise: WorkoutExerciseDb)
+
+    @Query("UPDATE workout_exercises SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :exerciseId")
+    suspend fun deleteExerciseById(exerciseId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+
+    @Transaction
+    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId AND deletedAt IS NULL LIMIT 1")
+    suspend fun getWorkoutExerciseWithSets(exerciseId: String): WorkoutExerciseWithSets?
+
     @Query("SELECT * FROM workout_sets")
     suspend fun getAllSets(): List<WorkoutSetDb>
 
     @Query("SELECT * FROM workout_exercises")
     suspend fun getAllExercises(): List<WorkoutExerciseDb>
+
+    @Transaction
+    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId AND deletedAt IS NULL LIMIT 1")
+    fun observeWorkoutExerciseWithSets(exerciseId: String): Flow<com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets?>
+
+    @Transaction
+    @Query("""
+        SELECT we.* FROM workout_exercises we
+        INNER JOIN workout_sessions ws ON we.workoutSessionId = ws.id
+        WHERE we.exerciseId = :exerciseId
+        AND ws.status = 'COMPLETED'
+        AND we.deletedAt IS NULL
+        AND ws.deletedAt IS NULL
+        ORDER BY ws.date DESC
+        LIMIT 1
+    """)
+    fun observeLastCompletedExerciseWithSets(exerciseId: String): Flow<com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets?>
 }

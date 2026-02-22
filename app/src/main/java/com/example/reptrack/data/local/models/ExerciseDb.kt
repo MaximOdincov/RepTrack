@@ -2,8 +2,8 @@ package com.example.reptrack.data.local.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.reptrack.domain.workout.ExerciseType
-import com.example.reptrack.domain.workout.MuscleGroup
+import com.example.reptrack.domain.workout.entities.ExerciseType
+import com.example.reptrack.domain.workout.entities.MuscleGroup
 import java.time.LocalDateTime
 
 @Entity(tableName = "exercise")

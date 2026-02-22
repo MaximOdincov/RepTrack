@@ -4,11 +4,10 @@ import com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets
 import com.example.reptrack.data.local.aggregates.WorkoutSessionWithExercises
 import com.example.reptrack.data.local.dao.WorkoutDao
 import com.example.reptrack.data.local.models.WorkoutExerciseDb
-import com.example.reptrack.data.local.models.WorkoutSetDb
-import com.example.reptrack.domain.workout.WorkoutExercise
-import com.example.reptrack.domain.workout.WorkoutSession
-import com.example.reptrack.domain.workout.WorkoutSet
-import com.example.reptrack.domain.workout.WorkoutStatus
+import com.example.reptrack.domain.workout.entities.WorkoutExercise
+import com.example.reptrack.domain.workout.entities.WorkoutSession
+import com.example.reptrack.domain.workout.entities.WorkoutSet
+import com.example.reptrack.domain.workout.entities.WorkoutStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

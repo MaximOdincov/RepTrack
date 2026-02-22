@@ -1,9 +1,9 @@
 package com.example.reptrack.data.workout.repositories
 
 import com.example.reptrack.data.local.dao.WorkoutDao
-import com.example.reptrack.data.local.mappers.DomainMapper.toDb
-import com.example.reptrack.data.local.mappers.DomainMapper.toDomain
-import com.example.reptrack.domain.workout.WorkoutSession
+import com.example.reptrack.data.local.mappers.toDb
+import com.example.reptrack.data.local.mappers.toDomain
+import com.example.reptrack.domain.workout.entities.WorkoutSession
 import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
