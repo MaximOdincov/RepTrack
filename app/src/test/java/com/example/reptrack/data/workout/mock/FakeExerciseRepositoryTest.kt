@@ -73,9 +73,9 @@ class FakeExerciseRepositoryTest {
             name = "Custom Exercise",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconUrl = null,
+            iconRes = null,
             iconColor = "#FFFFFF",
-            backgroundImageUrl = null,
+            backgroundRes = null,
             backgroundColor = "#000000",
             isCustom = true
         )
@@ -95,9 +95,9 @@ class FakeExerciseRepositoryTest {
             name = "Updated Bench Press",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconUrl = null,
+            iconRes = null,
             iconColor = "#FF0000",
-            backgroundImageUrl = null,
+            backgroundRes = null,
             backgroundColor = "#000000",
             isCustom = false
         )

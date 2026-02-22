@@ -5,9 +5,9 @@ data class Exercise(
     val name: String,
     val muscleGroup: MuscleGroup,
     val type: ExerciseType,
-    val iconUrl: String?,
-    val iconColor: String?,        
-    val backgroundImageUrl: String?,
+    val iconRes: Int?,
+    val iconColor: String?,
+    val backgroundRes: Int?,
     val backgroundColor: String?,
     val isCustom: Boolean
 )

@@ -26,9 +26,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Bench Press",
                         muscleGroup = MuscleGroup.CHEST,
                         type = ExerciseType.WEIGHT_REPS,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#FF6B6B",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#FFE5E5",
                         isCustom = false
                     ),
@@ -37,9 +37,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Squat",
                         muscleGroup = MuscleGroup.LEGS,
                         type = ExerciseType.WEIGHT_REPS,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#95E1D3",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#E5F9F4",
                         isCustom = false
                     ),
@@ -48,9 +48,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Incline Bench",
                         muscleGroup = MuscleGroup.CHEST,
                         type = ExerciseType.WEIGHT_REPS,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#FF6B6B",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#FFE5E5",
                         isCustom = false
                     )
@@ -92,9 +92,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Incline Bench",
                         muscleGroup = MuscleGroup.CHEST,
                         type = ExerciseType.WEIGHT_REPS,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#FF6B6B",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#FFE5E5",
                         isCustom = false
                     ),
@@ -103,9 +103,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Bench Press",
                         muscleGroup = MuscleGroup.CHEST,
                         type = ExerciseType.WEIGHT_REPS,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#FF6B6B",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#FFE5E5",
                         isCustom = false
                     )
@@ -144,9 +144,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Treadmill",
                         muscleGroup = MuscleGroup.CARDIO,
                         type = ExerciseType.TIME_DISTANCE,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#FCBAD3",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#FFF0F5",
                         isCustom = false
                     ),
@@ -155,9 +155,9 @@ class ObserveAllExercisesUseCaseTest {
                         name = "Bench Press",
                         muscleGroup = MuscleGroup.CHEST,
                         type = ExerciseType.WEIGHT_REPS,
-                        iconUrl = null,
+                        iconRes = null,
                         iconColor = "#FF6B6B",
-                        backgroundImageUrl = null,
+                        backgroundRes = null,
                         backgroundColor = "#FFE5E5",
                         isCustom = false
                     )

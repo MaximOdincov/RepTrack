@@ -393,9 +393,9 @@ class WorkoutTemplateRepositoryImplTest {
         name = "Exercise $id",
         muscleGroup = MuscleGroup.CHEST,
         type = ExerciseType.WEIGHT_REPS,
-        iconUrl = null,
+        iconRes = null,
         iconColor = null,
-        backgroundImageUrl = null,
+        backgroundRes = null,
         backgroundColor = null,
         isCustom = false
     )

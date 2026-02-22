@@ -21,9 +21,9 @@ class ExerciseMapperTest {
             name = "Bench Press",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconUrl = "https://example.com/icon.png",
+            iconRes = 123,
             iconColor = "#FF6B6B",
-            backgroundImageUrl = "https://example.com/bg.png",
+            backgroundRes = 456,
             backgroundColor = "#FFE5E5",
             isCustom = false,
             updatedAt = java.time.LocalDateTime.now(),
@@ -38,9 +38,9 @@ class ExerciseMapperTest {
         assertEquals("Bench Press", exercise.name)
         assertEquals(MuscleGroup.CHEST, exercise.muscleGroup)
         assertEquals(ExerciseType.WEIGHT_REPS, exercise.type)
-        assertEquals("https://example.com/icon.png", exercise.iconUrl)
+        assertEquals(123, exercise.iconRes)
         assertEquals("#FF6B6B", exercise.iconColor)
-        assertEquals("https://example.com/bg.png", exercise.backgroundImageUrl)
+        assertEquals(456, exercise.backgroundRes)
         assertEquals("#FFE5E5", exercise.backgroundColor)
         assertEquals(false, exercise.isCustom)
     }
@@ -53,9 +53,9 @@ class ExerciseMapperTest {
             name = "Squat",
             muscleGroup = MuscleGroup.LEGS,
             type = ExerciseType.WEIGHT_REPS,
-            iconUrl = null,
+            iconRes = null,
             iconColor = "#95E1D3",
-            backgroundImageUrl = null,
+            backgroundRes = null,
             backgroundColor = "#E5F9F4",
             isCustom = false
         )
@@ -68,9 +68,9 @@ class ExerciseMapperTest {
         assertEquals("Squat", exerciseDb.name)
         assertEquals(MuscleGroup.LEGS, exerciseDb.muscleGroup)
         assertEquals(ExerciseType.WEIGHT_REPS, exerciseDb.type)
-        assertNull(exerciseDb.iconUrl)
+        assertNull(exerciseDb.iconRes)
         assertEquals("#95E1D3", exerciseDb.iconColor)
-        assertNull(exerciseDb.backgroundImageUrl)
+        assertNull(exerciseDb.backgroundRes)
         assertEquals("#E5F9F4", exerciseDb.backgroundColor)
         assertEquals(false, exerciseDb.isCustom)
         assertNull(exerciseDb.deletedAt)

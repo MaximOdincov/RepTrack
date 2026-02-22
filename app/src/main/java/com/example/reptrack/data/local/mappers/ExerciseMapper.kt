@@ -1,8 +1,6 @@
 package com.example.reptrack.data.local.mappers
 
-import com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets
 import com.example.reptrack.data.local.models.ExerciseDb
-import com.example.reptrack.data.local.models.WorkoutExerciseDb
 import com.example.reptrack.domain.workout.entities.Exercise
 
 /**
@@ -14,9 +12,9 @@ fun ExerciseDb.toDomain(): Exercise = Exercise(
     name = name,
     muscleGroup = muscleGroup,
     type = type,
-    iconUrl = iconUrl,
+    iconRes = iconRes,
     iconColor = iconColor,
-    backgroundImageUrl = backgroundImageUrl,
+    backgroundRes = backgroundRes,
     backgroundColor = backgroundColor,
     isCustom = isCustom
 )
@@ -26,9 +24,9 @@ fun Exercise.toDb(): ExerciseDb = ExerciseDb(
     name = name,
     muscleGroup = muscleGroup,
     type = type,
-    iconUrl = iconUrl,
+    iconRes = iconRes,
     iconColor = iconColor,
-    backgroundImageUrl = backgroundImageUrl,
+    backgroundRes = backgroundRes,
     backgroundColor = backgroundColor,
     isCustom = isCustom
 )
