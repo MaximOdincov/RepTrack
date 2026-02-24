@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.reptrack.di.appModule
 import com.example.reptrack.di.authModule
 import com.example.reptrack.di.databaseModule
+import com.example.reptrack.di.exerciseModule
 import com.example.reptrack.di.profileModule
 import com.example.reptrack.di.workoutModule
 import org.koin.android.ext.koin.androidContext
@@ -22,6 +23,7 @@ class App: Application() {
                 authModule,
                 profileModule,
                 workoutModule,
+                exerciseModule,
                 databaseModule
             )
         }
