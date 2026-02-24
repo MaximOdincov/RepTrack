@@ -1,5 +1,6 @@
 package com.example.reptrack.data.workout.mock
 
+import com.example.reptrack.R
 import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.ExerciseType
 import com.example.reptrack.domain.workout.entities.MuscleGroup
@@ -77,10 +78,10 @@ class FakeExerciseRepository : ExerciseRepository {
             name = "Bench Press",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconRes = null,
+            iconRes = R.drawable.exercise_bench_press,
             iconColor = "#FF6B6B",
+            backgroundColor = "#FFEBEE",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
             isCustom = false
         ),
         Exercise(
@@ -88,10 +89,10 @@ class FakeExerciseRepository : ExerciseRepository {
             name = "Incline Bench Press",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconRes = null,
-            iconColor = "#FF6B6B",
+            iconRes = R.drawable.exercis_icon_2,
+            iconColor = "#FC3322",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFEBEE",
             isCustom = false
         ),
         Exercise(
@@ -99,10 +100,10 @@ class FakeExerciseRepository : ExerciseRepository {
             name = "Dumbbell Fly",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconRes = null,
-            iconColor = "#FF6B6B",
+            iconRes = R.drawable.exercise_icon_3,
+            iconColor = "#FA34D3",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFEBEE",
             isCustom = false
         ),
         Exercise(
@@ -110,10 +111,10 @@ class FakeExerciseRepository : ExerciseRepository {
             name = "Cable Fly",
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
-            iconRes = null,
+            iconRes = R.drawable.exercise_icon_4,
             iconColor = "#FF6B6B",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFEBEE",
             isCustom = false
         ),
         Exercise(
@@ -124,7 +125,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#FF6B6B",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFEBEE",
             isCustom = false
         ),
 
@@ -137,7 +138,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#4ECDC4",
             backgroundRes = null,
-            backgroundColor = "#E5F9F7",
+            backgroundColor = "#E0F7FA",
             isCustom = false
         ),
         Exercise(
@@ -148,7 +149,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#4ECDC4",
             backgroundRes = null,
-            backgroundColor = "#E5F9F7",
+            backgroundColor = "#E0F7FA",
             isCustom = false
         ),
         Exercise(
@@ -159,7 +160,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#4ECDC4",
             backgroundRes = null,
-            backgroundColor = "#E5F9F7",
+            backgroundColor = "#E0F7FA",
             isCustom = false
         ),
         Exercise(
@@ -170,7 +171,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#4ECDC4",
             backgroundRes = null,
-            backgroundColor = "#E5F9F7",
+            backgroundColor = "#E0F7FA",
             isCustom = false
         ),
         Exercise(
@@ -181,7 +182,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#4ECDC4",
             backgroundRes = null,
-            backgroundColor = "#E5F9F7",
+            backgroundColor = "#E0F7FA",
             isCustom = false
         ),
 
@@ -194,7 +195,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#95E1D3",
             backgroundRes = null,
-            backgroundColor = "#E5F9F4",
+            backgroundColor = "#E8F5E9",
             isCustom = false
         ),
         Exercise(
@@ -205,7 +206,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#95E1D3",
             backgroundRes = null,
-            backgroundColor = "#E5F9F4",
+            backgroundColor = "#E8F5E9",
             isCustom = false
         ),
         Exercise(
@@ -216,7 +217,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#95E1D3",
             backgroundRes = null,
-            backgroundColor = "#E5F9F4",
+            backgroundColor = "#E8F5E9",
             isCustom = false
         ),
         Exercise(
@@ -227,7 +228,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#95E1D3",
             backgroundRes = null,
-            backgroundColor = "#E5F9F4",
+            backgroundColor = "#E8F5E9",
             isCustom = false
         ),
         Exercise(
@@ -238,7 +239,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#95E1D3",
             backgroundRes = null,
-            backgroundColor = "#E5F9F4",
+            backgroundColor = "#E8F5E9",
             isCustom = false
         ),
 
@@ -251,7 +252,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#F38181",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFF3E0",
             isCustom = false
         ),
         Exercise(
@@ -262,7 +263,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#F38181",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFF3E0",
             isCustom = false
         ),
         Exercise(
@@ -273,7 +274,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#F38181",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFF3E0",
             isCustom = false
         ),
         Exercise(
@@ -284,7 +285,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#F38181",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFF3E0",
             isCustom = false
         ),
         Exercise(
@@ -295,7 +296,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#F38181",
             backgroundRes = null,
-            backgroundColor = "#FFE5E5",
+            backgroundColor = "#FFF3E0",
             isCustom = false
         ),
 
@@ -308,7 +309,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#AA96DA",
             backgroundRes = null,
-            backgroundColor = "#F0EDFF",
+            backgroundColor = "#F3E5F5",
             isCustom = false
         ),
         Exercise(
@@ -319,7 +320,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#AA96DA",
             backgroundRes = null,
-            backgroundColor = "#F0EDFF",
+            backgroundColor = "#F3E5F5",
             isCustom = false
         ),
         Exercise(
@@ -330,7 +331,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#AA96DA",
             backgroundRes = null,
-            backgroundColor = "#F0EDFF",
+            backgroundColor = "#F3E5F5",
             isCustom = false
         ),
         Exercise(
@@ -341,7 +342,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#AA96DA",
             backgroundRes = null,
-            backgroundColor = "#F0EDFF",
+            backgroundColor = "#F3E5F5",
             isCustom = false
         ),
         Exercise(
@@ -352,7 +353,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#AA96DA",
             backgroundRes = null,
-            backgroundColor = "#F0EDFF",
+            backgroundColor = "#F3E5F5",
             isCustom = false
         ),
 
@@ -365,7 +366,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#FCBAD3",
             backgroundRes = null,
-            backgroundColor = "#FFF0F5",
+            backgroundColor = "#FCE4EC",
             isCustom = false
         ),
         Exercise(
@@ -376,7 +377,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#FCBAD3",
             backgroundRes = null,
-            backgroundColor = "#FFF0F5",
+            backgroundColor = "#FCE4EC",
             isCustom = false
         ),
         Exercise(
@@ -387,7 +388,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#FCBAD3",
             backgroundRes = null,
-            backgroundColor = "#FFF0F5",
+            backgroundColor = "#FCE4EC",
             isCustom = false
         ),
         Exercise(
@@ -398,7 +399,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#FCBAD3",
             backgroundRes = null,
-            backgroundColor = "#FFF0F5",
+            backgroundColor = "#FCE4EC",
             isCustom = false
         ),
         Exercise(
@@ -409,7 +410,7 @@ class FakeExerciseRepository : ExerciseRepository {
             iconRes = null,
             iconColor = "#FCBAD3",
             backgroundRes = null,
-            backgroundColor = "#FFF0F5",
+            backgroundColor = "#FCE4EC",
             isCustom = false
         )
     )

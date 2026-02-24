@@ -61,9 +61,7 @@ internal fun MainScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
 
         Calendar(
             initialDate = selectedDate,
