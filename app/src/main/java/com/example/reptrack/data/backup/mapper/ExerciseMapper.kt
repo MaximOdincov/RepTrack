@@ -1,12 +1,9 @@
 package com.example.reptrack.data.backup.mapper
 
 import com.example.reptrack.data.local.models.ExerciseDb
-import com.example.reptrack.domain.workout.ExerciseType
-import com.example.reptrack.domain.workout.MuscleGroup
+import com.example.reptrack.domain.workout.entities.ExerciseType
+import com.example.reptrack.domain.workout.entities.MuscleGroup
 import com.google.firebase.firestore.DocumentSnapshot
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 
 object ExerciseMapper {
 
@@ -17,9 +14,9 @@ object ExerciseMapper {
                 name = doc.getString("name") ?: return null,
                 muscleGroup = MuscleGroup.valueOf(doc.getString("muscleGroup") ?: "CHEST"),
                 type = ExerciseType.valueOf(doc.getString("type") ?: "WEIGHT_REPS"),
-                iconUrl = doc.getString("iconUrl"),
+                iconRes = doc.getLong("iconRes")?.toInt(),
                 iconColor = doc.getString("iconColor"),
-                backgroundImageUrl = doc.getString("backgroundImageUrl"),
+                backgroundRes = doc.getLong("backgroundRes")?.toInt(),
                 backgroundColor = doc.getString("backgroundColor"),
                 isCustom = doc.getBoolean("isCustom") ?: false,
                 updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
@@ -36,9 +33,9 @@ object ExerciseMapper {
             "name" to exercise.name,
             "muscleGroup" to exercise.muscleGroup.name,
             "type" to exercise.type.name,
-            "iconUrl" to exercise.iconUrl,
+            "iconRes" to exercise.iconRes?.toLong(),
             "iconColor" to exercise.iconColor,
-            "backgroundImageUrl" to exercise.backgroundImageUrl,
+            "backgroundRes" to exercise.backgroundRes?.toLong(),
             "backgroundColor" to exercise.backgroundColor,
             "isCustom" to exercise.isCustom,
             "updatedAt" to TimestampMapper.toTimestamp(exercise.updatedAt),

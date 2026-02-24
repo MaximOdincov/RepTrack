@@ -1,9 +1,9 @@
 package com.example.reptrack.data.workout.mock
 
-import com.example.reptrack.domain.workout.WorkoutExercise
-import com.example.reptrack.domain.workout.WorkoutSet
-import com.example.reptrack.domain.workout.WorkoutSession
-import com.example.reptrack.domain.workout.WorkoutStatus
+import com.example.reptrack.domain.workout.entities.WorkoutExercise
+import com.example.reptrack.domain.workout.entities.WorkoutSet
+import com.example.reptrack.domain.workout.entities.WorkoutSession
+import com.example.reptrack.domain.workout.entities.WorkoutStatus
 import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

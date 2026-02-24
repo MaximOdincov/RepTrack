@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.extensions.coroutines.states
+import com.example.reptrack.domain.workout.entities.WorkoutSession
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.presentation.main.components.Calendar
 import com.example.reptrack.presentation.main.stores.MainScreenStore
@@ -93,7 +94,7 @@ internal fun MainScreen(
 
 @Composable
 private fun WorkoutDetails(
-    workout: com.example.reptrack.domain.workout.WorkoutSession,
+    workout: WorkoutSession,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.padding(16.dp)) {

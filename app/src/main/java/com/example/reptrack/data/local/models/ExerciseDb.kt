@@ -2,8 +2,8 @@ package com.example.reptrack.data.local.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.reptrack.domain.workout.ExerciseType
-import com.example.reptrack.domain.workout.MuscleGroup
+import com.example.reptrack.domain.workout.entities.ExerciseType
+import com.example.reptrack.domain.workout.entities.MuscleGroup
 import java.time.LocalDateTime
 
 @Entity(tableName = "exercise")
@@ -12,9 +12,9 @@ data class ExerciseDb(
     val name: String,
     val muscleGroup: MuscleGroup,
     val type: ExerciseType,
-    val iconUrl: String?,
-    val iconColor: String?,         
-    val backgroundImageUrl: String?,
+    val iconRes: Int?,
+    val iconColor: String?,
+    val backgroundRes: Int?,
     val backgroundColor: String?,
     val isCustom: Boolean,
     val updatedAt: LocalDateTime = LocalDateTime.now(),

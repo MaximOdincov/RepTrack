@@ -15,7 +15,7 @@ INSERT INTO weight_records (id, date, value) VALUES (
 );
 
 -- Exercises (~20 across muscle groups)
-INSERT INTO exercise (id, name, muscleGroup, type, iconUrl, isCustom) VALUES
+INSERT INTO exercise (id, name, muscleGroup, type, iconRes, isCustom) VALUES
 ('ex_chest_bench', 'Bench Press', 'CHEST', 'WEIGHT_REPS', NULL, 0),
 ('ex_chest_fly', 'Dumbbell Fly', 'CHEST', 'WEIGHT_REPS', NULL, 0),
 ('ex_back_row', 'Barbell Row', 'BACK', 'WEIGHT_REPS', NULL, 0),

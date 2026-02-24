@@ -1,6 +1,6 @@
 package com.example.reptrack.domain.workout.usecases.templates
 
-import com.example.reptrack.domain.workout.WorkoutTemplate
+import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 
 class UpdateWorkoutTemplateUseCase(

@@ -1,8 +1,10 @@
 package com.example.reptrack.domain.workout.usecases.calendar
 
-import com.example.reptrack.domain.workout.CalendarDay
-import com.example.reptrack.domain.workout.CalendarWeek
-import com.example.reptrack.domain.workout.DayWorkoutStatus
+import com.example.reptrack.domain.workout.entities.CalendarDay
+import com.example.reptrack.domain.workout.entities.CalendarWeek
+import com.example.reptrack.domain.workout.entities.DayWorkoutStatus
+import com.example.reptrack.domain.workout.entities.WorkoutSession
+import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarDateUtils.getDayOfWeekIndex
@@ -64,8 +66,8 @@ class CalendarUseCase(
      */
     private fun createCalendarDay(
         date: LocalDate,
-        session: com.example.reptrack.domain.workout.WorkoutSession?,
-        templates: List<com.example.reptrack.domain.workout.WorkoutTemplate>
+        session: WorkoutSession?,
+        templates: List<WorkoutTemplate>
     ): CalendarDay {
         val hasWorkout = session != null || templates.isNotEmpty()
         val now = LocalDate.now()

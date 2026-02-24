@@ -1,6 +1,6 @@
 package com.example.reptrack.domain.workout.repositories
 
-import com.example.reptrack.domain.workout.WorkoutSession
+import com.example.reptrack.domain.workout.entities.WorkoutSession
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
