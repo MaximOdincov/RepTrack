@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.R
+import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.presentation.exercise.list.components.ExerciseSearchBar
 import com.example.reptrack.presentation.exercise.list.components.MuscleGroupCard
 import com.example.reptrack.presentation.exercise.list.components.MuscleGroupExpansionState
@@ -72,6 +73,7 @@ fun ExerciseListScreen(
         }
     }
 
+    // Collect labels - use Unit to collect once per composition lifecycle
     LaunchedEffect(Unit) {
         store.labels.collect { label ->
             when (label) {
@@ -100,6 +102,9 @@ fun ExerciseListScreen(
         },
         onAddExerciseClick = {
             store.accept(ExerciseListStore.Intent.AddExerciseClicked)
+        },
+        onDeleteExercise = { exerciseId ->
+            store.accept(ExerciseListStore.Intent.DeleteExercise(exerciseId))
         }
     )
 }
@@ -120,9 +125,10 @@ private fun ExerciseListContent(
     state: ExerciseListStore.State,
     searchInput: String,
     onSearchInputChange: (String) -> Unit,
-    onExerciseClick: (com.example.reptrack.domain.workout.entities.Exercise) -> Unit,
+    onExerciseClick: (Exercise) -> Unit,
     onSearchChanged: (String) -> Unit,
-    onAddExerciseClick: () -> Unit
+    onAddExerciseClick: () -> Unit,
+    onDeleteExercise: (String) -> Unit
 ) {
     // Save expansion state across configuration changes
     val expansionState = rememberSaveable(saver = ExpansionStateSaver) {
@@ -196,6 +202,7 @@ private fun ExerciseListContent(
                                 muscleGroup = muscleGroup,
                                 exercises = exercises,
                                 onExerciseClick = onExerciseClick,
+                                onDeleteExercise = onDeleteExercise,
                                 expansionState = expansionState
                             )
                         }

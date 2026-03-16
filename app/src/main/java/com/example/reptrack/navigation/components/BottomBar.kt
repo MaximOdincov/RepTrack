@@ -81,9 +81,10 @@ fun BottomBar(
                     onClick = {
                         if (!isCurrentlySelected) {
                             navController.navigate(item.route) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
-                                }
+                                // TODO: Check if popUpTo causes issues with Profile
+                                // popUpTo(navController.graph.startDestinationId) {
+                                //     saveState = true
+                                // }
                                 launchSingleTop = true
                                 restoreState = true
                             }

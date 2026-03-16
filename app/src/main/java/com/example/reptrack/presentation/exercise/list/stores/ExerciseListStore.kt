@@ -7,6 +7,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.MuscleGroup
+import com.example.reptrack.domain.workout.usecases.exercises.DeleteExerciseUseCase
 import com.example.reptrack.domain.workout.usecases.exercises.ObserveAllExercisesUseCase
 import com.example.reptrack.navigation.ExerciseListMode
 import com.example.reptrack.presentation.exercise.list.stores.ExerciseListStore.Intent
@@ -22,6 +23,7 @@ interface ExerciseListStore : Store<Intent, State, Label> {
         data class ExerciseClicked(val exercise: Exercise) : Intent
         data class SearchChanged(val query: String) : Intent
         object AddExerciseClicked : Intent
+        data class DeleteExercise(val exerciseId: String) : Intent
     }
 
     data class State(
@@ -43,7 +45,8 @@ interface ExerciseListStore : Store<Intent, State, Label> {
 
 internal class ExerciseListStoreFactory(
     private val storeFactory: StoreFactory,
-    private val observeAllExercisesUseCase: ObserveAllExercisesUseCase
+    private val observeAllExercisesUseCase: ObserveAllExercisesUseCase,
+    private val deleteExerciseUseCase: DeleteExerciseUseCase
 ) {
 
     fun create(): ExerciseListStore =
@@ -65,6 +68,7 @@ internal class ExerciseListStoreFactory(
         data class ExercisesLoaded(val exercises: Map<MuscleGroup, List<Exercise>>) : Msg
         data class SearchQueryChanged(val query: String) : Msg
         data class FilteredExercisesUpdated(val exercises: Map<MuscleGroup, List<Exercise>>) : Msg
+        data class ExerciseDeleted(val exerciseId: String) : Msg
     }
 
     private class BootstrapperImpl : CoroutineBootstrapper<Action>() {
@@ -83,6 +87,7 @@ internal class ExerciseListStoreFactory(
                 is Intent.ExerciseClicked -> handleExerciseClick(intent.exercise, getState)
                 is Intent.SearchChanged -> handleSearchChanged(intent.query, getState)
                 Intent.AddExerciseClicked -> publish(Label.NavigateToAddExercise)
+                is Intent.DeleteExercise -> handleDeleteExercise(intent.exerciseId)
             }
         }
 
@@ -125,6 +130,16 @@ internal class ExerciseListStoreFactory(
             dispatch(Msg.FilteredExercisesUpdated(filtered))
         }
 
+        private fun handleDeleteExercise(exerciseId: String) {
+            scope.launch {
+                val result = deleteExerciseUseCase(exerciseId)
+                if (result.isSuccess) {
+                    dispatch(Msg.ExerciseDeleted(exerciseId))
+                }
+                // TODO: Handle error case
+            }
+        }
+
         private fun filterExercises(
             exercises: Map<MuscleGroup, List<Exercise>>,
             query: String
@@ -153,6 +168,14 @@ internal class ExerciseListStoreFactory(
                 )
                 is Msg.SearchQueryChanged -> copy(searchQuery = msg.query)
                 is Msg.FilteredExercisesUpdated -> copy(filteredExercises = msg.exercises)
+                is Msg.ExerciseDeleted -> copy(
+                    exercisesByGroup = exercisesByGroup.mapValues { entry ->
+                        entry.value.filter { it.id != msg.exerciseId }
+                    }.filterValues { it.isNotEmpty() },
+                    filteredExercises = filteredExercises.mapValues { entry ->
+                        entry.value.filter { it.id != msg.exerciseId }
+                    }.filterValues { it.isNotEmpty() }
+                )
             }
     }
 }

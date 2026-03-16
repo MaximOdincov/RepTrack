@@ -1,7 +1,7 @@
 package com.example.reptrack.di
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.example.reptrack.data.workout.mock.FakeExerciseRepository
+import com.example.reptrack.data.workout.repositories.ExerciseRepositoryImpl
 import com.example.reptrack.data.workout.mock.FakeWorkoutSessionRepository
 import com.example.reptrack.data.workout.mock.FakeWorkoutTemplateRepository
 import com.example.reptrack.domain.workout.repositories.ExerciseRepository
@@ -14,9 +14,12 @@ import com.example.reptrack.presentation.main.stores.MainScreenStoreFactory
 import org.koin.dsl.module
 
 val workoutModule = module {
-    // Repository implementations (using fake/mock data for testing)
+
     single<ExerciseRepository> {
-        FakeExerciseRepository()
+        ExerciseRepositoryImpl(
+            exerciseDao = get(),
+            workoutDao = get()
+        )
     }
 
     single<WorkoutSessionRepository> {
@@ -27,7 +30,6 @@ val workoutModule = module {
         FakeWorkoutTemplateRepository()
     }
 
-    // Exercise Use Cases
     factory { ObserveAllExercisesUseCase(get()) }
     factory { ObserveExerciseByIdUseCase(get()) }
     factory { CreateExerciseUseCase(get()) }
@@ -39,10 +41,8 @@ val workoutModule = module {
     factory { DeleteWorkoutExerciseUseCase(get()) }
     factory { ObserveLastExerciseProgressUseCase(get()) }
 
-    // Other Use cases
     factory { CalendarUseCase(get(), get()) }
-
-    // Store
+    
     factory<MainScreenStore> {
         MainScreenStoreFactory(
             storeFactory = get<StoreFactory>()

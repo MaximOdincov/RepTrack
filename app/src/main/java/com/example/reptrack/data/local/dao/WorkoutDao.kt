@@ -99,7 +99,7 @@ interface WorkoutDao {
 
     @Transaction
     @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId AND deletedAt IS NULL LIMIT 1")
-    fun observeWorkoutExerciseWithSets(exerciseId: String): Flow<com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets?>
+    fun observeWorkoutExerciseWithSets(exerciseId: String): Flow<WorkoutExerciseWithSets?>
 
     @Transaction
     @Query("""
@@ -112,5 +112,5 @@ interface WorkoutDao {
         ORDER BY ws.date DESC
         LIMIT 1
     """)
-    fun observeLastCompletedExerciseWithSets(exerciseId: String): Flow<com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets?>
+    fun observeLastCompletedExerciseWithSets(exerciseId: String): Flow<WorkoutExerciseWithSets?>
 }

@@ -20,9 +20,9 @@ val signInModule = module {
         ).create()
     }
 
-    factory { SignInUseCase(repository = get(), addUserUseCase = get()) }
-    factory { LoginAsGuestUseCase(repository = get(), addUserUseCase = get()) }
-    factory { SignInWithGoogleUseCase(repository = get(), addUserUseCase = get()) }
+    factory { SignInUseCase(repository = get()) }
+    factory { LoginAsGuestUseCase(repository = get()) }
+    factory { SignInWithGoogleUseCase(repository = get()) }
     factory { ResetPasswordUseCase(get()) }
 }
 

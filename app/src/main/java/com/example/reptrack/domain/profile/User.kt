@@ -1,4 +1,5 @@
-package com.example.reptrack.domain.workout
+package com.example.reptrack.domain.profile
+
 data class User(
     val id: String,
     val isGuest: Boolean = true,

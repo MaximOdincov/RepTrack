@@ -3,6 +3,7 @@ package com.example.reptrack.di
 import com.example.reptrack.data.auth.AuthRepositoryImpl
 import com.example.reptrack.data.auth.FirebaseAuthDataSource
 import com.example.reptrack.domain.auth.AuthRepository
+import com.example.reptrack.domain.auth.usecases.SignOutUseCase
 import com.google.firebase.auth.FirebaseAuth
 import org.koin.dsl.module
 
@@ -21,6 +22,12 @@ val authModule = module {
         )
     }
 
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
+    single<AuthRepository> {
+        AuthRepositoryImpl(
+            dataSource = get(),
+            context = get()
+        )
+    }
 
+    factory { SignOutUseCase(repository = get()) }
 }
