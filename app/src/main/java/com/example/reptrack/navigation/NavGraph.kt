@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -17,10 +18,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.reptrack.App
-import com.example.reptrack.di.databaseModule
-import com.example.reptrack.di.exerciseModule
-import com.example.reptrack.di.profileModule
-import com.example.reptrack.di.workoutModule
 import com.example.reptrack.domain.profile.usecases.AddUserUseCase
 import com.example.reptrack.domain.auth.usecases.GetCurrentUserUseCase
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
@@ -36,9 +33,17 @@ import com.example.reptrack.presentation.exercise.list.stores.ExerciseListStore
 import com.example.reptrack.presentation.exercise.detail.screens.ExerciseDetailScreen
 import com.example.reptrack.presentation.exercise.detail.stores.ExerciseDetailStoreFactory
 import com.example.reptrack.presentation.main.screens.MainScreen
+import com.example.reptrack.presentation.template.detail.screens.TemplateDetailScreen
+import com.example.reptrack.presentation.template.detail.stores.TemplateDetailStore
+import com.example.reptrack.presentation.template.detail.stores.TemplateDetailStoreFactory
+import com.example.reptrack.presentation.template.list.screens.TemplateListScreen
+import com.example.reptrack.presentation.template.list.stores.TemplateListStore
+import com.example.reptrack.presentation.template.list.stores.TemplateListStoreFactory
+import com.example.reptrack.presentation.workout_exercise.detail.screens.WorkoutExerciseDetailScreen
+import com.example.reptrack.presentation.workout_exercise.detail.stores.WorkoutExerciseDetailStore
+import com.example.reptrack.presentation.workout_exercise.detail.stores.WorkoutExerciseDetailStoreFactory
 import com.example.reptrack.presentation.main.stores.MainScreenStore
 import com.example.reptrack.presentation.profile.screens.ProfileScreen
-import com.example.reptrack.presentation.profile.stores.ProfileStore
 import com.example.reptrack.presentation.profile.stores.ProfileStoreFactory
 import com.example.reptrack.presentation.timer.screens.TimerScreen
 import com.example.reptrack.data.auth.toDomain
@@ -165,7 +170,13 @@ fun AppNavGraph(){
 
                     MainScreen(
                         store = store,
-                        calendarUseCase = calendarUseCase
+                        calendarUseCase = calendarUseCase,
+                        onNavigateToExerciseDetail = { workoutExerciseId ->
+                            navController.navigate(Screen.WorkoutExerciseDetail.createRoute(workoutExerciseId))
+                        },
+                        onNavigateToTemplates = {
+                            navController.navigate(Screen.TemplateList.createRoute(TemplateListMode.VIEW_MODE))
+                        }
                     )
                 }
 
@@ -189,6 +200,13 @@ fun AppNavGraph(){
                             navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId, ExerciseDetailMode.DESIGN_MODE))
                         },
                         onAddToWorkoutAndBack = { exercise ->
+                            navController.popBackStack()
+                        },
+                        onAddToTemplateAndBack = { exercise ->
+                            // Get the previous back stack entry to check if we came from TemplateDetail
+                            val previousBackStackEntry = navController.previousBackStackEntry
+                            // Just pop back - the template detail screen will handle adding the exercise
+                            navController.previousBackStackEntry?.savedStateHandle?.set("added_exercise_id", exercise.id)
                             navController.popBackStack()
                         },
                         onNavigateToAddExercise = {
@@ -232,6 +250,122 @@ fun AppNavGraph(){
                         mode = mode,
                         onNavigateBack = {
                             navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(
+                    route = Screen.WorkoutExerciseDetail.route,
+                    arguments = listOf(
+                        navArgument(Screen.WorkoutExerciseDetail.WORKOUT_EXERCISE_ID_ARG) {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { backStackEntry ->
+                    val workoutExerciseId = backStackEntry.arguments?.getString(Screen.WorkoutExerciseDetail.WORKOUT_EXERCISE_ID_ARG) ?: ""
+
+                    val storeFactory: WorkoutExerciseDetailStoreFactory = getKoin().get()
+
+                    // Use remember to keep the same store instance across recompositions
+                    val store = remember(workoutExerciseId) {
+                        storeFactory.create()
+                    }
+
+                    WorkoutExerciseDetailScreen(
+                        store = store,
+                        workoutExerciseId = workoutExerciseId,
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(
+                    route = Screen.TemplateList.route,
+                    arguments = listOf(
+                        navArgument(Screen.TemplateList.MODE_ARG) {
+                            type = NavType.StringType
+                            defaultValue = TemplateListMode.VIEW_MODE.value
+                        }
+                    )
+                ) { backStackEntry ->
+                    val modeValue = backStackEntry.arguments?.getString(Screen.TemplateList.MODE_ARG)
+                    val mode = when (modeValue) {
+                        TemplateListMode.SELECT_MODE.value -> TemplateListStore.TemplateListMode.SELECT_MODE
+                        else -> TemplateListStore.TemplateListMode.VIEW_MODE
+                    }
+
+                    val storeFactory: TemplateListStoreFactory = getKoin().get()
+
+                    // Use remember to keep the same store instance across recompositions
+                    val store = remember(mode) {
+                        storeFactory.create()
+                    }
+
+                    TemplateListScreen(
+                        store = store,
+                        onNavigateToDetail = { templateId ->
+                            navController.navigate(Screen.TemplateDetail.createRoute(templateId, TemplateDetailMode.EDIT_MODE))
+                        },
+                        onSelectTemplateAndBack = { template ->
+                            navController.popBackStack()
+                        },
+                        onNavigateToAddTemplate = {
+                            navController.navigate(Screen.TemplateDetail.createRoute(null, TemplateDetailMode.CREATE_MODE))
+                        },
+                        onInitialize = { initMode ->
+                            store.accept(TemplateListStore.Intent.Initialize(initMode))
+                        }
+                    )
+                }
+
+                composable(
+                    route = Screen.TemplateDetail.route,
+                    arguments = listOf(
+                        navArgument(Screen.TemplateDetail.TEMPLATE_ID_ARG) {
+                            type = NavType.StringType
+                        },
+                        navArgument(Screen.TemplateDetail.MODE_ARG) {
+                            type = NavType.StringType
+                            defaultValue = TemplateDetailMode.VIEW_MODE.value
+                        }
+                    )
+                ) { backStackEntry ->
+                    val templateIdArg = backStackEntry.arguments?.getString(Screen.TemplateDetail.TEMPLATE_ID_ARG)
+                    val templateId = if (templateIdArg == "new") null else templateIdArg
+                    val modeValue = backStackEntry.arguments?.getString(Screen.TemplateDetail.MODE_ARG)
+                    val mode = when (modeValue) {
+                        TemplateDetailMode.CREATE_MODE.value -> TemplateDetailStore.TemplateDetailMode.CREATE_MODE
+                        TemplateDetailMode.EDIT_MODE.value -> TemplateDetailStore.TemplateDetailMode.EDIT_MODE
+                        else -> TemplateDetailStore.TemplateDetailMode.VIEW_MODE
+                    }
+
+                    val storeFactory: TemplateDetailStoreFactory = getKoin().get()
+
+                    // Use remember to keep the same store instance across recompositions
+                    val store = remember(templateId, mode) {
+                        storeFactory.create()
+                    }
+
+                    // Handle exercise selection result
+                    val addedExerciseId by backStackEntry.savedStateHandle.getStateFlow<String?>("added_exercise_id", null).collectAsState()
+                    LaunchedEffect(addedExerciseId) {
+                        val exerciseId = addedExerciseId
+                        if (exerciseId != null) {
+                            store.accept(TemplateDetailStore.Intent.AddExerciseToTemplate(exerciseId))
+                            backStackEntry.savedStateHandle.remove<String>("added_exercise_id")
+                        }
+                    }
+
+                    TemplateDetailScreen(
+                        store = store,
+                        templateId = templateId,
+                        mode = mode,
+                        onNavigateBack = {
+                            navController.popBackStack()
+                        },
+                        onNavigateToExerciseSelection = { currentExerciseIds ->
+                            navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.SELECT_MODE))
                         }
                     )
                 }

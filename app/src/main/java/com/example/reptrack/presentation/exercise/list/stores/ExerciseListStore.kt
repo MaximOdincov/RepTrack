@@ -34,11 +34,13 @@ interface ExerciseListStore : Store<Intent, State, Label> {
         val filteredExercises: Map<MuscleGroup, List<Exercise>> = emptyMap()
     ) {
         val isWorkoutMode: Boolean get() = mode == ExerciseListMode.WORKOUT_MODE
+        val isSelectMode: Boolean get() = mode == ExerciseListMode.SELECT_MODE
     }
 
     sealed interface Label {
         data class NavigateToDetail(val exerciseId: String) : Label
         data class AddToWorkoutAndBack(val exercise: Exercise) : Label
+        data class AddToTemplateAndBack(val exercise: Exercise) : Label
         object NavigateToAddExercise : Label
     }
 }
@@ -120,6 +122,9 @@ internal class ExerciseListStoreFactory(
                 }
                 ExerciseListMode.WORKOUT_MODE -> {
                     publish(Label.AddToWorkoutAndBack(exercise))
+                }
+                ExerciseListMode.SELECT_MODE -> {
+                    publish(Label.AddToTemplateAndBack(exercise))
                 }
             }
         }

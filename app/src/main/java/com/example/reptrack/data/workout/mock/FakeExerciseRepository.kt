@@ -4,8 +4,6 @@ import com.example.reptrack.R
 import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.ExerciseType
 import com.example.reptrack.domain.workout.entities.MuscleGroup
-import com.example.reptrack.domain.workout.entities.WorkoutExercise
-import com.example.reptrack.domain.workout.entities.WorkoutSet
 import com.example.reptrack.domain.workout.repositories.ExerciseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -147,36 +145,6 @@ class FakeExerciseRepository : ExerciseRepository {
             current.filterNot { it.id == exerciseId }
         }
         return Result.success(Unit)
-    }
-
-    override suspend fun observeWorkoutExerciseById(exerciseId: String): Flow<WorkoutExercise> {
-        return kotlinx.coroutines.flow.flowOf(
-            WorkoutExercise(
-                id = "workout_exercise_$exerciseId",
-                exerciseId = exerciseId,
-                sets = createMockSets(),
-                restTimerSeconds = 90
-            )
-        )
-    }
-
-    override suspend fun createWorkoutExercise(
-        exercise: WorkoutExercise,
-        workoutSessionId: String
-    ): Result<Unit> {
-        return Result.success(Unit)
-    }
-
-    override suspend fun updateWorkoutExercise(exercise: WorkoutExercise): Result<Unit> {
-        return Result.success(Unit)
-    }
-
-    override suspend fun deleteWorkoutExercise(exerciseId: String): Result<Unit> {
-        return Result.success(Unit)
-    }
-
-    override suspend fun getLastExerciseProgress(exerciseId: String): Flow<List<WorkoutSet>> {
-        return kotlinx.coroutines.flow.flowOf(createMockSets())
     }
 
     private fun createMockExercises(): List<Exercise> = listOf(
@@ -520,30 +488,6 @@ class FakeExerciseRepository : ExerciseRepository {
             backgroundRes = null,
             backgroundColor = "#FCE4EC",
             isCustom = false
-        )
-    )
-
-    private fun createMockSets(): List<WorkoutSet> = listOf(
-        WorkoutSet(
-            id = "set_1",
-            index = 1,
-            weight = 20f,
-            reps = 12,
-            isCompleted = true
-        ),
-        WorkoutSet(
-            id = "set_2",
-            index = 2,
-            weight = 22.5f,
-            reps = 10,
-            isCompleted = true
-        ),
-        WorkoutSet(
-            id = "set_3",
-            index = 3,
-            weight = 25f,
-            reps = 8,
-            isCompleted = false
         )
     )
 }

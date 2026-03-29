@@ -1,5 +1,8 @@
 package com.example.reptrack.domain.workout.entities
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class WorkoutSet(
     val id: String,
     val index: Int,           // Порядковый номер (1, 2, 3...)

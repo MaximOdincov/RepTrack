@@ -1,10 +1,29 @@
 package com.example.reptrack.domain.workout.entities
 
+/**
+ * Сущность шаблона тренировки
+ *
+ * @param id Уникальный идентификатор шаблона
+ * @param name Название шаблона
+ * @param description Описание шаблона
+ * @param iconId Идентификатор иконки (строка для совместимости с существующим кодом)
+ * @param exerciseIds Список ID упражнений в шаблоне
+ * @param iconRes Ресурс иконки для Compose (nullable)
+ * @param iconColor Цвет иконки в формате HEX (nullable)
+ * @param muscleGroups Список задействованных групп мышц
+ * @param isCustom Является ли шаблон пользовательским
+ * @param schedule График тренировок (для календаря)
+ */
 data class WorkoutTemplate(
     val id: String,
     val name: String,
-    val iconId: String?,
-    val exerciseIds: List<String>,
+    val description: String = "",
+    val iconId: String? = null,
+    val exerciseIds: List<String> = emptyList(),
+    val iconRes: Int? = null,
+    val iconColor: String? = null,
+    val muscleGroups: List<MuscleGroup> = emptyList(),
+    val isCustom: Boolean = true,
     val schedule: TemplateSchedule? = null
 )
 

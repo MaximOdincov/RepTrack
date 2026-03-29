@@ -40,6 +40,7 @@ import kotlinx.coroutines.delay
  * @param store MVIKotlin store for state management
  * @param onNavigateToDetail Callback when navigating to exercise detail (VIEW_MODE)
  * @param onAddToWorkoutAndBack Callback when adding exercise to workout (WORKOUT_MODE)
+ * @param onAddToTemplateAndBack Callback when adding exercise to template (SELECT_MODE)
  * @param onNavigateToAddExercise Callback when clicking add exercise button
  * @param onInitialize Callback to initialize store with mode
  */
@@ -48,6 +49,7 @@ fun ExerciseListScreen(
     store: ExerciseListStore,
     onNavigateToDetail: (String) -> Unit = {},
     onAddToWorkoutAndBack: (com.example.reptrack.domain.workout.entities.Exercise) -> Unit = {},
+    onAddToTemplateAndBack: (com.example.reptrack.domain.workout.entities.Exercise) -> Unit = {},
     onNavigateToAddExercise: () -> Unit = {},
     onInitialize: () -> Unit = {}
 ) {
@@ -82,6 +84,9 @@ fun ExerciseListScreen(
                 }
                 is ExerciseListStore.Label.AddToWorkoutAndBack -> {
                     onAddToWorkoutAndBack(label.exercise)
+                }
+                is ExerciseListStore.Label.AddToTemplateAndBack -> {
+                    onAddToTemplateAndBack(label.exercise)
                 }
                 is ExerciseListStore.Label.NavigateToAddExercise -> {
                     onNavigateToAddExercise()

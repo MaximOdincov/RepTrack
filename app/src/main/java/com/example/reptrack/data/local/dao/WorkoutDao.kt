@@ -113,4 +113,29 @@ interface WorkoutDao {
         LIMIT 1
     """)
     fun observeLastCompletedExerciseWithSets(exerciseId: String): Flow<WorkoutExerciseWithSets?>
+
+    @Transaction
+    @Query("""
+        SELECT * FROM workout_exercises
+        WHERE workoutSessionId = :sessionId
+        AND deletedAt IS NULL
+        ORDER BY id
+    """)
+    fun observeExercisesBySession(sessionId: String): Flow<List<WorkoutExerciseWithSets>>
+
+    @Transaction
+    @Query("""
+        SELECT ws.* FROM workout_sets ws
+        INNER JOIN workout_exercises we ON ws.workoutExerciseId = we.id
+        INNER JOIN workout_sessions session ON we.workoutSessionId = session.id
+        WHERE we.exerciseId = :exerciseId
+        AND session.status = 'COMPLETED'
+        AND ws.deletedAt IS NULL
+        AND we.deletedAt IS NULL
+        AND session.deletedAt IS NULL
+        AND ws.isCompleted = 1
+        ORDER BY session.date DESC, ws.weight DESC
+        LIMIT 1
+    """)
+    fun observeBestSetFromLastWorkout(exerciseId: String): Flow<WorkoutSetDb?>
 }
