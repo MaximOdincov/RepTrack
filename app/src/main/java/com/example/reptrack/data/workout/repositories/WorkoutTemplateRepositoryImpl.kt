@@ -15,7 +15,7 @@ class WorkoutTemplateRepositoryImpl(
     private val templateDao: WorkoutTemplateDao
 ) : WorkoutTemplateRepository {
 
-    override fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?> {
+    override suspend fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?> {
         return templateDao.observeTemplateById(templateId)
             .map { aggregate ->
                 aggregate?.let {
@@ -27,7 +27,7 @@ class WorkoutTemplateRepositoryImpl(
             .catch { e -> throw e }
     }
 
-    override fun observeAllTemplates(): Flow<List<WorkoutTemplate>> {
+    override suspend fun observeAllTemplates(): Flow<List<WorkoutTemplate>> {
         return templateDao.observeTemplates()
             .map { aggregates ->
                 aggregates.map { aggregate ->

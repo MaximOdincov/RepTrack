@@ -31,4 +31,8 @@ class FirebaseAuthDataSource(
     }
 
     fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
+
+    suspend fun signOut() {
+        firebaseAuth.signOut()
+    }
 }

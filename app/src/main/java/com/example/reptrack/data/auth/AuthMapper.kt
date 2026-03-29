@@ -1,6 +1,6 @@
 package com.example.reptrack.data.auth
 
-import com.example.reptrack.domain.workout.User
+import com.example.reptrack.domain.profile.User
 import com.example.reptrack.domain.auth.AuthUser
 import com.google.firebase.auth.FirebaseUser
 

@@ -21,18 +21,13 @@ fun SplashScreen(
 ){
     val state by store.states.collectAsState(SplashStore.State(isLoading = true))
 
-    LaunchedEffect(store){
-        Log.d("fddfd", "fvdcfd")
+    LaunchedEffect(Unit) {
         store.labels.collect { label ->
             when(label){
                 SplashStore.Label.Authorized -> onAuthorized()
                 SplashStore.Label.UnAuthorized -> onUnAuthorized()
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        store.accept(SplashStore.Intent.CheckAuth)
     }
 
     Box(modifier = Modifier.fillMaxSize(),

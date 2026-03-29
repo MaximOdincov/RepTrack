@@ -2,7 +2,9 @@ package com.example.reptrack.data.local.mappers
 
 import com.example.reptrack.data.local.models.GdprConsentDb
 import com.example.reptrack.data.local.models.UserDb
-import com.example.reptrack.domain.workout.User
+import com.example.reptrack.data.local.aggregates.UserWithConsent
+import com.example.reptrack.domain.profile.User
+import com.example.reptrack.domain.profile.GdprConsent
 
 fun User.toDb(): UserDb =
     UserDb(
@@ -23,3 +25,20 @@ fun User.toGdprDb(): GdprConsentDb? =
             acceptedAt = it.acceptedAt
         )
     }
+
+fun UserWithConsent.toDomain(): User =
+    User(
+        id = user.id,
+        isGuest = user.isGuest,
+        username = user.username,
+        email = user.email,
+        avatarUrl = user.avatarUrl,
+        currentWeight = user.currentWeight,
+        height = user.height,
+        gdprConsent = gdprConsent?.let {
+            GdprConsent(
+                isAccepted = it.isAccepted,
+                acceptedAt = it.acceptedAt
+            )
+        }
+    )

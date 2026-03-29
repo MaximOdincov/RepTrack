@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class ObserveAllWorkoutTemplatesUseCase(
     private val templateRepository: WorkoutTemplateRepository
 ) {
-    operator fun invoke(): Flow<List<WorkoutTemplate>> {
+    suspend operator fun invoke(): Flow<List<WorkoutTemplate>> {
         return templateRepository.observeAllTemplates()
     }
 }

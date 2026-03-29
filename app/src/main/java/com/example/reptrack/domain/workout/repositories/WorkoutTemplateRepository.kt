@@ -4,9 +4,9 @@ import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import kotlinx.coroutines.flow.Flow
 
 interface WorkoutTemplateRepository {
-    fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?>
+    suspend fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?>
 
-    fun observeAllTemplates(): Flow<List<WorkoutTemplate>>
+    suspend fun observeAllTemplates(): Flow<List<WorkoutTemplate>>
 
     fun observeTemplatesByDayOfWeek(
         dayOfWeek: Int,
