@@ -3,9 +3,7 @@ package com.example.reptrack.domain
 import com.example.reptrack.domain.auth.AuthRepository
 import com.example.reptrack.domain.auth.AuthUser
 import com.example.reptrack.domain.auth.usecases.SignUpUseCase
-import com.example.reptrack.domain.profile.usecases.AddUserUseCase
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -19,11 +17,10 @@ class SignUpUseCaseTest {
 
     private lateinit var signUpUseCase: SignUpUseCase
     private val authRepository = mockk<AuthRepository>()
-    private val addUserUseCase = mockk<AddUserUseCase>()
 
     @Before
     fun setUp() {
-        signUpUseCase = SignUpUseCase(authRepository, addUserUseCase)
+        signUpUseCase = SignUpUseCase(authRepository)
     }
 
     // ============ Successful Sign Up Tests ============
@@ -42,7 +39,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -70,7 +66,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -79,29 +74,6 @@ class SignUpUseCaseTest {
         assertTrue(result.isSuccess)
         val user = result.getOrNull()
         assertEquals(username, user?.username)
-    }
-
-    @Test
-    fun `signUp calls addUserUseCase with user data`() = runTest {
-        // Arrange
-        val email = "test@example.com"
-        val password = "password123"
-        val username = "testuser"
-        val dataConsent = true
-
-        val authUser = AuthUser(
-            id = "user123",
-            email = email,
-            isGuest = false
-        )
-        coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
-
-        // Act
-        signUpUseCase(email, password, username, dataConsent)
-
-        // Assert
-        coVerify { addUserUseCase(any()) }
     }
 
     @Test
@@ -118,7 +90,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -145,7 +116,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -212,7 +182,7 @@ class SignUpUseCaseTest {
     }
 
     @Test
-    fun `signUp failure does not call addUserUseCase`() = runTest {
+    fun `signUp failure does not create user`() = runTest {
         // Arrange
         val email = "test@example.com"
         val password = "password123"
@@ -223,10 +193,10 @@ class SignUpUseCaseTest {
         coEvery { authRepository.signUp(email, password) } returns Result.failure(exception)
 
         // Act
-        signUpUseCase(email, password, username, dataConsent)
+        val result = signUpUseCase(email, password, username, dataConsent)
 
         // Assert
-        coVerify(exactly = 0) { addUserUseCase(any()) }
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -263,7 +233,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -288,7 +257,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -313,7 +281,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -338,7 +305,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)
@@ -363,7 +329,6 @@ class SignUpUseCaseTest {
             isGuest = false
         )
         coEvery { authRepository.signUp(email, password) } returns Result.success(authUser)
-        coEvery { addUserUseCase(any()) } returns Unit
 
         // Act
         val result = signUpUseCase(email, password, username, dataConsent)

@@ -1,5 +1,6 @@
 package com.example.reptrack.data.auth
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseUser
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,10 +18,11 @@ class AuthRepositoryImplTest {
 
     private lateinit var authRepositoryImpl: AuthRepositoryImpl
     private val firebaseAuthDataSource = mockk<FirebaseAuthDataSource>()
+    private val context = mockk<Context>(relaxed = true)
 
     @Before
     fun setUp() {
-        authRepositoryImpl = AuthRepositoryImpl(firebaseAuthDataSource)
+        authRepositoryImpl = AuthRepositoryImpl(firebaseAuthDataSource, context)
     }
 
     // ============ Sign Up Tests ============

@@ -63,15 +63,24 @@ internal class SplashStoreFactory(
         }
 
         override fun executeAction(action: Action, getState: () -> State) {
-
+            when(action) {
+                Action.CheckAuth -> checkAuth()
+            }
         }
 
         private fun checkAuth(){
             scope.launch {
                 val user = getCurrentUserUseCase()
+                android.util.Log.d("SplashStore", "checkAuth: user = ${user?.id ?: "null"}")
                 dispatch(Msg.LoadingFinished)
-                if(user != null) publish(Label.Authorized)
-                else publish(Label.UnAuthorized)
+                if(user != null) {
+                    android.util.Log.d("SplashStore", "Publishing Authorized")
+                    publish(Label.Authorized)
+                }
+                else {
+                    android.util.Log.d("SplashStore", "Publishing UnAuthorized")
+                    publish(Label.UnAuthorized)
+                }
             }
         }
     }

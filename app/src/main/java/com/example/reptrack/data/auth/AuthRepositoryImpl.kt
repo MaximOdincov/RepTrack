@@ -1,12 +1,15 @@
 package com.example.reptrack.data.auth
 
+import android.content.Context
+import com.example.reptrack.data.local.AppDatabase
 import com.example.reptrack.domain.auth.AuthRepository
 import com.example.reptrack.domain.auth.AuthUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AuthRepositoryImpl(
-    private val dataSource: FirebaseAuthDataSource
+    private val dataSource: FirebaseAuthDataSource,
+    private val context: Context
 ): AuthRepository {
 
     override suspend fun signUp(
@@ -41,6 +44,20 @@ class AuthRepositoryImpl(
 
     override fun getCurrentUser(): AuthUser? {
         return dataSource.getCurrentUser()?.toAuthUser()
+    }
+
+    override suspend fun signOut() {
+        return withContext(Dispatchers.IO) {
+            val userId = getCurrentUser()?.id
+
+            // Delete database first
+            if (userId != null) {
+                AppDatabase.deleteUserDatabase(context, userId)
+            }
+
+            // Then sign out from Firebase
+            dataSource.signOut()
+        }
     }
 
     override suspend fun resetPassword(email: String): Result<Unit> {
