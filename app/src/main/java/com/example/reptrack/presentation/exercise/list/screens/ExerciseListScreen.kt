@@ -68,8 +68,6 @@ fun ExerciseListScreen(
     // Apply saved search query immediately after initialization
     LaunchedEffect(Unit) {
         onInitialize()
-        // Small delay to ensure store is initialized
-        kotlinx.coroutines.delay(50)
         if (searchInput.isNotBlank()) {
             store.accept(ExerciseListStore.Intent.SearchChanged(searchInput))
         }

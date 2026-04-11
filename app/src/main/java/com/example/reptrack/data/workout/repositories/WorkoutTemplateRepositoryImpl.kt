@@ -15,7 +15,7 @@ class WorkoutTemplateRepositoryImpl(
     private val templateDao: WorkoutTemplateDao
 ) : WorkoutTemplateRepository {
 
-    override suspend fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?> {
+    override fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?> {
         return templateDao.observeTemplateById(templateId)
             .map { aggregate ->
                 aggregate?.let {
@@ -27,7 +27,7 @@ class WorkoutTemplateRepositoryImpl(
             .catch { e -> throw e }
     }
 
-    override suspend fun observeAllTemplates(): Flow<List<WorkoutTemplate>> {
+    override fun observeAllTemplates(): Flow<List<WorkoutTemplate>> {
         return templateDao.observeTemplates()
             .map { aggregates ->
                 aggregates.map { aggregate ->
@@ -58,28 +58,34 @@ class WorkoutTemplateRepositoryImpl(
 
     override suspend fun createTemplate(template: WorkoutTemplate): Result<Unit> {
         return try {
+            android.util.Log.i("TemplateRepository", "createTemplate: id=${template.id}, schedule=${template.schedule}")
             val templateDb = template.toDb()
+            android.util.Log.i("TemplateRepository", "createTemplate: week1Days=${templateDb.week1Days}, week2Days=${templateDb.week2Days}")
             templateDao.insertFullTemplate(
                 template = templateDb,
                 exerciseIds = template.exerciseIds
             )
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("TemplateRepository", "createTemplate error: ${e.message}", e)
             Result.failure(e)
         }
     }
 
     override suspend fun updateTemplate(template: WorkoutTemplate): Result<Unit> {
         return try {
+            android.util.Log.i("TemplateRepository", "updateTemplate: id=${template.id}, schedule=${template.schedule}")
             templateDao.deleteTemplateExercises(template.id)
 
             val templateDb = template.toDb()
+            android.util.Log.i("TemplateRepository", "updateTemplate: week1Days=${templateDb.week1Days}, week2Days=${templateDb.week2Days}")
             templateDao.insertFullTemplate(
                 template = templateDb,
                 exerciseIds = template.exerciseIds
             )
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("TemplateRepository", "updateTemplate error: ${e.message}", e)
             Result.failure(e)
         }
     }

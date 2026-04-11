@@ -62,6 +62,7 @@ sealed class Screen(val route: String) {
     data object Timer: Screen("timer")
     data object Profile: Screen("profile")
     data object Library: Screen("library")
+    data object CrashlyticsTest: Screen("crashlytics_test")
     data object ExerciseList: Screen("exercises/{mode}") {
         fun createRoute(mode: ExerciseListMode) = "exercises/${mode.value}"
 

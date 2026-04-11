@@ -1,8 +1,6 @@
 package com.example.reptrack.presentation.exercise.list.components
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -23,7 +21,6 @@ import androidx.compose.runtime.key
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +53,7 @@ import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.MuscleGroup
 import com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors
 import com.example.reptrack.presentation.main.components.ExerciseCard
+import io.github.aakira.napier.Napier
 
 /**
  * Muscle group card with accordion functionality
@@ -201,7 +199,7 @@ fun MuscleGroupCard(
 }
 
 /**
- * Swipe to delete exercise card with modern animation
+ * Swipe to delete exercise card
  */
 @Composable
 private fun SwipeToDeleteExerciseCard(
@@ -214,43 +212,11 @@ private fun SwipeToDeleteExerciseCard(
     val deleteThreshold = -300f
     val haptic = LocalHapticFeedback.current
 
-    // Calculate icon scale and opacity based on swipe progress
-    val swipeProgress = (kotlin.math.abs(offsetX) / kotlin.math.abs(deleteThreshold)).coerceIn(0f, 1f)
-    val iconScale by animateFloatAsState(
-        targetValue = if (swipeProgress > 0.01f) 0.3f + (swipeProgress * 0.7f) else 0f, // Scale from 0.3 to 1.0
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-        label = "icon_scale"
-    )
-    val iconAlpha by animateFloatAsState(
-        targetValue = swipeProgress,
-        animationSpec = tween(durationMillis = 100),
-        label = "icon_alpha"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
-        // Delete icon (appears when swiping)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .alpha(iconAlpha),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete",
-                tint = Color(0xFFEF5350).copy(alpha = iconAlpha),
-                modifier = Modifier
-                    .padding(end = 24.dp)
-                    .size(32.dp)
-                    .scale(iconScale)
-            )
-        }
-
         // Exercise card (swipeable)
         Box(
             modifier = Modifier
@@ -262,6 +228,10 @@ private fun SwipeToDeleteExerciseCard(
                     indication = null,
                     onClick = {
                         if (offsetX == 0f) {
+                            Napier.i(
+                                "Exercise clicked: exercise.id=${exercise.id}, exercise.name=${exercise.name}",
+                                tag = "MuscleGroupCard"
+                            )
                             onExerciseClick(exercise)
                         }
                     }

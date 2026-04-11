@@ -10,6 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.reptrack.data.local.converters.DateTimeConverters
 import com.example.reptrack.data.local.converters.ExerciseConverters
 import com.example.reptrack.data.local.MIGRATION_2_3
+import com.example.reptrack.data.local.MIGRATION_3_4
 import com.example.reptrack.data.local.dao.ExerciseDao
 import com.example.reptrack.data.local.dao.StatisticDao
 import com.example.reptrack.data.local.dao.UserDao
@@ -45,7 +46,7 @@ import com.example.reptrack.data.local.models.statistics.SetConfigDb
         FriendConfigDb::class,
         SetConfigDb::class
     ],
-    version = 3,
+    version = 7,
     exportSchema = true
 )
 @TypeConverters(DateTimeConverters::class, ExerciseConverters::class)
@@ -74,6 +75,9 @@ abstract class AppDatabase : RoomDatabase() {
                 })
                 .addMigrations(MIGRATION_1_2)
                 .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_3_4)
+                .addMigrations(MIGRATION_4_5)
+                .addMigrations(MIGRATION_5_6)
                 .build()
         }
 

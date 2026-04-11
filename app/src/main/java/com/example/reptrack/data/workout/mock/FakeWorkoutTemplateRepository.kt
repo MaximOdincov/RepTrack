@@ -18,13 +18,13 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
 
     private val templates = MutableStateFlow(createMockTemplates())
 
-    override suspend fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?> {
+    override fun observeTemplateById(templateId: String): Flow<WorkoutTemplate?> {
         return templates.map { templateList ->
             templateList.firstOrNull { it.id == templateId }
         }
     }
 
-    override suspend fun observeAllTemplates(): Flow<List<WorkoutTemplate>> {
+    override fun observeAllTemplates(): Flow<List<WorkoutTemplate>> {
         return templates
     }
 
@@ -94,7 +94,7 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
                 name = "Тренировка груди",
                 description = "Полноценная тренировка грудных мышц для развития объема и силы",
                 iconId = "dumbbell",
-                exerciseIds = listOf("exercise_1", "exercise_2", "exercise_3"),
+                exerciseIds = listOf("bench_press", "incline_bench_press", "cable_fly"),
                 iconRes = R.drawable.exercise_default_icon,
                 iconColor = "#FF5722",
                 muscleGroups = listOf(MuscleGroup.CHEST),
@@ -110,7 +110,7 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
                 name = "Тренировка спины",
                 description = "Комплекс упражнений для развития мышц спины",
                 iconId = "barbell",
-                exerciseIds = listOf("exercise_4", "exercise_5"),
+                exerciseIds = listOf("deadlift", "barbell_row", "lat_pulldown"),
                 iconRes = R.drawable.exercise_default_icon,
                 iconColor = "#4CAF50",
                 muscleGroups = listOf(MuscleGroup.BACK),
@@ -126,7 +126,7 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
                 name = "Ноги и плечи",
                 description = "Силовая тренировка нижней части тела и плечевого пояса",
                 iconId = "kettlebell",
-                exerciseIds = listOf("exercise_6", "exercise_7", "exercise_8", "exercise_9"),
+                exerciseIds = listOf("squat", "leg_press", "lunges", "overhead_press"),
                 iconRes = R.drawable.exercise_default_icon,
                 iconColor = "#2196F3",
                 muscleGroups = listOf(MuscleGroup.LEGS, MuscleGroup.ARMS),
@@ -142,7 +142,7 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
                 name = "Full Body",
                 description = "Полноценная тренировка всего тела за одну сессию",
                 iconId = "fullbody",
-                exerciseIds = listOf("exercise_1", "exercise_4", "exercise_6"),
+                exerciseIds = listOf("bench_press", "deadlift", "squat"),
                 iconRes = R.drawable.exercise_default_icon,
                 iconColor = "#9C27B0",
                 muscleGroups = listOf(
@@ -160,7 +160,7 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
                 name = "Кардио тренировка",
                 description = "Интенсивное кардио для сжигания калорий и развития выносливости",
                 iconId = "cardio",
-                exerciseIds = listOf("exercise_10"),
+                exerciseIds = listOf("treadmill"),
                 iconRes = R.drawable.exercise_default_icon,
                 iconColor = "#FF9800",
                 muscleGroups = listOf(MuscleGroup.CARDIO),
@@ -173,7 +173,7 @@ class FakeWorkoutTemplateRepository : WorkoutTemplateRepository {
                 name = "Пресс и кора",
                 description = "Укрепление мышц кора и пресса",
                 iconId = "abs",
-                exerciseIds = listOf("exercise_11", "exercise_12"),
+                exerciseIds = listOf("crunches", "plank"),
                 iconRes = R.drawable.exercise_default_icon,
                 iconColor = "#00BCD4",
                 muscleGroups = listOf(MuscleGroup.ABS),

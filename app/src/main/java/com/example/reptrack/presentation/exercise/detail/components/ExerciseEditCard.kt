@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import com.example.reptrack.presentation.utils.painterResourceSafe
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -97,9 +98,10 @@ fun ExerciseEditCard(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (iconRes != null) {
+                    // Проверяем и на null, и на 0 (0 - не валидный resource ID)
+                    if (iconRes != null && iconRes != 0) {
                         Icon(
-                            painter = painterResource(id = iconRes),
+                            painter = painterResourceSafe(id = iconRes),
                             contentDescription = "Exercise icon",
                             modifier = Modifier.size(60.dp),
                             tint = ColorUtils.parseColor(iconColor)

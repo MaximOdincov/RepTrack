@@ -28,7 +28,8 @@ import com.example.reptrack.presentation.profile.stores.ProfileStore
 @Composable
 fun ProfileScreen(
     store: ProfileStore,
-    onSignedOut: () -> Unit = {}
+    onSignedOut: () -> Unit = {},
+    onNavigateToCrashlyticsTest: () -> Unit = {}
 ) {
     LaunchedEffect(store) {
         store.labels.collect { label ->
@@ -102,7 +103,8 @@ fun ProfileScreen(
                 ProfileContent(
                     user = state.value.user!!,
                     isLoggingOut = state.value.isLoggingOut,
-                    onSignOut = { store.accept(ProfileStore.Intent.SignOut) }
+                    onSignOut = { store.accept(ProfileStore.Intent.SignOut) },
+                    onNavigateToCrashlyticsTest = onNavigateToCrashlyticsTest
                 )
             }
         }
@@ -113,7 +115,8 @@ fun ProfileScreen(
 private fun ProfileContent(
     user: User,
     isLoggingOut: Boolean,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onNavigateToCrashlyticsTest: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -145,6 +148,15 @@ private fun ProfileContent(
         }
 
         Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = onNavigateToCrashlyticsTest,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Test Crashlytics")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = onSignOut,

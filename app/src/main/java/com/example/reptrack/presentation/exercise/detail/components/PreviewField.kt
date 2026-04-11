@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import com.example.reptrack.presentation.utils.painterResourceSafe
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,9 +71,10 @@ fun PreviewField(
         ) {
             if (isIconMode) {
                 // Icon preview
-                if (iconRes != null) {
+                // Проверяем и на null, и на 0 (0 - не валидный resource ID)
+                if (iconRes != null && iconRes != 0) {
                     Icon(
-                        painter = painterResource(id = iconRes),
+                        painter = painterResourceSafe(id = iconRes),
                         contentDescription = "Icon preview",
                         modifier = Modifier.size(48.dp),
                         tint = ColorUtils.parseColor(iconColor)

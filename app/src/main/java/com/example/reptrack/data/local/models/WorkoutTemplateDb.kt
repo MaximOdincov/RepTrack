@@ -8,9 +8,12 @@ import java.time.LocalDateTime
 data class WorkoutTemplateDb(
     @PrimaryKey val id: String,
     val name: String,
+    val description: String? = null,
     val iconId: String?,
-    val week1Days: String?,  // JSON строка с набором дней для недели 1
-    val week2Days: String?,  // JSON строка с набором дней для недели 2
+    val iconRes: Int? = null,
+    val iconColor: String? = null,
+    val week1Days: String? = null,  // JSON строка с набором дней для недели 1
+    val week2Days: String? = null,  // JSON строка с набором дней для недели 2
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val deletedAt: LocalDateTime? = null
 )

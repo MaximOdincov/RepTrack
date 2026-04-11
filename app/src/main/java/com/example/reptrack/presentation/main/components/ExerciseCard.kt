@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import com.example.reptrack.presentation.utils.painterResourceSafe
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,8 +66,8 @@ fun ExerciseCard(
                     modifier = Modifier
                         .padding(4.dp)
                         .matchParentSize(),
-                    painter = painterResource(
-                        id = exercise.iconRes ?: R.drawable.exercise_default_icon
+                    painter = painterResourceSafe(
+                        id = exercise.iconRes
                     ),
                     contentDescription = null,
                     tint = iconTint

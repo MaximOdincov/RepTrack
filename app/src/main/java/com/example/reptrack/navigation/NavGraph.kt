@@ -1,7 +1,9 @@
 package com.example.reptrack.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -17,11 +20,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.App
 import com.example.reptrack.domain.profile.usecases.AddUserUseCase
 import com.example.reptrack.domain.auth.usecases.GetCurrentUserUseCase
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.navigation.components.BottomBar
+import kotlinx.coroutines.flow.first
 import com.example.reptrack.presentation.auth.signIn.SignInScreen
 import com.example.reptrack.presentation.auth.signIn.SignInStore
 import com.example.reptrack.presentation.auth.signUp.SignUpScreen
@@ -46,6 +51,7 @@ import com.example.reptrack.presentation.main.stores.MainScreenStore
 import com.example.reptrack.presentation.profile.screens.ProfileScreen
 import com.example.reptrack.presentation.profile.stores.ProfileStoreFactory
 import com.example.reptrack.presentation.timer.screens.TimerScreen
+import com.example.reptrack.presentation.crashlytics_test.CrashlyticsTestScreen
 import com.example.reptrack.data.auth.toDomain
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
@@ -85,7 +91,11 @@ fun AppNavGraph(){
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(
                 navController = navController,
-                startDestination = Screen.Splash.route
+                startDestination = Screen.Splash.route,
+                enterTransition = { androidx.compose.animation.EnterTransition.None },
+                exitTransition = { androidx.compose.animation.ExitTransition.None },
+                popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+                popExitTransition = { androidx.compose.animation.ExitTransition.None }
             ){
                 composable(Screen.Splash.route){
                     val store: SplashStore = getKoin().get()
@@ -192,7 +202,20 @@ fun AppNavGraph(){
                     val modeValue = backStackEntry.arguments?.getString(Screen.ExerciseList.MODE_ARG)
                     val mode = ExerciseListMode.fromValue(modeValue ?: ExerciseListMode.VIEW_MODE.value)
 
+                    // Try to get templateId from previous backStackEntry (if came from TemplateDetail)
+                    val templateId = navController.previousBackStackEntry
+                        ?.arguments
+                        ?.getString(Screen.TemplateDetail.TEMPLATE_ID_ARG)
+
+                    io.github.aakira.napier.Napier.i(
+                        "ExerciseList: mode=$mode, templateId=$templateId",
+                        tag = "NavGraph"
+                    )
+
                     val store: ExerciseListStore = getKoin().get()
+                    val coroutineScope = rememberCoroutineScope()
+                    val updateTemplateUseCase: com.example.reptrack.domain.workout.usecases.templates.UpdateWorkoutTemplateUseCase = getKoin().get()
+                    val observeTemplateUseCase: com.example.reptrack.domain.workout.usecases.templates.ObserveWorkoutTemplateByIdUseCase = getKoin().get()
 
                     ExerciseListScreen(
                         store = store,
@@ -203,11 +226,65 @@ fun AppNavGraph(){
                             navController.popBackStack()
                         },
                         onAddToTemplateAndBack = { exercise ->
-                            // Get the previous back stack entry to check if we came from TemplateDetail
-                            val previousBackStackEntry = navController.previousBackStackEntry
-                            // Just pop back - the template detail screen will handle adding the exercise
-                            navController.previousBackStackEntry?.savedStateHandle?.set("added_exercise_id", exercise.id)
-                            navController.popBackStack()
+                            if (templateId != null) {
+                                // Immediately save exercise to template in database
+                                io.github.aakira.napier.Napier.i(
+                                    "Adding exercise ${exercise.id} to template $templateId",
+                                    tag = "NavGraph"
+                                )
+
+                                // Run in coroutine and wait for completion
+                                coroutineScope.launch {
+                                    try {
+                                        // Load current template
+                                        val template = observeTemplateUseCase(templateId).first()
+                                        io.github.aakira.napier.Napier.i(
+                                            "Loaded template: $template",
+                                            tag = "NavGraph"
+                                        )
+
+                                        if (template != null) {
+                                            // Add exercise to template
+                                            val updatedTemplate = template.copy(
+                                                exerciseIds = template.exerciseIds + exercise.id
+                                            )
+                                            // Save to database
+                                            val result = updateTemplateUseCase(updatedTemplate)
+                                            if (result.isSuccess) {
+                                                io.github.aakira.napier.Napier.i(
+                                                    "Successfully added exercise to template. New exerciseIds: ${updatedTemplate.exerciseIds}",
+                                                    tag = "NavGraph"
+                                                )
+                                            } else {
+                                                io.github.aakira.napier.Napier.e(
+                                                    "Failed to add exercise: ${result.exceptionOrNull()?.message}",
+                                                    tag = "NavGraph"
+                                                )
+                                            }
+                                        } else {
+                                            io.github.aakira.napier.Napier.e(
+                                                "Template is null! Cannot add exercise",
+                                                tag = "NavGraph"
+                                            )
+                                        }
+                                    } catch (e: Exception) {
+                                        io.github.aakira.napier.Napier.e(
+                                            "Error adding exercise to template: ${e.message}",
+                                            tag = "NavGraph"
+                                        )
+                                        e.printStackTrace()
+                                    }
+                                    // Navigate back AFTER saving completes
+                                    navController.popBackStack()
+                                }
+                            } else {
+                                // No templateId, just go back
+                                io.github.aakira.napier.Napier.w(
+                                    "No templateId provided, cannot add exercise to template",
+                                    tag = "NavGraph"
+                                )
+                                navController.popBackStack()
+                            }
                         },
                         onNavigateToAddExercise = {
                             navController.navigate(Screen.ExerciseDetail.createRoute("new", ExerciseDetailMode.DESIGN_MODE))
@@ -296,6 +373,7 @@ fun AppNavGraph(){
                     }
 
                     val storeFactory: TemplateListStoreFactory = getKoin().get()
+                    val createTemplateUseCase: com.example.reptrack.domain.workout.usecases.templates.CreateWorkoutTemplateUseCase = getKoin().get()
 
                     // Use remember to keep the same store instance across recompositions
                     val store = remember(mode) {
@@ -311,7 +389,29 @@ fun AppNavGraph(){
                             navController.popBackStack()
                         },
                         onNavigateToAddTemplate = {
-                            navController.navigate(Screen.TemplateDetail.createRoute(null, TemplateDetailMode.CREATE_MODE))
+                            // Create empty template immediately, then navigate to edit it
+                            coroutineScope.launch {
+                                val emptyTemplate = com.example.reptrack.domain.workout.entities.WorkoutTemplate(
+                                    id = "template_${System.currentTimeMillis()}",
+                                    name = "",
+                                    description = "",
+                                    iconId = "custom",
+                                    exerciseIds = emptyList(),
+                                    iconRes = null,
+                                    iconColor = null,
+                                    muscleGroups = emptyList(),
+                                    isCustom = true
+                                )
+                                val result = createTemplateUseCase(emptyTemplate)
+                                if (result.isSuccess) {
+                                    navController.navigate(Screen.TemplateDetail.createRoute(emptyTemplate.id, TemplateDetailMode.EDIT_MODE))
+                                } else {
+                                    io.github.aakira.napier.Napier.e(
+                                        "Failed to create empty template: ${result.exceptionOrNull()?.message}",
+                                        tag = "NavGraph"
+                                    )
+                                }
+                            }
                         },
                         onInitialize = { initMode ->
                             store.accept(TemplateListStore.Intent.Initialize(initMode))
@@ -342,32 +442,49 @@ fun AppNavGraph(){
 
                     val storeFactory: TemplateDetailStoreFactory = getKoin().get()
 
-                    // Use remember to keep the same store instance across recompositions
-                    val store = remember(templateId, mode) {
+                    // Create ONE store per templateId and keep it alive
+                    // This way data is already loaded when we navigate to the same template again
+                    val store = remember(templateId) {
+                        io.github.aakira.napier.Napier.i(
+                            "Creating store for templateId=$templateId, mode=$mode",
+                            tag = "NavGraph"
+                        )
                         storeFactory.create()
                     }
 
-                    // Handle exercise selection result
-                    val addedExerciseId by backStackEntry.savedStateHandle.getStateFlow<String?>("added_exercise_id", null).collectAsState()
-                    LaunchedEffect(addedExerciseId) {
-                        val exerciseId = addedExerciseId
-                        if (exerciseId != null) {
-                            store.accept(TemplateDetailStore.Intent.AddExerciseToTemplate(exerciseId))
-                            backStackEntry.savedStateHandle.remove<String>("added_exercise_id")
-                        }
+                    // Get state and wait for initialization
+                    val state by store.states.collectAsState(TemplateDetailStore.State())
+
+                    // Pre-initialize BEFORE screen composition
+                    LaunchedEffect(templateId, mode) {
+                        io.github.aakira.napier.Napier.i(
+                            "Initializing store: templateId=$templateId, mode=$mode",
+                            tag = "NavGraph"
+                        )
+                        store.accept(TemplateDetailStore.Intent.Initialize(templateId, mode))
                     }
 
-                    TemplateDetailScreen(
-                        store = store,
-                        templateId = templateId,
-                        mode = mode,
-                        onNavigateBack = {
-                            navController.popBackStack()
-                        },
-                        onNavigateToExerciseSelection = { currentExerciseIds ->
-                            navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.SELECT_MODE))
+                    // Show loading spinner while data is being loaded for EDIT_MODE
+                    if (mode == TemplateDetailStore.TemplateDetailMode.EDIT_MODE && templateId != null && !state.isInitialized) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
                         }
-                    )
+                    } else {
+                        TemplateDetailScreen(
+                            store = store,
+                            templateId = templateId,
+                            mode = mode,
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            onNavigateToExerciseSelection = {
+                                navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.SELECT_MODE))
+                            }
+                        )
+                    }
                 }
 
                 composable(Screen.Timer.route){
@@ -399,6 +516,9 @@ fun AppNavGraph(){
                                 kotlinx.coroutines.delay(100) // Small delay for navigation to start
                                 App.unloadAuthenticatedModules()
                             }
+                        },
+                        onNavigateToCrashlyticsTest = {
+                            navController.navigate(Screen.CrashlyticsTest.route)
                         }
                     )
                 }
@@ -407,6 +527,10 @@ fun AppNavGraph(){
                     navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.VIEW_MODE)) {
                         popUpTo(Screen.Library.route) { inclusive = true }
                     }
+                }
+
+                composable(Screen.CrashlyticsTest.route){
+                    CrashlyticsTestScreen()
                 }
             }
         }

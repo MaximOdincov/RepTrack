@@ -112,14 +112,14 @@ class FakeExerciseRepository : ExerciseRepository {
         return icon
     }
 
-    override suspend fun observeExerciseById(exerciseId: String): Flow<Exercise> {
+    override fun observeExerciseById(exerciseId: String): Flow<Exercise> {
         return _exercises.map { exercises ->
             exercises.find { it.id == exerciseId }
                 ?: throw NoSuchElementException("Exercise with id $exerciseId not found")
         }
     }
 
-    override suspend fun observeAllExercises(): Flow<List<Exercise>> {
+    override fun observeAllExercises(): Flow<List<Exercise>> {
         return _exercises
     }
 

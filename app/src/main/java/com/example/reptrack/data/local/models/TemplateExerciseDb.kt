@@ -27,6 +27,7 @@ import java.time.LocalDateTime
 data class TemplateExerciseDb(
     val templateId: String,
     val exerciseId: String,
+    val exerciseOrder: Int, // Порядок упражнения в шаблоне
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val deletedAt: LocalDateTime? = null
 )

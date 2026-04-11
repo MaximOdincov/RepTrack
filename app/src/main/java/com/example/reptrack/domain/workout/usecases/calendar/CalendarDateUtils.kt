@@ -17,12 +17,17 @@ object CalendarDateUtils {
 
 
     fun isSecondWeekInMonth(date: LocalDate): Boolean {
-        return getWeekNumberInMonth(date) > 1
+        val weekNumber = getWeekNumberInMonth(date)
+        // Чётные недели (2, 4, 6...) → true
+        // Нечётные недели (1, 3, 5...) → false
+        return weekNumber % 2 == 0
     }
 
 
     fun getDayOfWeekIndex(date: LocalDate): Int {
-        return (date.dayOfWeek.value % 7)
+        // dayOfWeek.value: 1=Monday, 7=Sunday
+        //我们需要: 0=Monday, 6=Sunday
+        return date.dayOfWeek.value - 1
     }
 
     fun getDayName(dayIndex: Int): String {

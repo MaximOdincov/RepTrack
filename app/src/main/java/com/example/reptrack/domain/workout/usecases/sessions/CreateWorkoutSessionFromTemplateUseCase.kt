@@ -7,10 +7,12 @@ import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
+import java.time.LocalDate
 import java.util.UUID
 
 /**
  * Use case для создания тренировочной сессии из шаблона
+ * Создаёт сессию со статусом PLANNED на указанную дату
  */
 class CreateWorkoutSessionFromTemplateUseCase(
     private val sessionRepository: WorkoutSessionRepository,
@@ -19,23 +21,29 @@ class CreateWorkoutSessionFromTemplateUseCase(
     suspend operator fun invoke(
         templateId: String,
         userId: String,
+        date: LocalDate,
         sessionName: String? = null
     ): Result<WorkoutSession> {
         return try {
             val template = templateRepository.observeTemplateById(templateId).first()
                 ?: return Result.failure(NoSuchElementException("Template not found: $templateId"))
 
-            val now = LocalDateTime.now()
+            // Создаём сессию на начало указанного дня (например, 9:00)
+            val sessionDateTime = date.atTime(9, 0)
+
+            val sessionId = UUID.randomUUID().toString()
+
             val session = WorkoutSession(
-                id = UUID.randomUUID().toString(),
+                id = sessionId,
                 userId = userId,
-                date = now,
-                status = WorkoutStatus.IN_PROGRESS,
+                date = sessionDateTime,
+                status = WorkoutStatus.PLANNED,
                 name = sessionName ?: template.name,
                 durationSeconds = 0,
                 exercises = template.exerciseIds.mapIndexed { index, exerciseId ->
                     WorkoutExercise(
                         id = UUID.randomUUID().toString(),
+                        workoutSessionId = sessionId,
                         exerciseId = exerciseId,
                         sets = emptyList(),
                         restTimerSeconds = 60

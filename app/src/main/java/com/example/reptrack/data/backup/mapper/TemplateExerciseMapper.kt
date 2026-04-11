@@ -18,6 +18,7 @@ object TemplateExerciseMapper {
             TemplateExerciseDb(
                 templateId = doc.getString("templateId") ?: return null,
                 exerciseId = doc.getString("exerciseId") ?: return null,
+                exerciseOrder = doc.getLong("exerciseOrder")?.toInt() ?: 0,
                 updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
                 deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) }
             )
@@ -30,6 +31,7 @@ object TemplateExerciseMapper {
         return mapOf(
             "templateId" to templateExercise.templateId,
             "exerciseId" to templateExercise.exerciseId,
+            "exerciseOrder" to templateExercise.exerciseOrder,
             "updatedAt" to TimestampMapper.toTimestamp(templateExercise.updatedAt),
             "deletedAt" to templateExercise.deletedAt?.let { TimestampMapper.toTimestamp(it) }
         )

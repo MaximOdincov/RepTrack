@@ -32,6 +32,7 @@ fun WorkoutSession.toDb(): WorkoutSessionDb = WorkoutSessionDb(
 
 fun WorkoutExerciseWithSets.toDomain(): WorkoutExercise = WorkoutExercise(
     id = exercise.id,
+    workoutSessionId = exercise.workoutSessionId,
     exerciseId = exercise.exerciseId,
     sets = sets.map { it.toDomain() },
     restTimerSeconds = exercise.restTimerSeconds

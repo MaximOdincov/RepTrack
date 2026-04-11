@@ -147,6 +147,7 @@ class FakeWorkoutSessionRepository(
         return names.mapIndexed { index, name ->
             val exercise = WorkoutExercise(
                 id = "exercise_${sessionId}_$index",
+                workoutSessionId = sessionId,
                 exerciseId = nameToExerciseId(name),
                 sets = listOf(
                     WorkoutSet(

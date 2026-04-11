@@ -1,19 +1,26 @@
 package com.example.reptrack.data.workout.repositories
 
+import com.example.reptrack.core.error.ErrorHandler
+import com.example.reptrack.core.error.model.ErrorContext
+import com.example.reptrack.core.extensions.catchAndHandle
 import com.example.reptrack.data.local.dao.WorkoutDao
 import com.example.reptrack.data.local.mappers.toDb
 import com.example.reptrack.data.local.mappers.toDomain
+import com.example.reptrack.domain.auth.AuthRepository
 import com.example.reptrack.domain.workout.entities.WorkoutSession
 import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 class WorkoutSessionRepositoryImpl(
-    private val workoutDao: WorkoutDao
+    private val workoutDao: WorkoutDao,
+    private val authRepository: AuthRepository,
+    private val errorHandler: ErrorHandler
 ) : WorkoutSessionRepository {
 
     override fun observeSessionById(sessionId: String): Flow<WorkoutSession?> {
@@ -35,11 +42,21 @@ class WorkoutSessionRepositoryImpl(
     }
 
     override fun observeSessionByDate(date: LocalDate): Flow<WorkoutSession?> {
+        val userId = authRepository.getCurrentUser()?.id
+            ?: return flowOf(null)
+
         val startOfDay = date.atStartOfDay()
         val endOfDay = date.atTime(LocalTime.MAX)
 
-        // Примечание: здесь нужен userId
-        throw NotImplementedError("observeSessionByDate requires userId - will be implemented with SessionManager")
+        return workoutDao.observeSessionByDate(userId, startOfDay, endOfDay)
+            .map { it?.toDomain() }
+            .catchAndHandle(
+                errorHandler = errorHandler,
+                context = ErrorContext(
+                    action = "observeSessionByDate",
+                    additionalInfo = mapOf("date" to date.toString())
+                )
+            )
     }
 
     override suspend fun createSession(session: WorkoutSession): Result<Unit> {
