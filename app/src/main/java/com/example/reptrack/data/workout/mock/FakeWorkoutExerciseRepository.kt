@@ -131,6 +131,10 @@ class FakeWorkoutExerciseRepository : WorkoutExerciseRepository {
             id = id,
             workoutSessionId = "mock_session_id",
             exerciseId = exerciseId,
+            exerciseName = "Mock Exercise",
+            muscleGroup = com.example.reptrack.domain.workout.entities.MuscleGroup.CHEST,
+            exerciseType = com.example.reptrack.domain.workout.entities.ExerciseType.WEIGHT_REPS,
+            iconRes = null,
             sets = List(setsCount) { index ->
                 WorkoutSet(
                     id = "${id}_set_${index + 1}",

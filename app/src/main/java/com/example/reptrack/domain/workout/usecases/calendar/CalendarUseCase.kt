@@ -53,8 +53,6 @@ class CalendarUseCase(
         val dayOfWeekValue = getDayOfWeekIndex(date)
         val isSecondWeek = isSecondWeekInMonth(date)
 
-        Log.d("CalendarUseCase", "observeCalendarDay: date=$date, dayOfWeekValue=$dayOfWeekValue, isSecondWeek=$isSecondWeek")
-
         // Подписываемся на сессию и шаблоны параллельно
         return combine(
             sessionRepository.observeSessionByDate(date),
@@ -81,35 +79,12 @@ class CalendarUseCase(
         val hasWorkout = session != null || validTemplates.isNotEmpty()
         val now = LocalDate.now()
 
-        // Логируем входные данные
-        Log.d("CalendarUseCase", "=== Date: $date ===")
-        Log.d("CalendarUseCase", "Session: ${session?.id ?: "null"}, status: ${session?.status}")
-        Log.d("CalendarUseCase", "Templates count: ${templates.size}, validTemplates: ${validTemplates.size}")
-        Log.d("CalendarUseCase", "Today: $now, isBefore: ${date.isBefore(now)}")
-
-        // Логируем детали сессии
-        if (session != null) {
-            val completedSets = session.exercises.sumOf { exercise ->
-                exercise.sets.count { it.isCompleted }
-            }
-            Log.d("CalendarUseCase", "Session exercises: ${session.exercises.size}, completed sets: $completedSets")
-        }
-
-        // Логируем шаблоны
-        templates.forEach { template ->
-            val schedule = template.schedule
-            val isValid = schedule != null && (schedule.week1Days.isNotEmpty() || schedule.week2Days.isNotEmpty())
-            Log.d("CalendarUseCase", "Template: ${template.name}, schedule: $schedule, isValid: $isValid")
-        }
-
         val status = when {
             // Если есть сессия - проверяем подходы
             session != null -> {
                 val hasCompletedSets = session.exercises.any { exercise ->
                     exercise.sets.any { it.isCompleted }
                 }
-
-                Log.d("CalendarUseCase", "Has session, hasCompletedSets: $hasCompletedSets")
 
                 when {
                     hasCompletedSets -> DayWorkoutStatus.COMPLETED
@@ -120,8 +95,6 @@ class CalendarUseCase(
 
             // Если нет сессии, но есть валидные шаблоны
             validTemplates.isNotEmpty() -> {
-                Log.d("CalendarUseCase", "No session, but has valid templates. date.isBefore(now): ${date.isBefore(now)}")
-
                 when {
                     date.isBefore(now) -> DayWorkoutStatus.OVERDUE
                     else -> DayWorkoutStatus.PLANNED
@@ -129,14 +102,8 @@ class CalendarUseCase(
             }
 
             // Нет тренировки
-            else -> {
-                Log.d("CalendarUseCase", "No workout planned")
-                null
-            }
+            else -> null
         }
-
-        Log.d("CalendarUseCase", "Final status: $status")
-        Log.d("CalendarUseCase", "========================\n")
 
         return CalendarDay(
             date = date,

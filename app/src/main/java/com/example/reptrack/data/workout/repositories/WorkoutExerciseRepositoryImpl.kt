@@ -52,7 +52,7 @@ class WorkoutExerciseRepositoryImpl(
     }
 
     override suspend fun create(exercise: WorkoutExercise, sessionId: String): Result<Unit> = try {
-        workoutDao.insertExercise(exercise.toDb(sessionId))
+        workoutDao.insertExercises(listOf(exercise.toDb(sessionId)))
         workoutDao.insertSets(exercise.sets.map { it.toDb(exercise.id) })
         Result.success(Unit)
     } catch (e: Exception) {
@@ -74,21 +74,31 @@ class WorkoutExerciseRepositoryImpl(
     }
 
     override suspend fun update(exercise: WorkoutExercise): Result<Unit> = try {
-        // Update entire exercise with all sets
-        val current = workoutDao.getWorkoutExerciseWithSets(exercise.id)
-            ?: return Result.failure(
-                DomainException.EntityNotFound(
-                    entityType = "WorkoutExercise",
-                    entityId = exercise.id
-                )
-            )
+        android.util.Log.d("WorkoutExerciseRepo", "update: exerciseId=${exercise.id}, sets: ${exercise.sets.size}")
 
-        workoutDao.insertExercise(current.exercise.copy(
-            restTimerSeconds = exercise.restTimerSeconds,
-            updatedAt = LocalDateTime.now()
-        ))
+        // Получаем текущие сеты из БД
+        val currentSets = workoutDao.getAllSetsForWorkoutExercise(exercise.id)
+        val currentSetIds = currentSets.map { it.id }.toSet()
+        val newSetIds = exercise.sets.map { it.id }.toSet()
 
-        workoutDao.insertSets(exercise.sets.map { it.toDb(exercise.id) })
+        // Находим сеты, которые нужно удалить (есть в БД, но нет в новом списке)
+        val setsToDelete = currentSets.filter { it.id !in newSetIds }
+
+        android.util.Log.d("WorkoutExerciseRepo", "Current sets in DB: ${currentSets.size}, new sets: ${exercise.sets.size}, to delete: ${setsToDelete.size}")
+
+        // Удаляем старые сеты
+        if (setsToDelete.isNotEmpty()) {
+            setsToDelete.forEach { set ->
+                android.util.Log.d("WorkoutExerciseRepo", "Deleting set: ${set.id}")
+                workoutDao.deleteSet(set.id)
+            }
+        }
+
+        // Вставляем/обновляем новые сеты
+        val setsDb = exercise.sets.map { it.toDb(exercise.id) }
+        workoutDao.insertSets(setsDb)
+
+        android.util.Log.d("WorkoutExerciseRepo", "update SUCCESS: saved ${setsDb.size} sets")
         Result.success(Unit)
     } catch (e: Exception) {
         val appException = when (e) {
@@ -109,11 +119,10 @@ class WorkoutExerciseRepositoryImpl(
     }
 
     override suspend fun delete(exerciseId: String): Result<Unit> = try {
-        workoutDao.deleteExerciseById(
-            exerciseId = exerciseId,
-            deletedAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-        )
+        android.util.Log.d("SessionDB", "WorkoutExerciseRepository.delete: exerciseId=$exerciseId")
+        // CASCADE автоматически удалит все сеты этого упражнения
+        workoutDao.deleteExerciseById(exerciseId)
+        android.util.Log.d("SessionDB", "WorkoutExerciseRepository.delete: SUCCESS")
         Result.success(Unit)
     } catch (e: Exception) {
         val appException = when (e) {

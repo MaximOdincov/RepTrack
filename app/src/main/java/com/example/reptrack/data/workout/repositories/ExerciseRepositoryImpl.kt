@@ -36,9 +36,7 @@ class ExerciseRepositoryImpl(
     override fun observeAllExercises(): Flow<List<Exercise>> {
         return exerciseDao.observeAll()
             .map { exercisesDb ->
-                exercisesDb
-                    .filter { it.deletedAt == null }
-                    .map { it.toDomain() }
+                exercisesDb.map { it.toDomain() }
             }
             .catchAndHandle(
                 errorHandler = errorHandler,
@@ -91,7 +89,10 @@ class ExerciseRepositoryImpl(
     override suspend fun deleteExercise(exerciseId: String): Result<Unit> = try {
         val exercise = exerciseDao.getById(exerciseId)
         if (exercise != null) {
-            exerciseDao.insert(exercise.copy(deletedAt = LocalDateTime.now(), updatedAt = LocalDateTime.now()))
+            // Сначала удаляем из шаблонов (вручную, так как нет Foreign Key)
+            exerciseDao.deleteFromAllTemplates(exerciseId)
+            // Затем удаляем само упражнение
+            exerciseDao.deleteById(exerciseId)
             Result.success(Unit)
         } else {
             val appException = DomainException.EntityNotFound(

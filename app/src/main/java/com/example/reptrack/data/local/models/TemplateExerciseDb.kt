@@ -14,12 +14,6 @@ import java.time.LocalDateTime
             parentColumns = ["id"],
             childColumns = ["templateId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = ExerciseDb::class,
-            parentColumns = ["id"],
-            childColumns = ["exerciseId"],
-            onDelete = ForeignKey.RESTRICT
         )
     ],
     indices = [Index("exerciseId")]

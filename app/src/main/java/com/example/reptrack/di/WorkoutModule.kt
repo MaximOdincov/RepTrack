@@ -85,7 +85,7 @@ val workoutModule = module {
     factory { CalendarUseCase(get(), get()) }
 
     // Session use cases
-    factory { CreateWorkoutSessionFromTemplateUseCase(get(), get()) }
+    factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get()) }
     factory { ShouldUpdateSessionFromTemplateUseCase() }
     factory { UpdateSessionStatusOnFirstSetUseCase(get()) }
 
@@ -105,6 +105,7 @@ val workoutModule = module {
             observeBestSetFromLastWorkoutUseCase = get(),
             createSessionFromTemplateUseCase = get(),
             shouldUpdateSessionFromTemplateUseCase = get(),
+            deleteWorkoutExerciseUseCase = get(),
             authRepository = get()
         ).create()
     }
@@ -115,7 +116,8 @@ val workoutModule = module {
             observeWorkoutExerciseByIdUseCase = get(),
             observeExerciseByIdUseCase = get(),
             updateWorkoutExerciseUseCase = get(),
-            updateSessionStatusOnFirstSetUseCase = get()
+            updateSessionStatusOnFirstSetUseCase = get(),
+            workoutDao = get()
         )
     }
 

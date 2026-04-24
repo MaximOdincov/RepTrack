@@ -43,15 +43,20 @@ class AuthRepositoryImpl(
     }
 
     override fun getCurrentUser(): AuthUser? {
-        return dataSource.getCurrentUser()?.toAuthUser()
+        val user = dataSource.getCurrentUser()?.toAuthUser()
+        android.util.Log.d("AuthDB", "getCurrentUser: userId=${user?.id}")
+        return user
     }
 
     override suspend fun signOut() {
+        android.util.Log.e("AuthDB", "!!! signOut CALLED - DELETING DATABASE !!!")
+        android.util.Log.e("AuthDB", "Stack trace:", Exception())
         return withContext(Dispatchers.IO) {
             val userId = getCurrentUser()?.id
 
             // Delete database first
             if (userId != null) {
+                android.util.Log.e("AuthDB", "Deleting database for userId=$userId")
                 AppDatabase.deleteUserDatabase(context, userId)
             }
 

@@ -1,8 +1,6 @@
 package com.example.reptrack.presentation.workout_exercise.detail.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -22,9 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,49 +58,17 @@ fun SetCard(
 ) {
     val haptic = LocalHapticFeedback.current
     var offsetX by remember { mutableStateOf(0f) }
-    val deleteThreshold = -600f
-
-    val swipeProgress = (abs(offsetX) / abs(deleteThreshold)).coerceIn(0f, 1f)
-    val iconScale by animateFloatAsState(
-        targetValue = if (swipeProgress > 0.01f) 0.3f + (swipeProgress * 0.7f) else 0f,
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-        label = "icon_scale"
-    )
-    val iconAlpha by animateFloatAsState(
-        targetValue = swipeProgress,
-        animationSpec = tween(durationMillis = 100),
-        label = "icon_alpha"
-    )
+    val deleteThreshold = -400f
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 0.dp, vertical = 4.dp)
-            .height(height = BoxMinSize)
+            .padding(horizontal = 0.dp, vertical = 2.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .alpha(iconAlpha)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEF5350)),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(end = 24.dp)
-                    .size(32.dp)
-                    .scale(iconScale)
-            )
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .animateContentSize()
                 .offset(x = offsetX.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(
@@ -158,7 +120,7 @@ fun SetCard(
                             onToggleExpanded()
                         }
                     }
-                    .padding(12.dp),
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -200,7 +162,7 @@ fun SetCard(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -230,7 +192,7 @@ fun SetCard(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -258,14 +220,13 @@ fun SetCard(
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
 }
 
 private val BoxMinSize = 72.dp
+private val BoxWithContentSize = 230.dp
 
 @Composable
 private fun CompactNumberInput(

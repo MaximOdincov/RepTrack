@@ -68,7 +68,12 @@ class ObserveBestSetFromLastWorkoutUseCaseTest {
         // Create exercise directly with custom sets to have full control
         val exercise = com.example.reptrack.domain.workout.entities.WorkoutExercise(
             id = "ex_1",
+            workoutSessionId = "session_1",
             exerciseId = exerciseId,
+            exerciseName = "Bench Press",
+            muscleGroup = com.example.reptrack.domain.workout.entities.MuscleGroup.CHEST,
+            exerciseType = com.example.reptrack.domain.workout.entities.ExerciseType.WEIGHT_REPS,
+            iconRes = null,
             sets = listOf(
                 com.example.reptrack.domain.workout.entities.WorkoutSet(
                     id = "set_1",

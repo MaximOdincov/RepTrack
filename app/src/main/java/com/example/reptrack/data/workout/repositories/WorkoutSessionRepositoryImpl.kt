@@ -59,8 +59,39 @@ class WorkoutSessionRepositoryImpl(
             )
     }
 
+    override suspend fun getSessionByDate(date: LocalDate): WorkoutSession? {
+        val userId = authRepository.getCurrentUser()?.id
+
+        if (userId == null) {
+            android.util.Log.e("SessionDB", "getUser() returned null")
+            return null
+        }
+
+        val startOfDay = date.atStartOfDay()
+        val endOfDay = date.atTime(LocalTime.MAX)
+
+        val session = workoutDao.getSessionByDate(userId, startOfDay, endOfDay)
+
+        if (session != null) {
+            android.util.Log.d("SessionDB", "getSessionByDate FOUND: id=${session.session.id}, deletedAt=${session.session.deletedAt}, exercisesCount=${session.exercises.size}")
+        } else {
+            android.util.Log.e("SessionDB", "!!! SESSION NOT FOUND for date=$date !!!")
+
+            // Debug: show ALL sessions in DB for this user
+            val allSessions = workoutDao.debugGetAllSessions(userId)
+            android.util.Log.e("SessionDB", "!!! ALL SESSIONS IN DB for user $userId (${allSessions.size} total): !!!")
+            allSessions.forEach { s ->
+                android.util.Log.e("SessionDB", "  - id=${s.id}, date=${s.date}, status=${s.status}, deletedAt=${s.deletedAt}")
+            }
+        }
+
+        return session?.toDomain()
+    }
+
     override suspend fun createSession(session: WorkoutSession): Result<Unit> {
         return try {
+            android.util.Log.d("SessionDB", "createSession START: id=${session.id}, date=${session.date}, exercises=${session.exercises.size}")
+
             val sessionDb = session.toDb()
             val exercisesDb = session.exercises.map { exercise ->
                 exercise.toDb(session.id)
@@ -71,13 +102,18 @@ class WorkoutSessionRepositoryImpl(
                 }
             }
 
+            android.util.Log.d("SessionDB", "Inserting: sessionDb.deletedAt=${sessionDb.deletedAt}, exercises=${exercisesDb.size}, sets=${setsDb.size}")
+
             workoutDao.insertFullWorkout(
                 session = sessionDb,
                 exercises = exercisesDb,
                 sets = setsDb
             )
+
+            android.util.Log.d("SessionDB", "createSession SUCCESS: id=${session.id}")
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("SessionDB", "createSession FAILED: id=${session.id}, error=${e.message}", e)
             Result.failure(e)
         }
     }
@@ -105,14 +141,27 @@ class WorkoutSessionRepositoryImpl(
         }
     }
 
-    override suspend fun deleteSession(sessionId: String): Result<Unit> {
+    override suspend fun updateSessionStatus(sessionId: String, status: com.example.reptrack.domain.workout.entities.WorkoutStatus): Result<Unit> {
         return try {
-            val now = LocalDateTime.now()
-            workoutDao.deleteSession(sessionId, now, now)
-            workoutDao.deleteExercisesBySession(sessionId, now, now)
-            workoutDao.deleteSetsBySession(sessionId, now, now)
+            workoutDao.updateSessionStatus(
+                sessionId = sessionId,
+                status = status.name,
+                updatedAt = LocalDateTime.now()
+            )
             Result.success(Unit)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteSession(sessionId: String): Result<Unit> {
+        android.util.Log.d("SessionDB", "deleteSession: sessionId=$sessionId")
+        return try {
+            // CASCADE в FOREIGN KEY должен автоматически удалить упражнения и сеты
+            workoutDao.deleteSession(sessionId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("SessionDB", "deleteSession failed: ${e.message}", e)
             Result.failure(e)
         }
     }

@@ -14,20 +14,19 @@ import java.time.LocalDateTime
             parentColumns = ["id"],
             childColumns = ["workoutSessionId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = ExerciseDb::class,
-            parentColumns = ["id"],
-            childColumns = ["exerciseId"],
-            onDelete = ForeignKey.RESTRICT
         )
     ],
-    indices = [Index("workoutSessionId"), Index("exerciseId")]
+    indices = [Index("workoutSessionId")]
 )
 data class WorkoutExerciseDb(
     @PrimaryKey val id: String,
     val workoutSessionId: String,
-    val exerciseId: String,
+    val exerciseId: String,  // Для справки, но не используется в ForeignKey
+    // Денормализованные данные из Exercise (для независимости)
+    val exerciseName: String,
+    val muscleGroup: String,  // Храним как String (enum name)
+    val exerciseType: String,  // Храним как String (enum name)
+    val iconRes: Int?,
     val restTimerSeconds: Int,
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val deletedAt: LocalDateTime? = null

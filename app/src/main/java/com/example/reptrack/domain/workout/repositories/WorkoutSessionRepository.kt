@@ -1,6 +1,7 @@
 package com.example.reptrack.domain.workout.repositories
 
 import com.example.reptrack.domain.workout.entities.WorkoutSession
+import com.example.reptrack.domain.workout.entities.WorkoutStatus
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -11,12 +12,13 @@ interface WorkoutSessionRepository {
 
     fun observeSessionByDate(date: LocalDate): Flow<WorkoutSession?>
 
+    suspend fun getSessionByDate(date: LocalDate): WorkoutSession?
 
     suspend fun createSession(session: WorkoutSession): Result<Unit>
 
-
     suspend fun updateSession(session: WorkoutSession): Result<Unit>
 
+    suspend fun updateSessionStatus(sessionId: String, status: WorkoutStatus): Result<Unit>
 
     suspend fun deleteSession(sessionId: String): Result<Unit>
 }

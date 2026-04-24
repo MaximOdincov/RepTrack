@@ -42,12 +42,23 @@ class FakeWorkoutSessionRepository(
         return flowOf(session)
     }
 
+    override suspend fun getSessionByDate(date: LocalDate): WorkoutSession? {
+        return mockSessions.find { session ->
+            session.date.toLocalDate() == date
+        }
+    }
+
     override suspend fun createSession(session: WorkoutSession): Result<Unit> {
         // For mock, just return success
         return Result.success(Unit)
     }
 
     override suspend fun updateSession(session: WorkoutSession): Result<Unit> {
+        // For mock, just return success
+        return Result.success(Unit)
+    }
+
+    override suspend fun updateSessionStatus(sessionId: String, status: WorkoutStatus): Result<Unit> {
         // For mock, just return success
         return Result.success(Unit)
     }
@@ -149,6 +160,10 @@ class FakeWorkoutSessionRepository(
                 id = "exercise_${sessionId}_$index",
                 workoutSessionId = sessionId,
                 exerciseId = nameToExerciseId(name),
+                exerciseName = name,
+                muscleGroup = getMuscleGroupForExercise(name),
+                exerciseType = com.example.reptrack.domain.workout.entities.ExerciseType.WEIGHT_REPS,
+                iconRes = null,
                 sets = listOf(
                     WorkoutSet(
                         id = "set_${sessionId}_${index}_1",
@@ -199,6 +214,27 @@ class FakeWorkoutSessionRepository(
             "Treadmill" -> "treadmill"
             "Jump Rope" -> "jump_rope"
             else -> name.lowercase().replace(" ", "_")
+        }
+    }
+
+
+    /**
+     * Get muscle group for exercise based on name
+     */
+    private fun getMuscleGroupForExercise(name: String): com.example.reptrack.domain.workout.entities.MuscleGroup {
+        return when (name) {
+            "Bench Press", "Bench", "Overhead Press", "Shoulders", "Skull Crushers", "Triceps", "Push Ups" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.CHEST
+            "Pull Ups", "Barbell Row", "Rows", "Bicep Curls" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.BACK
+            "Squat", "Squats", "Lunges", "Leg Press" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.LEGS
+            "Plank" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.ABS
+            "Treadmill", "Jump Rope" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.CARDIO
+            else -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.CHEST
         }
     }
 }

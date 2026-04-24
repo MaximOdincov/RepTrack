@@ -26,8 +26,11 @@ interface ExerciseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(exercises: List<ExerciseDb>)
 
-    @Delete
-    suspend fun delete(exercise: ExerciseDb)
+    @Query("DELETE FROM exercise WHERE id = :exerciseId")
+    suspend fun deleteById(exerciseId: String)
+
+    @Query("DELETE FROM template_exercises WHERE exerciseId = :exerciseId")
+    suspend fun deleteFromAllTemplates(exerciseId: String)
 
     @Query("SELECT * FROM exercise")
     suspend fun getAllExercises(): List<ExerciseDb>

@@ -3,6 +3,8 @@ package com.example.reptrack.data.backup.mapper
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.reptrack.data.local.models.WorkoutExerciseDb
+import com.example.reptrack.domain.workout.entities.MuscleGroup
+import com.example.reptrack.domain.workout.entities.ExerciseType
 import com.google.firebase.firestore.DocumentSnapshot
 import java.time.Instant
 import java.time.LocalDateTime
@@ -15,11 +17,18 @@ object WorkoutExerciseMapper {
 
     fun fromFirestore(doc: DocumentSnapshot): WorkoutExerciseDb? {
         return try {
+            val muscleGroupStr = doc.getString("muscleGroup") ?: "ARMS"
+            val exerciseTypeStr = doc.getString("exerciseType") ?: "WEIGHT_REPS"
+
             WorkoutExerciseDb(
                 id = doc.id,
                 workoutSessionId = doc.getString("workoutSessionId") ?: return null,
                 exerciseId = doc.getString("exerciseId") ?: return null,
-                restTimerSeconds = (doc.getLong("restTimerSeconds") ?: 0L).toInt(),
+                exerciseName = doc.getString("exerciseName") ?: "Unknown",
+                muscleGroup = muscleGroupStr,
+                exerciseType = exerciseTypeStr,
+                iconRes = null, // Иконки не бэкапим
+                restTimerSeconds = (doc.getLong("restTimerSeconds") ?: 60L).toInt(),
                 updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
                 deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) }
             )
@@ -33,6 +42,9 @@ object WorkoutExerciseMapper {
             "id" to exercise.id,
             "workoutSessionId" to exercise.workoutSessionId,
             "exerciseId" to exercise.exerciseId,
+            "exerciseName" to exercise.exerciseName,
+            "muscleGroup" to exercise.muscleGroup,
+            "exerciseType" to exercise.exerciseType,
             "restTimerSeconds" to exercise.restTimerSeconds.toLong(),
             "updatedAt" to TimestampMapper.toTimestamp(exercise.updatedAt),
             "deletedAt" to exercise.deletedAt?.let { TimestampMapper.toTimestamp(it) }

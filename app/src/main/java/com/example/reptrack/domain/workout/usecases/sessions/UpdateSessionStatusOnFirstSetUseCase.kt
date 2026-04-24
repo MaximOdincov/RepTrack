@@ -12,14 +12,14 @@ class UpdateSessionStatusOnFirstSetUseCase(
 ) {
     suspend operator fun invoke(sessionId: String): Result<Unit> {
         return try {
-            // Получаем текущую сессию
+            // Получаем текущую сессию только для проверки статуса
             val session = workoutSessionRepository.observeSessionById(sessionId).first()
                 ?: return Result.failure(NoSuchElementException("Session not found: $sessionId"))
 
             // Если статус PLANNED, обновляем на IN_PROGRESS
             if (session.status == WorkoutStatus.PLANNED) {
-                val updatedSession = session.copy(status = WorkoutStatus.IN_PROGRESS)
-                workoutSessionRepository.updateSession(updatedSession)
+                // Используем updateSessionStatus вместо updateSession, чтобы не перезаписывать exercises и sets
+                workoutSessionRepository.updateSessionStatus(sessionId, WorkoutStatus.IN_PROGRESS)
             }
 
             Result.success(Unit)

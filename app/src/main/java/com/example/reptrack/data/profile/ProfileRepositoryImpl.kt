@@ -34,9 +34,8 @@ class ProfileRepositoryImpl(
         val userDb = user.toDb()
         val consentDb = user.toGdprDb()
 
-        userDao.insertFullUser(
-            user = userDb,
-            consent = consentDb
-        )
+        // Use updateUser instead of insertFullUser to avoid cascade delete
+        userDao.updateUser(userDb)
+        consentDb?.let { userDao.insertConsent(it) }
     }
 }

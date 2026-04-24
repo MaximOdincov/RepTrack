@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.reptrack.data.local.aggregates.WorkoutExerciseWithSets
 import com.example.reptrack.data.local.aggregates.WorkoutSessionWithExercises
 import com.example.reptrack.data.local.models.WorkoutExerciseDb
@@ -17,11 +18,11 @@ import java.time.LocalDateTime
 interface WorkoutDao {
 
     @Transaction
-    @Query("SELECT * FROM workout_sessions WHERE userId = :userId AND deletedAt IS NULL ORDER BY date DESC")
+    @Query("SELECT * FROM workout_sessions WHERE userId = :userId ORDER BY date DESC")
     fun observeSessions(userId: String): Flow<List<WorkoutSessionWithExercises>>
 
     @Transaction
-    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId AND deletedAt IS NULL LIMIT 1")
+    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId LIMIT 1")
     fun observeSessionById(sessionId: String): Flow<WorkoutSessionWithExercises?>
 
     @Transaction
@@ -29,7 +30,6 @@ interface WorkoutDao {
         SELECT * FROM workout_sessions
         WHERE userId = :userId
         AND date BETWEEN :fromDate AND :toDate
-        AND deletedAt IS NULL
         ORDER BY date DESC
     """)
     fun observeSessionsInRange(
@@ -43,7 +43,6 @@ interface WorkoutDao {
         SELECT * FROM workout_sessions
         WHERE userId = :userId
         AND date BETWEEN :startOfDay AND :endOfDay
-        AND deletedAt IS NULL
         LIMIT 1
     """)
     fun observeSessionByDate(
@@ -52,14 +51,42 @@ interface WorkoutDao {
         endOfDay: LocalDateTime
     ): Flow<WorkoutSessionWithExercises?>
 
+    @Transaction
+    @Query("""
+        SELECT * FROM workout_sessions
+        WHERE userId = :userId
+        AND date BETWEEN :startOfDay AND :endOfDay
+        LIMIT 1
+    """)
+    suspend fun getSessionByDate(
+        userId: String,
+        startOfDay: LocalDateTime,
+        endOfDay: LocalDateTime
+    ): WorkoutSessionWithExercises?
+
+    @Query("SELECT * FROM workout_sessions WHERE userId = :userId ORDER BY date DESC")
+    suspend fun debugGetAllSessions(userId: String): List<WorkoutSessionDb>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: WorkoutSessionDb)
+
+    @Query("UPDATE workout_sessions SET status = :status, updatedAt = :updatedAt WHERE id = :sessionId")
+    suspend fun updateSessionStatus(sessionId: String, status: String, updatedAt: java.time.LocalDateTime)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExercises(exercises: List<WorkoutExerciseDb>)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOrUpdateExercise(exercise: WorkoutExerciseDb)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSets(sets: List<WorkoutSetDb>)
+
+    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId LIMIT 1")
+    suspend fun getWorkoutExerciseById(exerciseId: String): WorkoutExerciseDb?
+
+    @Query("SELECT * FROM workout_sets WHERE workoutExerciseId = :exerciseId")
+    suspend fun getAllSetsForWorkoutExercise(exerciseId: String): List<WorkoutSetDb>
 
     @Transaction
     suspend fun insertFullWorkout(
@@ -67,28 +94,33 @@ interface WorkoutDao {
         exercises: List<WorkoutExerciseDb>,
         sets: List<WorkoutSetDb>
     ) {
+        android.util.Log.d("SessionDB", "insertFullWorkout: sessionId=${session.id}, deletedAt=${session.deletedAt}")
         insertSession(session)
         insertExercises(exercises)
         insertSets(sets)
+        android.util.Log.d("SessionDB", "insertFullWorkout DONE: inserted ${exercises.size} exercises, ${sets.size} sets")
     }
 
-    @Query("UPDATE workout_sessions SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :sessionId")
-    suspend fun deleteSession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+    @Query("DELETE FROM workout_sessions WHERE id = :sessionId")
+    suspend fun deleteSession(sessionId: String)
 
-    @Query("UPDATE workout_exercises SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE workoutSessionId = :sessionId")
-    suspend fun deleteExercisesBySession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+    @Query("DELETE FROM workout_exercises WHERE workoutSessionId = :sessionId")
+    suspend fun deleteExercisesBySession(sessionId: String)
 
-    @Query("UPDATE workout_sets SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE workoutExerciseId IN (SELECT id FROM workout_exercises WHERE workoutSessionId = :sessionId)")
-    suspend fun deleteSetsBySession(sessionId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+    @Query("DELETE FROM workout_sets WHERE workoutExerciseId IN (SELECT id FROM workout_exercises WHERE workoutSessionId = :sessionId)")
+    suspend fun deleteSetsBySession(sessionId: String)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExercise(exercise: WorkoutExerciseDb)
+    @Query("DELETE FROM workout_exercises WHERE id = :exerciseId")
+    suspend fun deleteExerciseById(exerciseId: String)
 
-    @Query("UPDATE workout_exercises SET deletedAt = :deletedAt, updatedAt = :updatedAt WHERE id = :exerciseId")
-    suspend fun deleteExerciseById(exerciseId: String, deletedAt: LocalDateTime, updatedAt: LocalDateTime)
+    @Query("DELETE FROM workout_sets WHERE workoutExerciseId = :exerciseId")
+    suspend fun deleteSetsByExercise(exerciseId: String)
+
+    @Query("DELETE FROM workout_sets WHERE id = :setId")
+    suspend fun deleteSet(setId: String)
 
     @Transaction
-    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId AND deletedAt IS NULL LIMIT 1")
+    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId LIMIT 1")
     suspend fun getWorkoutExerciseWithSets(exerciseId: String): WorkoutExerciseWithSets?
 
     @Query("SELECT * FROM workout_sets")
@@ -98,7 +130,7 @@ interface WorkoutDao {
     suspend fun getAllExercises(): List<WorkoutExerciseDb>
 
     @Transaction
-    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId AND deletedAt IS NULL LIMIT 1")
+    @Query("SELECT * FROM workout_exercises WHERE id = :exerciseId LIMIT 1")
     fun observeWorkoutExerciseWithSets(exerciseId: String): Flow<WorkoutExerciseWithSets?>
 
     @Transaction
@@ -107,8 +139,6 @@ interface WorkoutDao {
         INNER JOIN workout_sessions ws ON we.workoutSessionId = ws.id
         WHERE we.exerciseId = :exerciseId
         AND ws.status = 'COMPLETED'
-        AND we.deletedAt IS NULL
-        AND ws.deletedAt IS NULL
         ORDER BY ws.date DESC
         LIMIT 1
     """)
@@ -118,7 +148,6 @@ interface WorkoutDao {
     @Query("""
         SELECT * FROM workout_exercises
         WHERE workoutSessionId = :sessionId
-        AND deletedAt IS NULL
         ORDER BY id
     """)
     fun observeExercisesBySession(sessionId: String): Flow<List<WorkoutExerciseWithSets>>
@@ -130,9 +159,6 @@ interface WorkoutDao {
         INNER JOIN workout_sessions session ON we.workoutSessionId = session.id
         WHERE we.exerciseId = :exerciseId
         AND session.status = 'COMPLETED'
-        AND ws.deletedAt IS NULL
-        AND we.deletedAt IS NULL
-        AND session.deletedAt IS NULL
         AND ws.isCompleted = 1
         ORDER BY session.date DESC, ws.weight DESC
         LIMIT 1

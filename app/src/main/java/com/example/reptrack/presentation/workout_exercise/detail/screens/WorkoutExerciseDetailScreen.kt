@@ -68,6 +68,7 @@ fun WorkoutExerciseDetailScreen(
     onNavigateBack: () -> Unit = {}
 ) {
     LaunchedEffect(workoutExerciseId) {
+        android.util.Log.d("WorkoutExercise", "Screen initialized: workoutExerciseId=$workoutExerciseId")
         store.accept(WorkoutExerciseDetailStore.Intent.Initialize(workoutExerciseId))
     }
 
