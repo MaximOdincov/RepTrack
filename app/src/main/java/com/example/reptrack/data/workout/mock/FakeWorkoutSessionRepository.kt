@@ -12,10 +12,16 @@ import java.time.LocalDate
 /**
  * Mock repository for testing calendar functionality.
  * Contains pre-populated test data for various workout statuses.
+ * Uses FakeWorkoutExerciseRepository for managing exercises.
  */
-class FakeWorkoutSessionRepository : WorkoutSessionRepository {
+class FakeWorkoutSessionRepository(
+    private val workoutExerciseRepository: FakeWorkoutExerciseRepository = FakeWorkoutExerciseRepository()
+) : WorkoutSessionRepository {
 
     private val mockSessions = createMockSessions()
+
+    // Expose the workout exercise repository for testing
+    val exercises: FakeWorkoutExerciseRepository = workoutExerciseRepository
 
     override fun observeSessionById(sessionId: String): Flow<WorkoutSession?> {
         return flowOf(mockSessions.find { it.id == sessionId })
@@ -36,12 +42,23 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
         return flowOf(session)
     }
 
+    override suspend fun getSessionByDate(date: LocalDate): WorkoutSession? {
+        return mockSessions.find { session ->
+            session.date.toLocalDate() == date
+        }
+    }
+
     override suspend fun createSession(session: WorkoutSession): Result<Unit> {
         // For mock, just return success
         return Result.success(Unit)
     }
 
     override suspend fun updateSession(session: WorkoutSession): Result<Unit> {
+        // For mock, just return success
+        return Result.success(Unit)
+    }
+
+    override suspend fun updateSessionStatus(sessionId: String, status: WorkoutStatus): Result<Unit> {
         // For mock, just return success
         return Result.success(Unit)
     }
@@ -71,7 +88,7 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
                 status = WorkoutStatus.COMPLETED,
                 name = "Push Day",
                 durationSeconds = 3600,
-                exercises = createMockExercises("Bench Press", "Overhead Press", "Triceps"),
+                exercises = createMockExercises("session_1", "Bench Press", "Overhead Press", "Skull Crushers"),
                 comment = "Great workout!"
             ),
 
@@ -83,7 +100,7 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
                 status = WorkoutStatus.COMPLETED,
                 name = "Pull Day",
                 durationSeconds = 3300,
-                exercises = createMockExercises("Pull Ups", "Rows", "Bicep Curls"),
+                exercises = createMockExercises("session_2", "Pull Ups", "Barbell Row", "Bicep Curls"),
                 comment = null
             ),
 
@@ -95,7 +112,7 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
                 status = WorkoutStatus.COMPLETED,
                 name = "Cardio",
                 durationSeconds = 2400,
-                exercises = createMockExercises("Treadmill", "Jump Rope"),
+                exercises = createMockExercises("session_6", "Treadmill", "Jump Rope"),
                 comment = "Good cardio session"
             ),
 
@@ -107,7 +124,7 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
                 status = WorkoutStatus.IN_PROGRESS,
                 name = "Leg Day",
                 durationSeconds = 2700,
-                exercises = createMockExercises("Squats", "Lunges", "Leg Press"),
+                exercises = createMockExercises("session_3", "Squat", "Lunges", "Leg Press"),
                 comment = "Feeling strong"
             ),
 
@@ -119,7 +136,7 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
                 status = WorkoutStatus.PLANNED,
                 name = "Upper Body",
                 durationSeconds = 3000,
-                exercises = createMockExercises("Bench", "Rows", "Shoulders"),
+                exercises = createMockExercises("session_4", "Bench Press", "Barbell Row", "Overhead Press"),
                 comment = null
             ),
 
@@ -131,42 +148,93 @@ class FakeWorkoutSessionRepository : WorkoutSessionRepository {
                 status = WorkoutStatus.PLANNED,
                 name = "Full Body",
                 durationSeconds = 3600,
-                exercises = createMockExercises("Squats", "Push Ups", "Plank"),
+                exercises = createMockExercises("session_5", "Squat", "Push Ups", "Plank"),
                 comment = null
             )
         )
     }
 
-    private fun createMockExercises(vararg names: String): List<WorkoutExercise> {
+    private fun createMockExercises(sessionId: String, vararg names: String): List<WorkoutExercise> {
         return names.mapIndexed { index, name ->
-            WorkoutExercise(
-                id = "exercise_$index",
-                exerciseId = name.lowercase().replace(" ", "_"),
+            val exercise = WorkoutExercise(
+                id = "exercise_${sessionId}_$index",
+                workoutSessionId = sessionId,
+                exerciseId = nameToExerciseId(name),
+                exerciseName = name,
+                muscleGroup = getMuscleGroupForExercise(name),
+                exerciseType = com.example.reptrack.domain.workout.entities.ExerciseType.WEIGHT_REPS,
+                iconRes = null,
                 sets = listOf(
                     WorkoutSet(
-                        id = "set_${index}_1",
+                        id = "set_${sessionId}_${index}_1",
                         index = 1,
                         weight = 20f,
                         reps = 12,
                         isCompleted = true
                     ),
                     WorkoutSet(
-                        id = "set_${index}_2",
+                        id = "set_${sessionId}_${index}_2",
                         index = 2,
                         weight = 22.5f,
                         reps = 10,
                         isCompleted = true
                     ),
                     WorkoutSet(
-                        id = "set_${index}_3",
+                        id = "set_${sessionId}_${index}_3",
                         index = 3,
                         weight = 25f,
                         reps = 8,
-                        isCompleted = true
+                        isCompleted = false  // Last set is not completed
                     )
                 ),
                 restTimerSeconds = 90
             )
+            // Also add to the workout exercise repository
+            workoutExerciseRepository.addMockExercise(sessionId, exercise)
+            exercise
+        }
+    }
+
+    /**
+     * Convert exercise display name to exercise ID that exists in FakeExerciseRepository
+     */
+    private fun nameToExerciseId(name: String): String {
+        return when (name) {
+            "Bench Press", "Bench" -> "bench_press"
+            "Overhead Press", "Shoulders" -> "overhead_press"
+            "Skull Crushers", "Triceps" -> "skull_crushers"
+            "Pull Ups" -> "pull_ups"
+            "Barbell Row", "Rows" -> "barbell_row"
+            "Bicep Curls" -> "bicep_curls"
+            "Squat", "Squats" -> "squat"
+            "Lunges" -> "lunges"
+            "Leg Press" -> "leg_press"
+            "Push Ups" -> "push_ups"
+            "Plank" -> "plank"
+            "Treadmill" -> "treadmill"
+            "Jump Rope" -> "jump_rope"
+            else -> name.lowercase().replace(" ", "_")
+        }
+    }
+
+
+    /**
+     * Get muscle group for exercise based on name
+     */
+    private fun getMuscleGroupForExercise(name: String): com.example.reptrack.domain.workout.entities.MuscleGroup {
+        return when (name) {
+            "Bench Press", "Bench", "Overhead Press", "Shoulders", "Skull Crushers", "Triceps", "Push Ups" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.CHEST
+            "Pull Ups", "Barbell Row", "Rows", "Bicep Curls" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.BACK
+            "Squat", "Squats", "Lunges", "Leg Press" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.LEGS
+            "Plank" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.ABS
+            "Treadmill", "Jump Rope" -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.CARDIO
+            else -> 
+                com.example.reptrack.domain.workout.entities.MuscleGroup.CHEST
         }
     }
 }

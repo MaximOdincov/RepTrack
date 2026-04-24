@@ -3,7 +3,6 @@ package com.example.reptrack.domain.workout.usecases.exercises
 import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.MuscleGroup
 import com.example.reptrack.domain.workout.entities.ExerciseType
-import com.example.reptrack.domain.workout.entities.WorkoutExercise
 import com.example.reptrack.domain.workout.repositories.ExerciseRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -59,11 +58,6 @@ class ObserveAllExercisesUseCaseTest {
             override suspend fun createExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun updateExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun deleteExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun observeWorkoutExerciseById(exerciseId: String) = throw NotImplementedError()
-            override suspend fun createWorkoutExercise(exercise: WorkoutExercise, workoutSessionId: String) = throw NotImplementedError()
-            override suspend fun updateWorkoutExercise(exercise: WorkoutExercise) = throw NotImplementedError()
-            override suspend fun deleteWorkoutExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun getLastExerciseProgress(exerciseId: String) = throw NotImplementedError()
         }
 
         val useCase = ObserveAllExercisesUseCase(mockRepository)
@@ -114,11 +108,6 @@ class ObserveAllExercisesUseCaseTest {
             override suspend fun createExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun updateExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun deleteExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun observeWorkoutExerciseById(exerciseId: String) = throw NotImplementedError()
-            override suspend fun createWorkoutExercise(exercise: WorkoutExercise, workoutSessionId: String) = throw NotImplementedError()
-            override suspend fun updateWorkoutExercise(exercise: WorkoutExercise) = throw NotImplementedError()
-            override suspend fun deleteWorkoutExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun getLastExerciseProgress(exerciseId: String) = throw NotImplementedError()
         }
 
         val useCase = ObserveAllExercisesUseCase(mockRepository)
@@ -166,11 +155,6 @@ class ObserveAllExercisesUseCaseTest {
             override suspend fun createExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun updateExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun deleteExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun observeWorkoutExerciseById(exerciseId: String) = throw NotImplementedError()
-            override suspend fun createWorkoutExercise(exercise: WorkoutExercise, workoutSessionId: String) = throw NotImplementedError()
-            override suspend fun updateWorkoutExercise(exercise: WorkoutExercise) = throw NotImplementedError()
-            override suspend fun deleteWorkoutExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun getLastExerciseProgress(exerciseId: String) = throw NotImplementedError()
         }
 
         val useCase = ObserveAllExercisesUseCase(mockRepository)
@@ -193,11 +177,6 @@ class ObserveAllExercisesUseCaseTest {
             override suspend fun createExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun updateExercise(exercise: Exercise) = throw NotImplementedError()
             override suspend fun deleteExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun observeWorkoutExerciseById(exerciseId: String) = throw NotImplementedError()
-            override suspend fun createWorkoutExercise(exercise: WorkoutExercise, workoutSessionId: String) = throw NotImplementedError()
-            override suspend fun updateWorkoutExercise(exercise: WorkoutExercise) = throw NotImplementedError()
-            override suspend fun deleteWorkoutExercise(exerciseId: String) = throw NotImplementedError()
-            override suspend fun getLastExerciseProgress(exerciseId: String) = throw NotImplementedError()
         }
 
         val useCase = ObserveAllExercisesUseCase(mockRepository)

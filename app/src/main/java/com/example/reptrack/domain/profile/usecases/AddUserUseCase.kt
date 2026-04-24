@@ -1,6 +1,6 @@
 package com.example.reptrack.domain.profile.usecases
 
-import com.example.reptrack.domain.workout.User
+import com.example.reptrack.domain.profile.User
 import com.example.reptrack.domain.profile.ProfileRepository
 
 class AddUserUseCase(

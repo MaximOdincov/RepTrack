@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -20,14 +21,46 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Разные названия приложений для debug и release
+    val debugName = "RepTrack DEBUG"
+    val releaseName = "RepTrack"
+
+    signingConfigs {
+        create("release") {
+            // Для демонстрации используем debug keystore
+            // В реальном проекте нужно создать собственный keystore
+            storeFile = file("debug-keystore.jks")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true  // Включаем минификацию для release
+            isShrinkResources = true  // Включаем сжатие ресурсов
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+            manifestPlaceholders["appName"] = releaseName
         }
+        debug {
+            isMinifyEnabled = false
+            // applicationIdSuffix = ".debug" // Закомментировано для совместимости с google-services.json
+            manifestPlaceholders["appName"] = debugName
+        }
+    }
+
+    // Настройка Android Lint
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = true
+        warningsAsErrors = false
+        xmlReport = true
+        htmlReport = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -38,6 +71,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -68,6 +102,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-crashlytics")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("io.insert-koin:koin-android:3.5.3")
     implementation("io.insert-koin:koin-androidx-compose:3.5.3")
@@ -82,6 +117,12 @@ dependencies {
 
     implementation(libs.room.core)
     ksp(libs.room.compiler)
+
+    // LeakCanary - только для debug сборки
+    debugImplementation(libs.leakcanary)
+
+    // Napier для логирования
+    implementation(libs.napier)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

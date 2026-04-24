@@ -8,7 +8,8 @@ import java.time.LocalDate
 enum class DayWorkoutStatus {
     SKIPPED,
     COMPLETED,
-    PLANNED
+    PLANNED,
+    OVERDUE
 }
 
 /**

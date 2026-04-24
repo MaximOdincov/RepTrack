@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(./gradlew:*)",
+      "Bash(Select-String:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(sqlite3:*)",
+      "mcp__word-document-server__add_table",
+      "mcp__word-document-server__get_document_info",
+      "mcp__word-document-server__get_document_outline",
+      "mcp__word-document-server__create_document",
+      "mcp__word-document-server__add_paragraph",
+      "mcp__word-document-server__format_table"
+    ]
+  }
+}

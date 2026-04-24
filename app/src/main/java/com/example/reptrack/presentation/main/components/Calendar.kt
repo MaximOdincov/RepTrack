@@ -180,6 +180,7 @@ private fun NumberCell(
     isSelected: Boolean,
     onDateSelected: (LocalDate) -> Unit
 ) {
+    val isToday = calendarDay.date == LocalDate.now()
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.15f else 1f,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
@@ -187,7 +188,7 @@ private fun NumberCell(
     )
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        targetValue = if (isSelected) Color(0xFFFF9800) else Color.Transparent,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
         label = "background_color"
     )
@@ -205,7 +206,7 @@ private fun NumberCell(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val dotScale by animateFloatAsState(
-            targetValue = if (calendarDay.status != null) 1f else 0f,
+            targetValue = if (calendarDay.status != null || isToday) 1f else 0f,
             animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
             label = "dot_scale"
         )
@@ -216,11 +217,13 @@ private fun NumberCell(
                 .scale(dotScale)
                 .clip(CircleShape)
                 .background(
-                    when (calendarDay.status) {
-                        DayWorkoutStatus.SKIPPED -> MaterialTheme.colorScheme.secondaryContainer
-                        DayWorkoutStatus.COMPLETED -> MaterialTheme.colorScheme.tertiary
-                        DayWorkoutStatus.PLANNED -> MaterialTheme.colorScheme.primaryContainer
-                        null -> Color.Transparent
+                    when {
+                        isToday && calendarDay.status == null -> Color(0xFFFF9800) // Orange for today without workout
+                        calendarDay.status == DayWorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
+                        calendarDay.status == DayWorkoutStatus.PLANNED -> Color(0xFFBDBDBD)
+                        calendarDay.status == DayWorkoutStatus.OVERDUE -> Color(0xFFF44336)
+                        calendarDay.status == DayWorkoutStatus.SKIPPED -> Color(0xFF9E9E9E)
+                        else -> Color.Transparent
                     }
                 )
         )

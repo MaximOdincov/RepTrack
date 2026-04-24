@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.sp
 // For Inter, you'll need to add the font files to res/font or use a library
 
 val Typography = Typography(
-    // Headline - Roboto Bold
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,

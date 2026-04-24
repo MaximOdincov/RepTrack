@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.example.reptrack.data.local.aggregates.WorkoutTemplateWithExercises
+import com.example.reptrack.data.local.models.ExerciseDb
 import com.example.reptrack.data.local.models.TemplateExerciseDb
 import com.example.reptrack.data.local.models.WorkoutTemplateDb
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +23,15 @@ interface WorkoutTemplateDao {
     @Query("SELECT * FROM workout_templates WHERE id = :templateId AND deletedAt IS NULL LIMIT 1")
     fun observeTemplateById(templateId: String): Flow<WorkoutTemplateWithExercises?>
 
+    // New method: Get template with exercises in correct order
+    @Query("""
+        SELECT te.exerciseId, e.* FROM template_exercises te
+        INNER JOIN exercise e ON te.exerciseId = e.id
+        WHERE te.templateId = :templateId
+        ORDER BY te.exerciseOrder ASC
+    """)
+    fun getExercisesForTemplateOrdered(templateId: String): Flow<List<ExerciseDb>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTemplate(template: WorkoutTemplateDb)
 
@@ -35,15 +45,18 @@ interface WorkoutTemplateDao {
         template: WorkoutTemplateDb,
         exerciseIds: List<String>
     ) {
+        android.util.Log.i("WorkoutTemplateDao", "insertFullTemplate: id=${template.id}, week1Days=${template.week1Days}, week2Days=${template.week2Days}")
         insertTemplate(template)
         insertTemplateExercises(
-            exerciseIds.map {
+            exerciseIds.mapIndexed { index, exerciseId ->
                 TemplateExerciseDb(
                     templateId = template.id,
-                    exerciseId = it
+                    exerciseId = exerciseId,
+                    exerciseOrder = index
                 )
             }
         )
+        android.util.Log.i("WorkoutTemplateDao", "insertFullTemplate: completed, inserted ${exerciseIds.size} exercises")
     }
 
     @Query("SELECT * FROM workout_templates")
@@ -57,4 +70,18 @@ interface WorkoutTemplateDao {
 
     @Query("DELETE FROM template_exercises WHERE templateId = :templateId")
     suspend fun deleteTemplateExercises(templateId: String)
+
+    @Query("""
+        SELECT exerciseId FROM template_exercises
+        WHERE templateId = :templateId
+        ORDER BY exerciseOrder ASC
+    """)
+    suspend fun getOrderedExerciseIds(templateId: String): List<String>
+
+    @Query("""
+        SELECT exerciseId FROM template_exercises
+        WHERE templateId = :templateId
+        ORDER BY exerciseOrder ASC
+    """)
+    fun observeOrderedExerciseIds(templateId: String): Flow<List<String>>
 }

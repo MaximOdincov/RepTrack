@@ -9,7 +9,6 @@ import com.example.reptrack.presentation.auth.signUp.SignUpStoreFactory
 import org.koin.dsl.module
 
 val signUpModule = module {
-
     factory<SignUpStore> {
         SignUpStoreFactory(
             storeFactory = get<StoreFactory>(),
@@ -17,5 +16,5 @@ val signUpModule = module {
         ).create()
     }
 
-    factory { SignUpUseCase(repository = get(), addUserUseCase = get()) }
+    factory { SignUpUseCase(repository = get()) }
 }

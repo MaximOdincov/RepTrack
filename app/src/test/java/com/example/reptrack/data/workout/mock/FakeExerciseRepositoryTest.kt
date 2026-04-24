@@ -3,13 +3,10 @@ package com.example.reptrack.data.workout.mock
 import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.ExerciseType
 import com.example.reptrack.domain.workout.entities.MuscleGroup
-import com.example.reptrack.domain.workout.entities.WorkoutExercise
-import com.example.reptrack.domain.workout.entities.WorkoutSet
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class FakeExerciseRepositoryTest {
@@ -113,93 +110,6 @@ class FakeExerciseRepositoryTest {
     fun `deleteExercise returns success`() = runTest {
         // Act
         val result = repository.deleteExercise("bench_press")
-
-        // Assert
-        assertEquals(Result.success(Unit), result)
-    }
-
-    @Test
-    fun `observeWorkoutExerciseById returns exercise with sets`() = runTest {
-        // Act
-        val workoutExercise = repository.observeWorkoutExerciseById("bench_press").first()
-
-        // Assert
-        assertNotNull(workoutExercise)
-        assertEquals("workout_exercise_bench_press", workoutExercise.id)
-        assertEquals("bench_press", workoutExercise.exerciseId)
-        assertEquals(3, workoutExercise.sets.size)
-        assertEquals(90, workoutExercise.restTimerSeconds)
-    }
-
-    @Test
-    fun `getLastExerciseProgress returns correct sets`() = runTest {
-        // Act
-        val sets = repository.getLastExerciseProgress("bench_press").first()
-
-        // Assert
-        assertEquals(3, sets.size)
-        assertEquals(1, sets[0].index)
-        assertEquals(20f, sets[0].weight)
-        assertEquals(12, sets[0].reps)
-        assertTrue(sets[0].isCompleted)
-
-        assertEquals(2, sets[1].index)
-        assertEquals(22.5f, sets[1].weight)
-        assertEquals(10, sets[1].reps)
-        assertTrue(sets[1].isCompleted)
-
-        assertEquals(3, sets[2].index)
-        assertEquals(25f, sets[2].weight)
-        assertEquals(8, sets[2].reps)
-        assertEquals(false, sets[2].isCompleted)
-    }
-
-    @Test
-    fun `createWorkoutExercise returns success`() = runTest {
-        // Arrange
-        val workoutExercise = WorkoutExercise(
-            id = "workout_ex_1",
-            exerciseId = "bench_press",
-            sets = emptyList(),
-            restTimerSeconds = 60
-        )
-
-        // Act
-        val result = repository.createWorkoutExercise(workoutExercise, "session_1")
-
-        // Assert
-        assertEquals(Result.success(Unit), result)
-    }
-
-    @Test
-    fun `updateWorkoutExercise returns success`() = runTest {
-        // Arrange
-        val workoutExercise = WorkoutExercise(
-            id = "workout_ex_1",
-            exerciseId = "bench_press",
-            sets = listOf(
-                WorkoutSet(
-                    id = "set_1",
-                    index = 1,
-                    weight = 30f,
-                    reps = 10,
-                    isCompleted = true
-                )
-            ),
-            restTimerSeconds = 120
-        )
-
-        // Act
-        val result = repository.updateWorkoutExercise(workoutExercise)
-
-        // Assert
-        assertEquals(Result.success(Unit), result)
-    }
-
-    @Test
-    fun `deleteWorkoutExercise returns success`() = runTest {
-        // Act
-        val result = repository.deleteWorkoutExercise("workout_ex_1")
 
         // Assert
         assertEquals(Result.success(Unit), result)

@@ -94,7 +94,12 @@ class WorkoutSessionRepositoryImplTest {
             exercises = listOf(
                 WorkoutExercise(
                     id = exerciseId,
+                    workoutSessionId = sessionId,
                     exerciseId = "squat",
+                    exerciseName = "Squat",
+                    muscleGroup = com.example.reptrack.domain.workout.entities.MuscleGroup.LEGS,
+                    exerciseType = com.example.reptrack.domain.workout.entities.ExerciseType.WEIGHT_REPS,
+                    iconRes = null,
                     sets = listOf(
                         WorkoutSet(
                             id = setId,

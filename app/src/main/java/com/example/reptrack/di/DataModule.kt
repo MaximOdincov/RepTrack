@@ -1,62 +1,28 @@
 package com.example.reptrack.di
 
-import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.reptrack.data.local.Database
-import com.example.reptrack.data.local.MIGRATION_2_3
+import com.example.reptrack.data.local.AppDatabase
+import com.example.reptrack.data.local.dao.ExerciseDao
+import com.example.reptrack.data.local.dao.StatisticDao
+import com.example.reptrack.data.local.dao.UserDao
+import com.example.reptrack.data.local.dao.WorkoutDao
+import com.example.reptrack.data.local.dao.WorkoutTemplateDao
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
-val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        val tables = listOf(
-            "exercise",
-            "users",
-            "workout_sessions",
-            "workout_exercises",
-            "workout_sets",
-            "weight_records",
-            "workout_templates",
-            "template_exercises",
-            "gdpr_consent",
-            "chart_templates",
-            "exercise_line_configs",
-            "friend_configs",
-            "set_configs"
-        )
-
-        tables.forEach { table ->
-            try {
-                database.execSQL("ALTER TABLE $table ADD COLUMN updatedAt INTEGER")
-            } catch (e: Exception) {
-                // column may already exist
-            }
-            try {
-                database.execSQL("ALTER TABLE $table ADD COLUMN deletedAt INTEGER")
-            } catch (e: Exception) {
-                // column may already exist
-            }
-        }
-    }
-}
-
 val databaseModule = module {
+    single<AppDatabase> {
+        val authRepository = get<com.example.reptrack.domain.auth.AuthRepository>()
+        val userId = authRepository.getCurrentUser()?.id
 
-    single<Database> {
-        Room.databaseBuilder(
-            androidContext(),
-            Database::class.java,
-            "workout_db"
-        )
-            .fallbackToDestructiveMigration(false)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
-            .createFromAsset("workout_db_prepopulated.db")
-            .build()
+        if (userId == null) {
+            throw IllegalStateException("User not authenticated. Cannot initialize database. This should only be called from authenticated screens.")
+        }
+        AppDatabase.getInstance(androidContext(), userId)
     }
 
-    single { get<Database>().exerciseDao() }
-    single { get<Database>().workoutDao() }
-    single { get<Database>().templateDao() }
-    single { get<Database>().userDao() }
+    single { get<AppDatabase>().exerciseDao() }
+    single { get<AppDatabase>().workoutDao() }
+    single { get<AppDatabase>().templateDao() }
+    single { get<AppDatabase>().userDao() }
+    single { get<AppDatabase>().statisticDao() }
 }

@@ -1,5 +1,6 @@
 package com.example.reptrack.domain.workout.usecases.calendar
 
+import android.util.Log
 import com.example.reptrack.domain.workout.entities.CalendarDay
 import com.example.reptrack.domain.workout.entities.CalendarWeek
 import com.example.reptrack.domain.workout.entities.DayWorkoutStatus
@@ -69,21 +70,38 @@ class CalendarUseCase(
         session: WorkoutSession?,
         templates: List<WorkoutTemplate>
     ): CalendarDay {
-        val hasWorkout = session != null || templates.isNotEmpty()
+        // Фильтруем шаблоны: только те, у которых есть непустое расписание
+        val validTemplates = templates.filter { template ->
+            template.schedule != null &&
+            (template.schedule.week1Days.isNotEmpty() || template.schedule.week2Days.isNotEmpty())
+        }
+
+        val hasWorkout = session != null || validTemplates.isNotEmpty()
         val now = LocalDate.now()
 
-        val status = session?.status?.let { workoutStatus ->
-            when (workoutStatus.toString()) {
-                "COMPLETED" -> DayWorkoutStatus.COMPLETED
-                "SKIPPED", "CANCELLED" -> DayWorkoutStatus.SKIPPED
-                else -> DayWorkoutStatus.PLANNED
+        val status = when {
+            // Если есть сессия - проверяем подходы
+            session != null -> {
+                val hasCompletedSets = session.exercises.any { exercise ->
+                    exercise.sets.any { it.isCompleted }
+                }
+
+                when {
+                    hasCompletedSets -> DayWorkoutStatus.COMPLETED
+                    date.isBefore(now) -> DayWorkoutStatus.OVERDUE
+                    else -> DayWorkoutStatus.PLANNED
+                }
             }
-        } ?: when {
-            // If date is in the past and has templates but no session -> SKIPPED
-            templates.isNotEmpty() && date.isBefore(now) -> DayWorkoutStatus.SKIPPED
-            // If date is today/future and has templates -> PLANNED
-            templates.isNotEmpty() -> DayWorkoutStatus.PLANNED
-            // No workout at all
+
+            // Если нет сессии, но есть валидные шаблоны
+            validTemplates.isNotEmpty() -> {
+                when {
+                    date.isBefore(now) -> DayWorkoutStatus.OVERDUE
+                    else -> DayWorkoutStatus.PLANNED
+                }
+            }
+
+            // Нет тренировки
             else -> null
         }
 
@@ -92,7 +110,7 @@ class CalendarUseCase(
             hasWorkout = hasWorkout,
             status = status,
             workoutSession = session,
-            applicableTemplates = templates
+            applicableTemplates = validTemplates
         )
     }
 }

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.reptrack.data.local.models.GdprConsentDb
 import com.example.reptrack.data.local.models.UserDb
 import com.example.reptrack.data.local.aggregates.UserWithConsent
@@ -17,8 +18,11 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id = :userId")
     fun observeUser(userId: String): Flow<UserWithConsent?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUser(user: UserDb)
+
+    @Update
+    suspend fun updateUser(user: UserDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertConsent(consent: GdprConsentDb)
@@ -28,6 +32,7 @@ interface UserDao {
         user: UserDb,
         consent: GdprConsentDb?
     ) {
+        android.util.Log.d("UserDB", "insertFullUser: userId=${user.id}")
         insertUser(user)
         consent?.let { insertConsent(it) }
     }
