@@ -92,6 +92,13 @@ internal class MainScreenStoreFactory(
         override fun executeIntent(intent: MainScreenStore.Intent, getState: () -> MainScreenStore.State) {
             when (intent) {
                 is MainScreenStore.Intent.SelectDate -> {
+                    // Only reload if date actually changed
+                    val currentState = getState()
+                    if (currentState.currentDate == intent.date) {
+                        // Date hasn't changed, no need to reload
+                        return
+                    }
+
                     // Cancel previous loading operations
                     currentLoadJob?.cancel()
                     activeExerciseDataJobs.values.forEach { it.cancel() }

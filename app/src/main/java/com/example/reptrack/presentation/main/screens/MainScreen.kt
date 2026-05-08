@@ -84,7 +84,7 @@ internal fun MainScreen(
     store: MainScreenStore,
     calendarUseCase: com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase,
     onNavigateToExerciseDetail: (String) -> Unit = {},
-    onNavigateToTemplates: () -> Unit = {}
+    onNavigateToLibrary: () -> Unit = {}
 ) {
     val state by store.states.collectAsState(MainScreenStore.State())
 
@@ -103,34 +103,18 @@ internal fun MainScreen(
         }
     }
 
-    // Save selected date locally to survive screen rotation
-    var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
-        mutableStateOf(state.currentDate)
-    }
-
-    // Update store when selected date changes - use LaunchedEffect to avoid recomposition loop
-    LaunchedEffect(selectedDate) {
-        if (selectedDate != state.currentDate) {
-            store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
-        }
-    }
-
-    // Sync selectedDate with state.currentDate when state changes externally
-    LaunchedEffect(state.currentDate) {
-        if (selectedDate != state.currentDate) {
-            selectedDate = state.currentDate
-        }
-    }
+    // Use store's currentDate directly - with single store, state is preserved across navigation
+    val selectedDate = state.currentDate
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToTemplates,
+                onClick = onNavigateToLibrary,
                 containerColor = Color(0xFFFF9800)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Workout",
+                    contentDescription = "Add to Workout",
                     tint = Color.White
                 )
             }
@@ -146,7 +130,7 @@ internal fun MainScreen(
                 initialDate = selectedDate,
                 selectedDate = selectedDate,
                 onDateSelected = { newDate ->
-                    selectedDate = newDate
+                    store.accept(MainScreenStore.Intent.SelectDate(newDate))
                 },
                 calendarUseCase = calendarUseCase
             )

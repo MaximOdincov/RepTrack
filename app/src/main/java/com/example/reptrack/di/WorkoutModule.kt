@@ -14,6 +14,7 @@ import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepositor
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.domain.workout.usecases.exercises.*
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.UpdateSessionStatusOnFirstSetUseCase
 import com.example.reptrack.domain.workout.usecases.templates.*
@@ -85,6 +86,7 @@ val workoutModule = module {
     factory { CalendarUseCase(get(), get()) }
 
     // Session use cases
+    factory { CreateWorkoutSessionUseCase(get()) }
     factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get()) }
     factory { ShouldUpdateSessionFromTemplateUseCase() }
     factory { UpdateSessionStatusOnFirstSetUseCase(get()) }
@@ -97,7 +99,7 @@ val workoutModule = module {
     factory { DeleteWorkoutTemplateUseCase(get(), get()) }
     factory { ObserveWorkoutCalendarUseCase(get(), get()) }
 
-    factory<MainScreenStore> {
+    single<MainScreenStore> {
         MainScreenStoreFactory(
             storeFactory = get<StoreFactory>(),
             calendarUseCase = get(),
@@ -108,6 +110,19 @@ val workoutModule = module {
             deleteWorkoutExerciseUseCase = get(),
             authRepository = get()
         ).create()
+    }
+
+    factory<MainScreenStoreFactory> {
+        MainScreenStoreFactory(
+            storeFactory = get<StoreFactory>(),
+            calendarUseCase = get(),
+            observeExerciseByIdUseCase = get(),
+            observeBestSetFromLastWorkoutUseCase = get(),
+            createSessionFromTemplateUseCase = get(),
+            shouldUpdateSessionFromTemplateUseCase = get(),
+            deleteWorkoutExerciseUseCase = get(),
+            authRepository = get()
+        )
     }
 
     factory {

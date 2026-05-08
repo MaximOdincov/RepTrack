@@ -53,6 +53,9 @@ import com.example.reptrack.presentation.profile.stores.ProfileStoreFactory
 import com.example.reptrack.presentation.timer.screens.TimerScreen
 import com.example.reptrack.presentation.crashlytics_test.CrashlyticsTestScreen
 import com.example.reptrack.data.auth.toDomain
+import com.example.reptrack.domain.workout.entities.WorkoutTemplate
+import com.example.reptrack.domain.workout.usecases.templates.CreateWorkoutTemplateUseCase
+import com.example.reptrack.presentation.library.screens.LibraryScreen
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 
@@ -184,8 +187,8 @@ fun AppNavGraph(){
                         onNavigateToExerciseDetail = { workoutExerciseId ->
                             navController.navigate(Screen.WorkoutExerciseDetail.createRoute(workoutExerciseId))
                         },
-                        onNavigateToTemplates = {
-                            navController.navigate(Screen.TemplateList.createRoute(TemplateListMode.VIEW_MODE))
+                        onNavigateToLibrary = {
+                            navController.navigate(Screen.LibraryAddToWorkout.route)
                         }
                     )
                 }
@@ -524,9 +527,182 @@ fun AppNavGraph(){
                 }
 
                 composable(Screen.Library.route){
-                    navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.VIEW_MODE)) {
-                        popUpTo(Screen.Library.route) { inclusive = true }
+                    val exerciseStore: ExerciseListStore = getKoin().get()
+                    val templateStoreFactory: TemplateListStoreFactory = getKoin().get()
+                    val createTemplateUseCase: CreateWorkoutTemplateUseCase = getKoin().get()
+
+                    // Use remember to keep the same store instance across recompositions
+                    val templateStore = remember {
+                        templateStoreFactory.create()
                     }
+
+                    LibraryScreen(
+                        exerciseStore = exerciseStore,
+                        templateStore = templateStore,
+                        mode = com.example.reptrack.presentation.library.screens.LibraryMode.VIEW,
+                        onNavigateToExerciseDetail = { exerciseId ->
+                            navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId, ExerciseDetailMode.DESIGN_MODE))
+                        },
+                        onNavigateToTemplateDetail = { templateId ->
+                            navController.navigate(Screen.TemplateDetail.createRoute(templateId, TemplateDetailMode.EDIT_MODE))
+                        },
+                        onNavigateToAddExercise = {
+                            navController.navigate(Screen.ExerciseDetail.createRoute("new", ExerciseDetailMode.DESIGN_MODE))
+                        },
+                        onNavigateToAddTemplate = {
+                            // Create empty template immediately, then navigate to edit it
+                            coroutineScope.launch {
+                                val emptyTemplate = WorkoutTemplate(
+                                    id = "template_${System.currentTimeMillis()}",
+                                    name = "",
+                                    description = "",
+                                    iconId = "custom",
+                                    exerciseIds = emptyList(),
+                                    iconRes = null,
+                                    iconColor = null,
+                                    muscleGroups = emptyList(),
+                                    isCustom = true
+                                )
+                                val result = createTemplateUseCase(emptyTemplate)
+                                if (result.isSuccess) {
+                                    navController.navigate(Screen.TemplateDetail.createRoute(emptyTemplate.id, TemplateDetailMode.EDIT_MODE))
+                                } else {
+                                    io.github.aakira.napier.Napier.e(
+                                        "Failed to create empty template: ${result.exceptionOrNull()?.message}",
+                                        tag = "NavGraph"
+                                    )
+                                }
+                            }
+                        },
+                        onAddExerciseToWorkout = {},
+                        onAddTemplateToWorkout = {}
+                    )
+                }
+
+                composable(Screen.LibraryAddToWorkout.route){
+                    val exerciseStore: ExerciseListStore = getKoin().get()
+                    val templateStoreFactory: TemplateListStoreFactory = getKoin().get()
+
+                    // Get use cases
+                    val createWorkoutExerciseUseCase: com.example.reptrack.domain.workout.usecases.workout_exercises.CreateWorkoutExerciseUseCase = getKoin().get()
+                    val createSessionUseCase: com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionUseCase = getKoin().get()
+                    val createSessionFromTemplateUseCase: com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase = getKoin().get()
+                    val sessionRepository: com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository = getKoin().get()
+                    val observeExerciseByIdUseCase: com.example.reptrack.domain.workout.usecases.exercises.ObserveExerciseByIdUseCase = getKoin().get()
+                    val authRepository: com.example.reptrack.domain.auth.AuthRepository = getKoin().get()
+
+                    // Use remember to keep the same store instance across recompositions
+                    val templateStore = remember {
+                        templateStoreFactory.create()
+                    }
+
+                    LibraryScreen(
+                        exerciseStore = exerciseStore,
+                        templateStore = templateStore,
+                        mode = com.example.reptrack.presentation.library.screens.LibraryMode.ADD_TO_WORKOUT,
+                        onNavigateToExerciseDetail = {},
+                        onNavigateToTemplateDetail = {},
+                        onNavigateToAddExercise = {},
+                        onNavigateToAddTemplate = {},
+                        onAddExerciseToWorkout = { exercise ->
+                            coroutineScope.launch {
+                                try {
+                                    // Get current date
+                                    val currentDate = java.time.LocalDate.now()
+
+                                    // Get or create session for today
+                                    var session = sessionRepository.getSessionByDate(currentDate)
+                                    val currentUser = authRepository.getCurrentUser()
+                                    val userId = currentUser?.id ?: ""
+
+                                    if (session == null && userId.isNotEmpty()) {
+                                        // Create new session
+                                        val newSession = com.example.reptrack.domain.workout.entities.WorkoutSession(
+                                            id = java.util.UUID.randomUUID().toString(),
+                                            userId = userId,
+                                            date = currentDate.atTime(9, 0),
+                                            status = com.example.reptrack.domain.workout.entities.WorkoutStatus.IN_PROGRESS,
+                                            name = "Тренировка",
+                                            durationSeconds = 0,
+                                            exercises = emptyList(),
+                                            comment = null
+                                        )
+                                        val createResult = createSessionUseCase(newSession)
+                                        if (createResult.isSuccess) {
+                                            session = newSession
+                                        } else {
+                                            io.github.aakira.napier.Napier.e(
+                                                "Failed to create session: ${createResult.exceptionOrNull()?.message}",
+                                                tag = "NavGraph"
+                                            )
+                                            return@launch
+                                        }
+                                    }
+
+                                    if (session != null) {
+                                        // Create workout exercise
+                                        val workoutExercise = com.example.reptrack.domain.workout.entities.WorkoutExercise(
+                                            id = java.util.UUID.randomUUID().toString(),
+                                            workoutSessionId = session.id,
+                                            exerciseId = exercise.id,
+                                            exerciseName = exercise.name,
+                                            muscleGroup = exercise.muscleGroup,
+                                            exerciseType = exercise.type,
+                                            iconRes = exercise.iconRes,
+                                            sets = emptyList(),
+                                            restTimerSeconds = 60
+                                        )
+                                        val result = createWorkoutExerciseUseCase(workoutExercise, session.id)
+                                        if (result.isSuccess) {
+                                            navController.popBackStack()
+                                        } else {
+                                            io.github.aakira.napier.Napier.e(
+                                                "Failed to add exercise: ${result.exceptionOrNull()?.message}",
+                                                tag = "NavGraph"
+                                            )
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    io.github.aakira.napier.Napier.e(
+                                        "Error adding exercise to workout: ${e.message}",
+                                        tag = "NavGraph"
+                                    )
+                                }
+                            }
+                        },
+                        onAddTemplateToWorkout = { template ->
+                            coroutineScope.launch {
+                                val currentUser = authRepository.getCurrentUser()
+                                val userId = currentUser?.id ?: ""
+                                val currentDate = java.time.LocalDate.now()
+
+                                if (userId.isEmpty()) {
+                                    io.github.aakira.napier.Napier.e(
+                                        "User not logged in",
+                                        tag = "NavGraph"
+                                    )
+                                    return@launch
+                                }
+
+                                // Create session from template
+                                val result = createSessionFromTemplateUseCase(
+                                    templateId = template.id,
+                                    userId = userId,
+                                    date = currentDate,
+                                    sessionName = template.name
+                                )
+
+                                if (result.isSuccess) {
+                                    navController.popBackStack()
+                                } else {
+                                    io.github.aakira.napier.Napier.e(
+                                        "Failed to create session from template: ${result.exceptionOrNull()?.message}",
+                                        tag = "NavGraph"
+                                    )
+                                }
+                            }
+                        }
+                    )
                 }
 
                 composable(Screen.CrashlyticsTest.route){

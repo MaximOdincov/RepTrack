@@ -115,7 +115,7 @@ fun ExerciseListScreen(
 /**
  * Saver for MuscleGroupExpansionState
  */
-private val ExpansionStateSaver = Saver<MuscleGroupExpansionState, Map<String, Boolean>>(
+val ExpansionStateSaver = Saver<MuscleGroupExpansionState, Map<String, Boolean>>(
     save = { it.getState() },
     restore = { MuscleGroupExpansionState().apply { restoreState(it) } }
 )
