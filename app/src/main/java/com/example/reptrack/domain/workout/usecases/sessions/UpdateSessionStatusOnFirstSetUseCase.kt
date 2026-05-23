@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.first
  * Use case для обновления статуса сессии на IN_PROGRESS когда добавляется первый завершённый подход
  */
 class UpdateSessionStatusOnFirstSetUseCase(
-    private val workoutSessionRepository: WorkoutSessionRepository
+    private val workoutSessionRepository: WorkoutSessionRepository,
+    private val unlinkSessionFromTemplateUseCase: UnlinkSessionFromTemplateUseCase
 ) {
     suspend operator fun invoke(sessionId: String): Result<Unit> {
         return try {
@@ -20,6 +21,9 @@ class UpdateSessionStatusOnFirstSetUseCase(
             if (session.status == WorkoutStatus.PLANNED) {
                 // Используем updateSessionStatus вместо updateSession, чтобы не перезаписывать exercises и sets
                 workoutSessionRepository.updateSessionStatus(sessionId, WorkoutStatus.IN_PROGRESS)
+
+                // Unlink from template since workout has started
+                unlinkSessionFromTemplateUseCase(sessionId)
             }
 
             Result.success(Unit)

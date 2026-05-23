@@ -8,6 +8,7 @@ import com.example.reptrack.core.error.mappers.ErrorToMessageMapper
 import com.example.reptrack.core.error.mappers.ErrorToMessageMapperImpl
 import com.example.reptrack.core.util.BuildConfigUtils
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.firestore.FirebaseFirestore
 import org.koin.dsl.module
 
 /**
@@ -36,5 +37,10 @@ val coreModule = module {
     // Firebase Crashlytics instance (provided by Firebase BoM)
     single<FirebaseCrashlytics> {
         FirebaseCrashlytics.getInstance()
+    }
+
+    // Firebase Firestore instance
+    single<FirebaseFirestore> {
+        FirebaseFirestore.getInstance()
     }
 }

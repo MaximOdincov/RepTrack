@@ -2,8 +2,10 @@ package com.example.reptrack.di
 
 import com.example.reptrack.data.local.AppDatabase
 import com.example.reptrack.data.local.dao.ExerciseDao
+import com.example.reptrack.data.local.dao.FriendDao
 import com.example.reptrack.data.local.dao.StatisticDao
 import com.example.reptrack.data.local.dao.UserDao
+import com.example.reptrack.data.local.dao.WeightRecordDao
 import com.example.reptrack.data.local.dao.WorkoutDao
 import com.example.reptrack.data.local.dao.WorkoutTemplateDao
 import org.koin.android.ext.koin.androidContext
@@ -25,4 +27,6 @@ val databaseModule = module {
     single { get<AppDatabase>().templateDao() }
     single { get<AppDatabase>().userDao() }
     single { get<AppDatabase>().statisticDao() }
+    single { get<AppDatabase>().friendDao() }
+    single { get<AppDatabase>().weightRecordDao() }
 }

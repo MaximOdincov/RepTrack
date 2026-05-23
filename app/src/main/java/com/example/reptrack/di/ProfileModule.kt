@@ -5,8 +5,13 @@ import com.example.reptrack.data.profile.ProfileRepositoryImpl
 import com.example.reptrack.domain.profile.ProfileRepository
 import com.example.reptrack.domain.profile.usecases.AddUserUseCase
 import com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase
+import com.example.reptrack.domain.profile.usecases.InitializeDatabaseUseCase
+import com.example.reptrack.domain.backup.SyncUseCase
 import com.example.reptrack.presentation.profile.stores.ProfileStore
 import com.example.reptrack.presentation.profile.stores.ProfileStoreFactory
+import com.example.reptrack.presentation.profile.stores.FriendsStore
+import com.example.reptrack.presentation.profile.stores.FriendsStoreFactory
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val profileModule = module {
@@ -30,15 +35,36 @@ val profileModule = module {
         )
     }
 
+    factory {
+        InitializeDatabaseUseCase(
+            context = androidContext(),
+            database = get()
+        )
+    }
+
     factory<ProfileStoreFactory> {
         ProfileStoreFactory(
             storeFactory = get(),
             getCurrentUserProfileUseCase = get(),
-            signOutUseCase = get()
+            signOutUseCase = get(),
+            syncUseCase = get()
         )
     }
 
     factory<ProfileStore> {
         get<ProfileStoreFactory>().create()
+    }
+
+    factory<FriendsStoreFactory> {
+        FriendsStoreFactory(
+            storeFactory = get(),
+            getFriendsUseCase = get(),
+            addFriendUseCase = get(),
+            deleteFriendUseCase = get()
+        )
+    }
+
+    factory<FriendsStore> {
+        get<FriendsStoreFactory>().create()
     }
 }

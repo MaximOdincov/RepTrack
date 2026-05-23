@@ -23,7 +23,8 @@ class CreateWorkoutSessionFromTemplateUseCase(
         templateId: String,
         userId: String,
         date: LocalDate,
-        sessionName: String? = null
+        sessionName: String? = null,
+        unlinkFromTemplate: Boolean = false
     ): Result<WorkoutSession> {
         return try {
             // Check if session already exists for this date (synchronous check to avoid Flow caching issues)
@@ -71,7 +72,8 @@ class CreateWorkoutSessionFromTemplateUseCase(
                 name = sessionName ?: template.name,
                 durationSeconds = 0,
                 exercises = exercises,
-                comment = null
+                comment = null,
+                templateId = if (unlinkFromTemplate) null else templateId
             )
 
             val result = sessionRepository.createSession(session)

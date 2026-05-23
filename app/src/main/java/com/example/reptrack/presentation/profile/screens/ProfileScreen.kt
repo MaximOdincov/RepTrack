@@ -9,8 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -19,17 +26,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.profile.User
+import com.example.reptrack.presentation.profile.components.FriendsSection
+import com.example.reptrack.presentation.profile.components.ProfileHeader
+import com.example.reptrack.presentation.profile.components.StatisticsSection
+import com.example.reptrack.presentation.profile.stores.FriendsStore
 import com.example.reptrack.presentation.profile.stores.ProfileStore
 
 @Composable
 fun ProfileScreen(
     store: ProfileStore,
+    friendsStore: FriendsStore,
+    statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore,
     onSignedOut: () -> Unit = {},
-    onNavigateToCrashlyticsTest: () -> Unit = {}
+    onNavigateToCrashlyticsTest: () -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {}
 ) {
     LaunchedEffect(store) {
         store.labels.collect { label ->
@@ -39,28 +54,21 @@ fun ProfileScreen(
                 }
                 is ProfileStore.Label.Error -> {
                 }
+                ProfileStore.Label.SyncCompleted -> {
+                    // Sync completed, could show a toast or snackbar
+                }
+                is ProfileStore.Label.SyncError -> {
+                    // Sync error, could show a toast or snackbar
+                }
             }
         }
     }
 
     val state = store.states.collectAsState(ProfileStore.State())
 
-    LaunchedEffect(store) {
-        store.labels.collect { label ->
-            when (label) {
-                ProfileStore.Label.SignedOut -> {
-                    onSignedOut()
-                }
-                is ProfileStore.Label.Error -> {
-                }
-            }
-        }
-    }
-
     LaunchedEffect(Unit) {
         store.accept(ProfileStore.Intent.LoadProfile)
     }
-
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -103,8 +111,15 @@ fun ProfileScreen(
                 ProfileContent(
                     user = state.value.user!!,
                     isLoggingOut = state.value.isLoggingOut,
+                    isSyncing = state.value.isSyncing,
+                    syncError = state.value.syncError,
+                    lastSyncTime = state.value.lastSyncTime,
+                    friendsStore = friendsStore,
+                    statisticsStore = statisticsStore,
                     onSignOut = { store.accept(ProfileStore.Intent.SignOut) },
-                    onNavigateToCrashlyticsTest = onNavigateToCrashlyticsTest
+                    onSync = { store.accept(ProfileStore.Intent.SyncData) },
+                    onNavigateToCrashlyticsTest = onNavigateToCrashlyticsTest,
+                    onNavigateToStatistics = onNavigateToStatistics
                 )
             }
         }
@@ -115,23 +130,65 @@ fun ProfileScreen(
 private fun ProfileContent(
     user: User,
     isLoggingOut: Boolean,
+    isSyncing: Boolean,
+    syncError: String?,
+    lastSyncTime: Long,
+    friendsStore: FriendsStore,
+    statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore,
     onSignOut: () -> Unit,
-    onNavigateToCrashlyticsTest: () -> Unit = {}
+    onSync: () -> Unit,
+    onNavigateToCrashlyticsTest: () -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(
-            text = "Profile",
-            style = MaterialTheme.typography.headlineLarge
+        // Profile Header with Avatar
+        ProfileHeader(
+            username = user.username,
+            email = user.email,
+            avatarUrl = user.avatarUrl,
+            isSyncing = isSyncing,
+            syncError = syncError,
+            lastSyncTime = lastSyncTime,
+            onAvatarClick = {
+                // TODO: Implement avatar selection
+            },
+            onSettingsClick = {
+                // TODO: Implement settings
+            },
+            onSyncClick = onSync
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        UserInfoRow(label = "Username", value = user.username ?: "Not set")
-        UserInfoRow(label = "Email", value = user.email ?: "Not set")
+        // Friends Section
+        FriendsSection(
+            store = friendsStore
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Statistics Section
+        StatisticsSection(
+            store = statisticsStore,
+            onNavigateToStatistics = onNavigateToStatistics
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // User Info
+        Text(
+            text = "Account Info",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         UserInfoRow(label = "Account Type", value = if (user.isGuest) "Guest" else "Registered")
         user.currentWeight?.let {
             UserInfoRow(label = "Weight", value = "$it kg")

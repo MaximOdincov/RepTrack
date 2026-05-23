@@ -16,7 +16,8 @@ fun WorkoutSessionWithExercises.toDomain(): WorkoutSession {
         name = session.name,
         durationSeconds = session.durationSeconds,
         exercises = exercises.map { it.toDomain() },
-        comment = session.comment
+        comment = session.comment,
+        templateId = session.templateId
     )
 }
 
@@ -28,6 +29,7 @@ fun WorkoutSession.toDb(): WorkoutSessionDb = WorkoutSessionDb(
     name = name,
     durationSeconds = durationSeconds,
     comment = comment,
+    templateId = templateId,
     updatedAt = java.time.LocalDateTime.now(),
     deletedAt = null
 )

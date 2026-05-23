@@ -23,7 +23,8 @@ val backupModule = module {
             workoutDao = get(),
             templateDao = get(),
             userDao = get(),
-            statisticDao = get()
+            statisticDao = get(),
+            friendDao = get()
         )
     }
 

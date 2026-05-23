@@ -1,6 +1,7 @@
 package com.example.reptrack.domain.auth.usecases
 
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
+import com.example.reptrack.data.auth.PasskeyService
 import com.example.reptrack.domain.profile.GdprConsent
 import com.example.reptrack.domain.profile.User
 import com.example.reptrack.data.auth.toDomain
@@ -16,7 +17,11 @@ class SignUpUseCase(
         return repository.signUp(email, password)
             .fold(
                 onSuccess = { authUser ->
-                    val baseUser = authUser.toDomain().copy(username = username)
+                    val passkey = PasskeyService.generatePasskey()
+                    val baseUser = authUser.toDomain().copy(
+                        username = username,
+                        passkey = passkey
+                    )
                     val userWithConsent = if (dataConsent) {
                         baseUser.copy(
                             gdprConsent = GdprConsent(

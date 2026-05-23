@@ -61,6 +61,7 @@ sealed class Screen(val route: String) {
     data object SignUp: Screen("sign_up")
     data object Timer: Screen("timer")
     data object Profile: Screen("profile")
+    data object Statistics: Screen("statistics")
     data object Library: Screen("library")
     data object LibraryAddToWorkout: Screen("library/add_to_workout")
     data object CrashlyticsTest: Screen("crashlytics_test")

@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
@@ -50,12 +52,14 @@ import com.example.reptrack.presentation.workout_exercise.detail.stores.WorkoutE
 import com.example.reptrack.presentation.main.stores.MainScreenStore
 import com.example.reptrack.presentation.profile.screens.ProfileScreen
 import com.example.reptrack.presentation.profile.stores.ProfileStoreFactory
+import com.example.reptrack.presentation.profile.stores.FriendsStoreFactory
 import com.example.reptrack.presentation.timer.screens.TimerScreen
 import com.example.reptrack.presentation.crashlytics_test.CrashlyticsTestScreen
 import com.example.reptrack.data.auth.toDomain
 import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.usecases.templates.CreateWorkoutTemplateUseCase
 import com.example.reptrack.presentation.library.screens.LibraryScreen
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 
@@ -170,14 +174,34 @@ fun AppNavGraph(){
                     val calendarUseCase: CalendarUseCase = getKoin().get()
                     val addUserUseCase: AddUserUseCase = getKoin().get()
                     val getCurrentUserUseCase: GetCurrentUserUseCase = getKoin().get()
+                    val getCurrentUserProfileUseCase: com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase = getKoin().get()
+                    val firebaseUserDataSource: com.example.reptrack.data.auth.FirebaseUserDataSource = getKoin().get()
 
                     // Add user to database on first entry to Main screen
                     LaunchedEffect(Unit) {
-                        try {
-                            val authUser = getCurrentUserUseCase()
-                            authUser?.let { addUserUseCase(it.toDomain()) }
-                        } catch (e: Exception) {
-                            android.util.Log.e("NavGraph", "Failed to add user: ${e.message}")
+                        val authUser = getCurrentUserUseCase()
+                        authUser?.let { auth ->
+                            // Add user to local database
+                            addUserUseCase(auth.toDomain())
+
+                            // Wait a bit for database to be ready
+                            kotlinx.coroutines.delay(100)
+
+                            // Get the user from database to get username, avatarUrl, and passkey
+                            getCurrentUserProfileUseCase().collect { user ->
+                                user?.let {
+                                    // Also save user to Firebase with passkey
+                                    firebaseUserDataSource.saveUser(
+                                        userId = it.id,
+                                        username = it.username,
+                                        email = it.email,
+                                        avatarUrl = it.avatarUrl,
+                                        passkey = it.passkey
+                                    )
+                                    // Only need to save once
+                                    return@collect
+                                }
+                            }
                         }
                     }
 
@@ -496,14 +520,21 @@ fun AppNavGraph(){
 
                 composable(Screen.Profile.route){
                     val storeFactory: ProfileStoreFactory = getKoin().get()
+                    val friendsStoreFactory: FriendsStoreFactory = getKoin().get()
+                    val statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore = getKoin().get()
 
                     // Use remember to keep the same store instance across recompositions
                     val store = remember {
                         storeFactory.create()
                     }
+                    val friendsStore = remember {
+                        friendsStoreFactory.create()
+                    }
 
                     ProfileScreen(
                         store = store,
+                        friendsStore = friendsStore,
+                        statisticsStore = statisticsStore,
                         onSignedOut = {
                             // 1. Reset the flag so modules can be loaded again for new user
                             authenticatedModulesLoaded = false
@@ -522,7 +553,42 @@ fun AppNavGraph(){
                         },
                         onNavigateToCrashlyticsTest = {
                             navController.navigate(Screen.CrashlyticsTest.route)
+                        },
+                        onNavigateToStatistics = {
+                            navController.navigate(Screen.Statistics.route)
                         }
+                    )
+                }
+
+                composable(Screen.Statistics.route){
+                    val statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore = getKoin().get()
+                    val friendsStore: com.example.reptrack.presentation.profile.stores.FriendsStore = getKoin().get()
+                    val getFriendsUseCase: com.example.reptrack.domain.friends.usecases.GetFriendsUseCase = getKoin().get()
+                    val observeAllExercisesUseCase: com.example.reptrack.domain.workout.usecases.exercises.ObserveAllExercisesUseCase = getKoin().get()
+
+                    // Collect friends state
+                    val friends by friendsStore.states.collectAsState(com.example.reptrack.presentation.profile.stores.FriendsStore.State())
+
+                    // Load exercises and friends
+                    LaunchedEffect(Unit) {
+                        statisticsStore.accept(com.example.reptrack.presentation.statistics.stores.StatisticsStore.Intent.LoadData)
+                        friendsStore.accept(com.example.reptrack.presentation.profile.stores.FriendsStore.Intent.LoadFriends)
+                    }
+
+                    // Collect exercises
+                    var exercises by remember { mutableStateOf(emptyList<com.example.reptrack.domain.workout.entities.Exercise>()) }
+                    LaunchedEffect(Unit) {
+                        observeAllExercisesUseCase().collect { exerciseMap ->
+                            exercises = exerciseMap.values.flatten()
+                        }
+                    }
+
+                    com.example.reptrack.presentation.statistics.screens.StatisticsScreen(
+                        store = statisticsStore,
+                        getFriendsUseCase = getFriendsUseCase,
+                        exercises = exercises,
+                        friends = friends.friends,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
@@ -587,6 +653,7 @@ fun AppNavGraph(){
                     val createWorkoutExerciseUseCase: com.example.reptrack.domain.workout.usecases.workout_exercises.CreateWorkoutExerciseUseCase = getKoin().get()
                     val createSessionUseCase: com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionUseCase = getKoin().get()
                     val createSessionFromTemplateUseCase: com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase = getKoin().get()
+                    val unlinkSessionFromTemplateUseCase: com.example.reptrack.domain.workout.usecases.sessions.UnlinkSessionFromTemplateUseCase = getKoin().get()
                     val sessionRepository: com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository = getKoin().get()
                     val observeExerciseByIdUseCase: com.example.reptrack.domain.workout.usecases.exercises.ObserveExerciseByIdUseCase = getKoin().get()
                     val authRepository: com.example.reptrack.domain.auth.AuthRepository = getKoin().get()
@@ -654,6 +721,8 @@ fun AppNavGraph(){
                                         )
                                         val result = createWorkoutExerciseUseCase(workoutExercise, session.id)
                                         if (result.isSuccess) {
+                                            // Unlink from template since we added an exercise manually
+                                            unlinkSessionFromTemplateUseCase(session.id)
                                             navController.popBackStack()
                                         } else {
                                             io.github.aakira.napier.Napier.e(
@@ -684,12 +753,13 @@ fun AppNavGraph(){
                                     return@launch
                                 }
 
-                                // Create session from template
+                                // Create session from template (unlink from template - manual addition)
                                 val result = createSessionFromTemplateUseCase(
                                     templateId = template.id,
                                     userId = userId,
                                     date = currentDate,
-                                    sessionName = template.name
+                                    sessionName = template.name,
+                                    unlinkFromTemplate = true
                                 )
 
                                 if (result.isSuccess) {

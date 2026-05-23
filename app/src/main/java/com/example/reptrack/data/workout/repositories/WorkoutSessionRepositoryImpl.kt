@@ -59,6 +59,12 @@ class WorkoutSessionRepositoryImpl(
             )
     }
 
+    override fun observeSessionsByTemplateId(templateId: String): Flow<List<WorkoutSession>> {
+        return workoutDao.observeSessionsByTemplateId(templateId)
+            .map { sessions -> sessions.map { it.toDomain() } }
+            .catch { e -> throw e }
+    }
+
     override suspend fun getSessionByDate(date: LocalDate): WorkoutSession? {
         val userId = authRepository.getCurrentUser()?.id
 

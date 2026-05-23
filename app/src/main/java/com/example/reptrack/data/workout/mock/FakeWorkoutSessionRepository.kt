@@ -42,6 +42,10 @@ class FakeWorkoutSessionRepository(
         return flowOf(session)
     }
 
+    override fun observeSessionsByTemplateId(templateId: String): Flow<List<WorkoutSession>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getSessionByDate(date: LocalDate): WorkoutSession? {
         return mockSessions.find { session ->
             session.date.toLocalDate() == date

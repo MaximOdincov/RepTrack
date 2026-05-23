@@ -16,7 +16,10 @@ object WorkoutTemplateMapper {
             WorkoutTemplateDb(
                 id = doc.id,
                 name = doc.getString("name") ?: return null,
+                description = doc.getString("description"),
                 iconId = doc.getString("iconId"),
+                iconRes = doc.getLong("iconRes")?.toInt(),
+                iconColor = doc.getString("iconColor"),
                 week1Days = doc.getString("week1Days"),
                 week2Days = doc.getString("week2Days"),
                 updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
@@ -31,7 +34,10 @@ object WorkoutTemplateMapper {
         return mapOf(
             "id" to template.id,
             "name" to template.name,
+            "description" to template.description,
             "iconId" to template.iconId,
+            "iconRes" to template.iconRes?.toLong(),
+            "iconColor" to template.iconColor,
             "week1Days" to template.week1Days,
             "week2Days" to template.week2Days,
             "updatedAt" to TimestampMapper.toTimestamp(template.updatedAt),

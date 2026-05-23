@@ -16,7 +16,10 @@ import com.example.reptrack.domain.workout.usecases.exercises.*
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.UnlinkSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.UpdateLinkedSessionsUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.UpdateSessionStatusOnFirstSetUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.UpdateWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.templates.*
 import com.example.reptrack.domain.workout.usecases.workout_exercises.CreateWorkoutExerciseUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.DeleteWorkoutExerciseUseCase
@@ -88,14 +91,17 @@ val workoutModule = module {
     // Session use cases
     factory { CreateWorkoutSessionUseCase(get()) }
     factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get()) }
+    factory { UpdateWorkoutSessionUseCase(get()) }
+    factory { UnlinkSessionFromTemplateUseCase(get()) }
+    factory { UpdateLinkedSessionsUseCase(get(), get(), get()) }
     factory { ShouldUpdateSessionFromTemplateUseCase() }
-    factory { UpdateSessionStatusOnFirstSetUseCase(get()) }
+    factory { UpdateSessionStatusOnFirstSetUseCase(get(), get()) }
 
     // Template use cases
     factory { ObserveAllWorkoutTemplatesUseCase(get(), get()) }
     factory { ObserveWorkoutTemplateByIdUseCase(get(), get()) }
     factory { CreateWorkoutTemplateUseCase(get(), get()) }
-    factory { UpdateWorkoutTemplateUseCase(get(), get()) }
+    factory { UpdateWorkoutTemplateUseCase(get(), get(), get()) }
     factory { DeleteWorkoutTemplateUseCase(get(), get()) }
     factory { ObserveWorkoutCalendarUseCase(get(), get()) }
 
@@ -105,9 +111,11 @@ val workoutModule = module {
             calendarUseCase = get(),
             observeExerciseByIdUseCase = get(),
             observeBestSetFromLastWorkoutUseCase = get(),
+            observeWorkoutExerciseByIdUseCase = get(),
             createSessionFromTemplateUseCase = get(),
             shouldUpdateSessionFromTemplateUseCase = get(),
             deleteWorkoutExerciseUseCase = get(),
+            unlinkSessionFromTemplateUseCase = get(),
             authRepository = get()
         ).create()
     }
@@ -118,9 +126,11 @@ val workoutModule = module {
             calendarUseCase = get(),
             observeExerciseByIdUseCase = get(),
             observeBestSetFromLastWorkoutUseCase = get(),
+            observeWorkoutExerciseByIdUseCase = get(),
             createSessionFromTemplateUseCase = get(),
             shouldUpdateSessionFromTemplateUseCase = get(),
             deleteWorkoutExerciseUseCase = get(),
+            unlinkSessionFromTemplateUseCase = get(),
             authRepository = get()
         )
     }

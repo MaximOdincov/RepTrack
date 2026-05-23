@@ -124,6 +124,10 @@ dependencies {
     // Napier для логирования
     implementation(libs.napier)
 
+    // Vico Charts
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.core)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

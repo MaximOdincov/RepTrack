@@ -12,6 +12,8 @@ interface WorkoutSessionRepository {
 
     fun observeSessionByDate(date: LocalDate): Flow<WorkoutSession?>
 
+    fun observeSessionsByTemplateId(templateId: String): Flow<List<WorkoutSession>>
+
     suspend fun getSessionByDate(date: LocalDate): WorkoutSession?
 
     suspend fun createSession(session: WorkoutSession): Result<Unit>

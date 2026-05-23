@@ -8,5 +8,6 @@ data class User(
     val avatarUrl: String? = null,
     val currentWeight: Float? = null,
     val height: Float? = null,
+    val passkey: String? = null,
     val gdprConsent: GdprConsent? = null
 )

@@ -13,6 +13,7 @@ import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.domain.workout.usecases.exercises.ObserveExerciseByIdUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.DeleteWorkoutExerciseUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveBestSetFromLastWorkoutUseCase
+import com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveWorkoutExerciseByIdUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
 import kotlinx.coroutines.Dispatchers
@@ -58,9 +59,11 @@ internal class MainScreenStoreFactory(
     private val calendarUseCase: CalendarUseCase,
     private val observeExerciseByIdUseCase: ObserveExerciseByIdUseCase,
     private val observeBestSetFromLastWorkoutUseCase: ObserveBestSetFromLastWorkoutUseCase,
+    private val observeWorkoutExerciseByIdUseCase: com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveWorkoutExerciseByIdUseCase,
     private val createSessionFromTemplateUseCase: CreateWorkoutSessionFromTemplateUseCase,
     private val shouldUpdateSessionFromTemplateUseCase: ShouldUpdateSessionFromTemplateUseCase,
     private val deleteWorkoutExerciseUseCase: DeleteWorkoutExerciseUseCase,
+    private val unlinkSessionFromTemplateUseCase: com.example.reptrack.domain.workout.usecases.sessions.UnlinkSessionFromTemplateUseCase,
     private val authRepository: com.example.reptrack.domain.auth.AuthRepository
 ) {
 
@@ -224,8 +227,17 @@ internal class MainScreenStoreFactory(
 
         private fun deleteExercise(workoutExerciseId: String) {
             scope.launch {
+                // Get sessionId from workoutExercise
+                val workoutExercise = observeWorkoutExerciseByIdUseCase(workoutExerciseId).firstOrNull()
+                val sessionId = workoutExercise?.workoutSessionId
+
                 val result = deleteWorkoutExerciseUseCase(workoutExerciseId)
                 if (result.isSuccess) {
+                    // Unlink from template since we deleted an exercise
+                    if (sessionId != null) {
+                        unlinkSessionFromTemplateUseCase(sessionId)
+                    }
+
                     dispatch(Msg.ExerciseDeleted(workoutExerciseId))
                 }
             }

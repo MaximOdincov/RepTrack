@@ -1,0 +1,260 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">RepTrack</string>
+    <string name="default_web_client_id">WEB_CLIENT_ID</string>
+
+    <!-- ==================== EXERCISES ==================== -->
+
+    <!-- CHEST EXERCISES -->
+    <string name="exercise_bench_press">Жим штанги лежа</string>
+    <string name="exercise_incline_bench_press">Жим штанги на наклонной скамье</string>
+    <string name="exercise_decline_bench_press">Жим штанги на наклонной скамье вниз</string>
+    <string name="exercise_dumbbell_bench_press">Жим гантелей лежа</string>
+    <string name="exercise_incline_dumbbell_press">Жим гантелей на наклонной скамье</string>
+    <string name="exercise_decline_dumbbell_press">Жим гантелей на наклонной скамье вниз</string>
+    <string name="exercise_cable_flyes">Разведение рук в тренажере</string>
+    <string name="exercise_dumbbell_flyes">Разведение гантелей</string>
+    <string name="exercise_pec_deck">Бабочка</string>
+    <string name="exercise_push_ups">Отжимания</string>
+    <string name="exercise_diamond_push_ups">Алмазные отжимания</string>
+    <string name="exercise_chest_dips">Отжимания на брусьях</string>
+    <string name="exercise_landmine_press">Жим в «земляной машине»</string>
+    <string name="exercise_cable_crossover">Кроссовер</string>
+    <string name="exercise_chest_press_machine">Жим в тренажере</string>
+    <string name="exercise_floor_press">Жим с пола</string>
+
+    <!-- BACK EXERCISES -->
+    <string name="exercise_deadlift">Становая тяга</string>
+    <string name="exercise_conventional_deadlift">Классическая становая тяга</string>
+    <string name="exercise_sumo_deadlift">Становая тяга сумо</string>
+    <string name="exercise_romanian_deadlift">Румынская тяга</string>
+    <string name="exercise_pull_ups">Подтягивания</string>
+    <string name="exercise_chin_ups">Подтягивания обратным хватом</string>
+    <string name="exercise_lat_pulldown">Тяга вертикального блока</string>
+    <string name="exercise_cable_row">Тяга горизонтального блока</string>
+    <string name="exercise_barbell_row">Тяга штанги в наклоне</string>
+    <string name="exercise_dumbbell_row">Тяга гантели одной рукой</string>
+    <string name="exercise_t_bar_row">Тяга Т-грифа</string>
+    <string name="exercise_seated_cable_row">Тяга горизонтального блока сидя</string>
+    <string name="exercise_face_pulls">Тяга к лицу</string>
+    <string name="exercise_shrugs">Шраги</string>
+    <string name="exercise_barbell_shrugs">Шраги со штангой</string>
+    <string name="exercise_dumbbell_shrugs">Шраги с гантелями</string>
+    <string name="exercise_assisted_pull_up">Подтягивания с помощью</string>
+    <string name="exercise_landmine_row">Тяга в «земляной машине»</string>
+
+    <!-- LEGS EXERCISES -->
+    <string name="exercise_squat">Приседания</string>
+    <string name="exercise_barbell_squat">Приседания со штангой</string>
+    <string name="exercise_dumbbell_squat">Приседания с гантелями</string>
+    <string name="exercise_goblet_squat">Приседания «Гоблет»</string>
+    <string name="exercise_leg_press">Жим ногами</string>
+    <string name="exercise_hack_squat">Приседания в тренажере</string>
+    <string name="exercise_lunges">Выпады</string>
+    <string name="exercise_walking_lunges">Выпады в ходьбе</string>
+    <string name="exercise_reverse_lunges">Обратные выпады</string>
+    <string name="exercise_bulgarian_split_squat">Болгарские выпады</string>
+    <string name="exercise_leg_curl">Сгибание ног</string>
+    <string name="exercise_leg_extension">Разгибание ног</string>
+    <string name="exercise_seated_leg_curl">Сгибание ног сидя</string>
+    <string name="exercise_lying_leg_curl">Сгибание ног лёжа</string>
+    <string name="exercise_calf_raises">Подъём на носки</string>
+    <string name="exercise_seated_calf_raises">Подъём на носки сидя</string>
+    <string name="exercise_standing_calf_raises">Подъём на носки стоя</string>
+    <string name="exercise_hip_thrust">Ягодичный мостик</string>
+    <string name="exercise_glute_bridge">Мостик</string>
+    <string name="exercise_step_ups">Заход на платформу</string>
+    <string name="exercise_leg_adduction">Приведение ног</string>
+    <string name="exercise_leg_abduction">Отведение ног</string>
+    <string name="exercise_sumo_squat">Приседания сумо</string>
+    <string name="exercise_front_squat">Фронтальные приседания</string>
+    <string name="exercise_box_squat">Приседания к коробке</string>
+    <string name="exercise_good_mornings">Доброе утро</string>
+    <string name="exercise_sissy_squat">Сисси-приседания</string>
+
+    <!-- ARMS EXERCISES - BICEPS -->
+    <string name="exercise_barbell_curl">Подъём штанги на бицепс</string>
+    <string name="exercise_dumbbell_curl">Подъём гантели на бицепс</string>
+    <string name="exercise_hammer_curl">Молотки</string>
+    <string name="exercise_preacher_curl">Подъём на бицепс на скамье Скотта</string>
+    <string name="exercise_concentration_curl">Концентрированный подъём</string>
+    <string name="exercise_cable_curl">Подъём на бицепс в кроссовере</string>
+    <string name="exercise_incline_dumbbell_curl">Подъём гантелей на наклонной скамье</string>
+    <string name="exercise_spider_curl">Подъём на бицепс паука</string>
+    <string name="exercise_ez_bar_curl">Подъём EZ-штанги</string>
+    <string name="exercise_drag_curl">Подъём штанги с опусканием</string>
+    <string name="exercise_zottman_curl">Подъём Цоттмана</string>
+
+    <!-- ARMS EXERCISES - TRICEPS -->
+    <string name="exercise_tricep_pushdown">Французский жим в кроссовере</string>
+    <string name="exercise_skull_crushers">Французский жим лёжа</string>
+    <string name="exercise_overhead_extension">Разгибание рук из-за головы</string>
+    <string name="exercise_close_grip_bench_press">Жим штанги узким хватом</string>
+    <string name="exercise_tricep_dips">Отжимания на брусьях на трицепс</string>
+    <string name="exercise_kickbacks">Разгибание руки назад</string>
+    <string name="exercise_overhead_dumbbell_extension">Разгибание гантели из-за головы</string>
+    <string name="exercise_cable_overhead_extension">Разгибание в кроссовере из-за головы</string>
+    <string name="exercise_rope_pushdown">Разгибание на канатах</string>
+    <string name="exercise_lying_tricep_extension">Французский жим лёжа</string>
+    <string name="exercise_tate_press">Жим Тейта</string>
+
+    <!-- ARMS EXERCISES - FOREARMS -->
+    <string name="exercise_wrist_curl">Подъём на запястья</string>
+    <string name="exercise_reverse_wrist_curl">Подъём на запястья обратным хватом</string>
+    <string name="exercise_farmer_walk">Ходьба фермера</string>
+    <string name="exercise_plate_curl">Подъём блина</string>
+    <string name="exercise_grip_squeeze">Сжатие эспандера</string>
+
+    <!-- SHOULDERS EXERCISES -->
+    <string name="exercise_overhead_press">Жим над головой</string>
+    <string name="exercise_barbell_overhead_press">Жим штанги над головой</string>
+    <string name="exercise_dumbbell_overhead_press">Жим гантелей над головой</string>
+    <string name="exercise_seated_overhead_press">Жим сидя над головой</string>
+    <string name="exercise_lateral_raise">Махи в стороны</string>
+    <string name="exercise_dumbbell_lateral_raise">Махи гантелями в стороны</string>
+    <string name="exercise_cable_lateral_raise">Махи в стороны в кроссовере</string>
+    <string name="exercise_front_raise">Махи вперёд</string>
+    <string name="exercise_dumbbell_front_raise">Махи гантелями вперёд</string>
+    <string name="exercise_cable_front_raise">Махи вперёд в кроссовере</string>
+    <string name="exercise_reverse_flyes">Обратные махи</string>
+    <string name="exercise_rear_delt_fly">Махи на заднюю дельту</string>
+    <string name="exercise_shoulder_press_machine">Жим в тренажере на плечи</string>
+    <string name="exercise_arnold_press">Жим Арнольда</string>
+    <string name="exercise_upright_row">Тяга штанги к подбородку</string>
+    <string name="exercise_face_pulls_shoulders">Тяга к лицу на плечи</string>
+    <string name="exercise_landmine_press_shoulders">Жим в «земляной машине» на плечи</string>
+    <string name="exercise_halo">Хало</string>
+    <string name="exercise_band_pull_apart">Разведение резинки</string>
+
+    <!-- ABS EXERCISES -->
+    <string name="exercise_crunches">Скручивания</string>
+    <string name="exercise_sit_ups">Подъём туловища</string>
+    <string name="exercise_plank">Планка</string>
+    <string name="exercise_side_plank">Боковая планка</string>
+    <string name="exercise_leg_raises">Подъём ног</string>
+    <string name="exercise_hanging_leg_raises">Подъём ног в висе</string>
+    <string name="exercise_russian_twist">Русский твист</string>
+    <string name="exercise_bicycle_crunches">Велосипед</string>
+    <string name="exercise_mountain_climbers">Альпинист</string>
+    <string name="exercise_cable_crunch">Скручивания в кроссовере</string>
+    <string name="exercise_ab_wheel">Гимнастическое колесо</string>
+    <string name="exercise_dead_bug">Мёртвая жаба</string>
+    <string name="exercise_bird_dog">Птица-собака</string>
+    <string name="exercise_hollow_body_hold">Удержание в позиции лодочка</string>
+    <string name="exercise_v_sit">Буква V</string>
+    <string name="exercise_oblique_crunches">Скручивания на косые мышцы</string>
+    <string name="exercise_reverse_crunches">Обратные скручивания</string>
+    <string name="exercise_plank_jacks">Разноног в планке</string>
+    <string name="exercise_toe_touches">Касание носками</string>
+    <string name="exercise_flutter_kicks">Ножницы</string>
+
+    <!-- CARDIO EXERCISES -->
+    <string name="exercise_treadmill">Беговая дорожка</string>
+    <string name="exercise_running">Бег</string>
+    <string name="exercise_walking">Ходьба</string>
+    <string name="exercise_cycling">Велосипед</string>
+    <string name="exercise_stationary_bike">Велотренажёр</string>
+    <string name="exercise_elliptical">Эллипсоид</string>
+    <string name="exercise_rowing_machine">Гребной тренажёр</string>
+    <string name="exercise_stair_climber">Степпер</string>
+    <string name="exercise_jump_rope">Скакалка</string>
+    <string name="exercise_burpees">Бёрпи</string>
+    <string name="exercise_box_jumps">Прыжки на тумбу</string>
+    <string name="exercise_box_jumps_cardio">Прыжки на тумбу</string>
+    <string name="exercise_kettlebell_swings">Махи гирей</string>
+    <string name="exercise_battle_ropes">Боевые верёвки</string>
+    <string name="exercise_sprinting">Спринт</string>
+    <string name="exercise_interval_running">Интервальный бег</string>
+    <string name="exercise_hiit">HIIT</string>
+    <string name="exercise_skipping">Прыжки через скакалку</string>
+
+    <!-- FULL BODY EXERCISES -->
+    <string name="exercise_clean_and_jerk">Рывок и толчок</string>
+    <string name="exercise_snatch">Рывок</string>
+    <string name="exercise_thrusters">Трастеры</string>
+    <string name="exercise_sandbag_clean">Рывок гири</string>
+    <string name="exercise_sledgehammer">Удары кувалдой</string>
+    <string name="exercise_tire_flip">Переворот шины</string>
+    <string name="exercise_sled_push">Толкание санок</string>
+    <string name="exercise_sled_pull">Тяга санок</string>
+    <string name="exercise_kettlebell_snatch">Рывок гири</string>
+    <string name="exercise_wall_ball">Медицинбол в стену</string>
+
+    <!-- ==================== WORKOUT TEMPLATES ==================== -->
+    <string name="template_push_day">День толчка</string>
+    <string name="template_pull_day">День тяги</string>
+    <string name="template_legs_day">День ног</string>
+    <string name="template_full_body">Всё тело</string>
+    <string name="template_upper_body">Верх тела</string>
+    <string name="template_lower_body">Низ тела</string>
+    <string name="template_push_pull_legs_3_day">PPL 3 дня</string>
+    <string name="template_push_pull_legs_6_day">PPL 6 дней</string>
+    <string name="template_upper_lower_split">Верх/Низ сплит</string>
+    <string name="template_full_body_3x">Всё тело 3 раза в неделю</string>
+    <string name="template_chest_focus">Акцент на грудь</string>
+    <string name="template_back_focus">Акцент на спину</string>
+    <string name="template_arm_focus">Акцент на руки</string>
+    <string name="template_leg_focus">Акцент на ноги</string>
+    <string name="template_shoulders_focus">Акцент на плечи</string>
+    <string name="template_abs_focus">Акцент на пресс</string>
+    <string name="template_strength">Сила</string>
+    <string name="template_hypertrophy">Гипертрофия</string>
+    <string name="template_endurance">Выносливость</string>
+    <string name="template_bodyweight">С весом тела</string>
+    <string name="template_dumbbell_only">Только гантели</string>
+    <string name="template_cardio_mix">Кардио микс</string>
+    <string name="template_hiit_workout">HIIT тренировка</string>
+    <string name="template_warm_up">Разминка</string>
+    <string name="template_cool_down">Заминка</string>
+
+    <!-- ==================== MUSCLE GROUPS ==================== -->
+    <string name="muscle_chest">Грудь</string>
+    <string name="muscle_back">Спина</string>
+    <string name="muscle_legs">Ноги</string>
+    <string name="muscle_arms">Руки</string>
+    <string name="muscle_shoulders">Плечи</string>
+    <string name="muscle_abs">Пресс</string>
+    <string name="muscle_cardio">Кардио</string>
+    <string name="muscle_full_body">Всё тело</string>
+
+    <!-- ==================== EXERCISE TYPES ==================== -->
+    <string name="type_weight_reps">Вес и повторения</string>
+    <string name="type_time_distance">Время и дистанция</string>
+
+    <!-- ==================== ICON REFERENCES ==================== -->
+    <!-- These are internal references for icon resource mapping -->
+    <string name="icon_bench_press">exercise_bench_press</string>
+    <string name="icon_dumbbell">dumbell</string>
+    <string name="icon_barbell">barbell_energy</string>
+    <string name="icon_barbell_energy">barbell_energy</string>
+    <string name="icon_fitness">fitness</string>
+    <string name="icon_muscles">muscles</string>
+    <string name="icon_back_muscles">back_muscles</string>
+    <string name="icon_leg_push">leg_push</string>
+    <string name="icon_treadmill">treadmill</string>
+    <string name="icon_bicycle">bicycle</string>
+    <string name="icon_rowing">rowing</string>
+    <string name="icon_weights">weights</string>
+    <string name="icon_weight_lifting">weight_lifting</string>
+    <string name="icon_dumbbell_hand">dumbel_with_a_hand</string>
+    <string name="icon_bic_dumbbell">bic_dumbell</string>
+    <string name="icon_heart_dumbbell">heart_dumbell</string>
+    <string name="icon_stationary_bike">stationary_bike</string>
+    <string name="icon_calories">calories</string>
+    <string name="icon_timer">chronometr</string>
+    <string name="icon_chest">muscle_icon_chest</string>
+    <string name="icon_back">muscle_icon_back</string>
+    <string name="icon_legs">muscle_icon_legs</string>
+    <string name="icon_arms">muscle_icon_arms</string>
+    <string name="icon_abs">muscle_icon_abs</string>
+    <string name="icon_cardio">muscle_icon_cardio</string>
+
+    <!-- Template Icons -->
+    <string name="icon_push_day">push_day_icon</string>
+    <string name="icon_pull_day">pull_day_icon</string>
+    <string name="icon_legs_day">legs_day_icon</string>
+    <string name="icon_full_body">full_body_icon</string>
+    <string name="icon_upper_body">upper_body_icon</string>
+    <string name="icon_lower_body">lower_body_icon</string>
+
+</resources>

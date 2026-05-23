@@ -1,4 +1,262 @@
 <resources>
+    <!-- App -->
     <string name="app_name">RepTrack</string>
     <string name="default_web_client_id">WEB_CLIENT_ID</string>
+
+    <!-- ==================== EXERCISES ==================== -->
+
+    <!-- CHEST EXERCISES -->
+    <string name="exercise_bench_press">Bench Press</string>
+    <string name="exercise_incline_bench_press">Incline Bench Press</string>
+    <string name="exercise_decline_bench_press">Decline Bench Press</string>
+    <string name="exercise_dumbbell_bench_press">Dumbbell Bench Press</string>
+    <string name="exercise_incline_dumbbell_press">Incline Dumbbell Press</string>
+    <string name="exercise_decline_dumbbell_press">Decline Dumbbell Press</string>
+    <string name="exercise_cable_flyes">Cable Flyes</string>
+    <string name="exercise_dumbbell_flyes">Dumbbell Flyes</string>
+    <string name="exercise_pec_deck">Pec Deck</string>
+    <string name="exercise_push_ups">Push Ups</string>
+    <string name="exercise_diamond_push_ups">Diamond Push Ups</string>
+    <string name="exercise_chest_dips">Chest Dips</string>
+    <string name="exercise_landmine_press">Landmine Press</string>
+    <string name="exercise_cable_crossover">Cable Crossover</string>
+    <string name="exercise_chest_press_machine">Chest Press Machine</string>
+    <string name="exercise_floor_press">Floor Press</string>
+
+    <!-- BACK EXERCISES -->
+    <string name="exercise_deadlift">Deadlift</string>
+    <string name="exercise_conventional_deadlift">Conventional Deadlift</string>
+    <string name="exercise_sumo_deadlift">Sumo Deadlift</string>
+    <string name="exercise_romanian_deadlift">Romanian Deadlift</string>
+    <string name="exercise_pull_ups">Pull Ups</string>
+    <string name="exercise_chin_ups">Chin Ups</string>
+    <string name="exercise_lat_pulldown">Lat Pulldown</string>
+    <string name="exercise_cable_row">Cable Row</string>
+    <string name="exercise_barbell_row">Barbell Row</string>
+    <string name="exercise_dumbbell_row">Dumbbell Row</string>
+    <string name="exercise_t_bar_row">T-Bar Row</string>
+    <string name="exercise_seated_cable_row">Seated Cable Row</string>
+    <string name="exercise_face_pulls">Face Pulls</string>
+    <string name="exercise_reverse_flyes">Reverse Flyes</string>
+    <string name="exercise_shrugs">Shrugs</string>
+    <string name="exercise_barbell_shrugs">Barbell Shrugs</string>
+    <string name="exercise_dumbbell_shrugs">Dumbbell Shrugs</string>
+    <string name="exercise_assisted_pull_up">Assisted Pull Up</string>
+    <string name="exercise_landmine_row">Landmine Row</string>
+
+    <!-- LEGS EXERCISES -->
+    <string name="exercise_squat">Squat</string>
+    <string name="exercise_barbell_squat">Barbell Squat</string>
+    <string name="exercise_dumbbell_squat">Dumbbell Squat</string>
+    <string name="exercise_goblet_squat">Goblet Squat</string>
+    <string name="exercise_leg_press">Leg Press</string>
+    <string name="exercise_hack_squat">Hack Squat</string>
+    <string name="exercise_lunges">Lunges</string>
+    <string name="exercise_walking_lunges">Walking Lunges</string>
+    <string name="exercise_reverse_lunges">Reverse Lunges</string>
+    <string name="exercise_bulgarian_split_squat">Bulgarian Split Squat</string>
+    <string name="exercise_leg_curl">Leg Curl</string>
+    <string name="exercise_leg_extension">Leg Extension</string>
+    <string name="exercise_seated_leg_curl">Seated Leg Curl</string>
+    <string name="exercise_lying_leg_curl">Lying Leg Curl</string>
+    <string name="exercise_calf_raises">Calf Raises</string>
+    <string name="exercise_seated_calf_raises">Seated Calf Raises</string>
+    <string name="exercise_standing_calf_raises">Standing Calf Raises</string>
+    <string name="exercise_hip_thrust">Hip Thrust</string>
+    <string name="exercise_glute_bridge">Glute Bridge</string>
+    <string name="exercise_step_ups">Step Ups</string>
+    <string name="exercise_leg_adduction">Leg Adduction</string>
+    <string name="exercise_leg_abduction">Leg Abduction</string>
+    <string name="exercise_sumo_squat">Sumo Squat</string>
+    <string name="exercise_front_squat">Front Squat</string>
+    <string name="exercise_box_squat">Box Squat</string>
+    <string name="exercise_good_mornings">Good Mornings</string>
+    <string name="exercise_sissy_squat">Sissy Squat</string>
+
+    <!-- ARMS EXERCISES - BICEPS -->
+    <string name="exercise_barbell_curl">Barbell Curl</string>
+    <string name="exercise_dumbbell_curl">Dumbbell Curl</string>
+    <string name="exercise_hammer_curl">Hammer Curl</string>
+    <string name="exercise_preacher_curl">Preacher Curl</string>
+    <string name="exercise_concentration_curl">Concentration Curl</string>
+    <string name="exercise_cable_curl">Cable Curl</string>
+    <string name="exercise_incline_dumbbell_curl">Incline Dumbbell Curl</string>
+    <string name="exercise_spider_curl">Spider Curl</string>
+    <string name="exercise_ez_bar_curl">EZ Bar Curl</string>
+    <string name="exercise_drag_curl">Drag Curl</string>
+    <string name="exercise_zottman_curl">Zottman Curl</string>
+
+    <!-- ARMS EXERCISES - TRICEPS -->
+    <string name="exercise_tricep_pushdown">Tricep Pushdown</string>
+    <string name="exercise_skull_crushers">Skull Crushers</string>
+    <string name="exercise_overhead_extension">Overhead Extension</string>
+    <string name="exercise_close_grip_bench_press">Close Grip Bench Press</string>
+    <string name="exercise_tricep_dips">Tricep Dips</string>
+    <string name="exercise_diamond_push_ups_triceps">Diamond Push Ups</string>
+    <string name="exercise_kickbacks">Kickbacks</string>
+    <string name="exercise_overhead_dumbbell_extension">Overhead Dumbbell Extension</string>
+    <string name="exercise_cable_overhead_extension">Cable Overhead Extension</string>
+    <string name="exercise_rope_pushdown">Rope Pushdown</string>
+    <string name="exercise_lying_tricep_extension">Lying Tricep Extension</string>
+    <string name="exercise_tate_press">Tate Press</string>
+
+    <!-- ARMS EXERCISES - FOREARMS -->
+    <string name="exercise_wrist_curl">Wrist Curl</string>
+    <string name="exercise_reverse_wrist_curl">Reverse Wrist Curl</string>
+    <string name="exercise_farmer_walk">Farmer Walk</string>
+    <string name="exercise_plate_curl">Plate Curl</string>
+    <string name="exercise_grip_squeeze">Grip Squeeze</string>
+
+    <!-- SHOULDERS EXERCISES -->
+    <string name="exercise_overhead_press">Overhead Press</string>
+    <string name="exercise_barbell_overhead_press">Barbell Overhead Press</string>
+    <string name="exercise_dumbbell_overhead_press">Dumbbell Overhead Press</string>
+    <string name="exercise_seated_overhead_press">Seated Overhead Press</string>
+    <string name="exercise_lateral_raise">Lateral Raise</string>
+    <string name="exercise_dumbbell_lateral_raise">Dumbbell Lateral Raise</string>
+    <string name="exercise_cable_lateral_raise">Cable Lateral Raise</string>
+    <string name="exercise_front_raise">Front Raise</string>
+    <string name="exercise_dumbbell_front_raise">Dumbbell Front Raise</string>
+    <string name="exercise_cable_front_raise">Cable Front Raise</string>
+    <string name="exercise_reverse_flyes_shoulders">Reverse Flyes</string>
+    <string name="exercise_rear_delt_fly">Rear Delt Fly</string>
+    <string name="exercise_shoulder_press_machine">Shoulder Press Machine</string>
+    <string name="exercise_arnold_press">Arnold Press</string>
+    <string name="exercise_upright_row">Upright Row</string>
+    <string name="exercise_face_pulls_shoulders">Face Pulls</string>
+    <string name="exercise_landmine_press_shoulders">Landmine Press</string>
+    <string name="exercise_halo">Halo</string>
+    <string name="exercise_band_pull_apart">Band Pull Apart</string>
+
+    <!-- ABS EXERCISES -->
+    <string name="exercise_crunches">Crunches</string>
+    <string name="exercise_sit_ups">Sit Ups</string>
+    <string name="exercise_plank">Plank</string>
+    <string name="exercise_side_plank">Side Plank</string>
+    <string name="exercise_leg_raises">Leg Raises</string>
+    <string name="exercise_hanging_leg_raises">Hanging Leg Raises</string>
+    <string name="exercise_russian_twist">Russian Twist</string>
+    <string name="exercise_bicycle_crunches">Bicycle Crunches</string>
+    <string name="exercise_mountain_climbers">Mountain Climbers</string>
+    <string name="exercise_cable_crunch">Cable Crunch</string>
+    <string name="exercise_ab_wheel">Ab Wheel Rollout</string>
+    <string name="exercise_dead_bug">Dead Bug</string>
+    <string name="exercise_bird_dog">Bird Dog</string>
+    <string name="exercise_hollow_body_hold">Hollow Body Hold</string>
+    <string name="exercise_v_sit">V Sit</string>
+    <string name="exercise_oblique_crunches">Oblique Crunches</string>
+    <string name="exercise_reverse_crunches">Reverse Crunches</string>
+    <string name="exercise_plank_jacks">Plank Jacks</string>
+    <string name="exercise_toe_touches">Toe Touches</string>
+    <string name="exercise_flutter_kicks">Flutter Kicks</string>
+
+    <!-- CARDIO EXERCISES -->
+    <string name="exercise_treadmill">Treadmill</string>
+    <string name="exercise_running">Running</string>
+    <string name="exercise_walking">Walking</string>
+    <string name="exercise_cycling">Cycling</string>
+    <string name="exercise_stationary_bike">Stationary Bike</string>
+    <string name="exercise_elliptical">Elliptical</string>
+    <string name="exercise_rowing_machine">Rowing Machine</string>
+    <string name="exercise_stair_climber">Stair Climber</string>
+    <string name="exercise_jump_rope">Jump Rope</string>
+    <string name="exercise_burpees">Burpees</string>
+    <string name="exercise_box_jumps">Box Jumps</string>
+    <string name="exercise_box_jumps_cardio">Box Jumps</string>
+    <string name="exercise_kettlebell_swings">Kettlebell Swings</string>
+    <string name="exercise_battle_ropes">Battle Ropes</string>
+    <string name="exercise_sprinting">Sprinting</string>
+    <string name="exercise_interval_running">Interval Running</string>
+    <string name="exercise_hiit">HIIT</string>
+    <string name="exercise_skipping">Skipping</string>
+
+    <!-- FULL BODY EXERCISES -->
+    <string name="exercise_clean_and_jerk">Clean and Jerk</string>
+    <string name="exercise_snatch">Snatch</string>
+    <string name="exercise_thrusters">Thrusters</string>
+    <string name="exercise_sandbag_clean">Sandbag Clean</string>
+    <string name="exercise_sledgehammer">Sledgehammer</string>
+    <string name="exercise_tire_flip">Tire Flip</string>
+    <string name="exercise_sled_push">Sled Push</string>
+    <string name="exercise_sled_pull">Sled Pull</string>
+    <string name="exercise_kettlebell_snatch">Kettlebell Snatch</string>
+    <string name="exercise_wall_ball">Wall Ball</string>
+
+    <!-- ==================== WORKOUT TEMPLATES ==================== -->
+    <string name="template_push_day">Push Day</string>
+    <string name="template_pull_day">Pull Day</string>
+    <string name="template_legs_day">Legs Day</string>
+    <string name="template_full_body">Full Body</string>
+    <string name="template_upper_body">Upper Body</string>
+    <string name="template_lower_body">Lower Body</string>
+    <string name="template_push_pull_legs_3_day">PPL 3-Day Split</string>
+    <string name="template_push_pull_legs_6_day">PPL 6-Day Split</string>
+    <string name="template_upper_lower_split">Upper/Lower Split</string>
+    <string name="template_full_body_3x">Full Body 3x Week</string>
+    <string name="template_chest_focus">Chest Focus</string>
+    <string name="template_back_focus">Back Focus</string>
+    <string name="template_arm_focus">Arm Focus</string>
+    <string name="template_leg_focus">Leg Focus</string>
+    <string name="template_shoulders_focus">Shoulders Focus</string>
+    <string name="template_abs_focus">Abs Focus</string>
+    <string name="template_strength">Strength Training</string>
+    <string name="template_hypertrophy">Hypertrophy</string>
+    <string name="template_endurance">Endurance</string>
+    <string name="template_bodyweight">Bodyweight Only</string>
+    <string name="template_dumbbell_only">Dumbbell Only</string>
+    <string name="template_cardio_mix">Cardio Mix</string>
+    <string name="template_hiit_workout">HIIT Workout</string>
+    <string name="template_warm_up">Warm Up</string>
+    <string name="template_cool_down">Cool Down</string>
+
+    <!-- ==================== MUSCLE GROUPS ==================== -->
+    <string name="muscle_chest">Chest</string>
+    <string name="muscle_back">Back</string>
+    <string name="muscle_legs">Legs</string>
+    <string name="muscle_arms">Arms</string>
+    <string name="muscle_shoulders">Shoulders</string>
+    <string name="muscle_abs">Abs</string>
+    <string name="muscle_cardio">Cardio</string>
+    <string name="muscle_full_body">Full Body</string>
+
+    <!-- ==================== EXERCISE TYPES ==================== -->
+    <string name="type_weight_reps">Weight &amp; Reps</string>
+    <string name="type_time_distance">Time &amp; Distance</string>
+
+    <!-- ==================== ICON REFERENCES ==================== -->
+    <!-- These are internal references for icon resource mapping -->
+    <string name="icon_bench_press">exercise_bench_press</string>
+    <string name="icon_dumbbell">dumbell</string>
+    <string name="icon_barbell">barbell_energy</string>
+    <string name="icon_barbell_energy">barbell_energy</string>
+    <string name="icon_fitness">fitness</string>
+    <string name="icon_muscles">muscles</string>
+    <string name="icon_back_muscles">back_muscles</string>
+    <string name="icon_leg_push">leg_push</string>
+    <string name="icon_treadmill">treadmill</string>
+    <string name="icon_bicycle">bicycle</string>
+    <string name="icon_rowing">rowing</string>
+    <string name="icon_weights">weights</string>
+    <string name="icon_weight_lifting">weight_lifting</string>
+    <string name="icon_dumbbell_hand">dumbel_with_a_hand</string>
+    <string name="icon_bic_dumbbell">bic_dumbell</string>
+    <string name="icon_heart_dumbbell">heart_dumbell</string>
+    <string name="icon_stationary_bike">stationary_bike</string>
+    <string name="icon_calories">calories</string>
+    <string name="icon_timer">chronometr</string>
+    <string name="icon_chest">muscle_icon_chest</string>
+    <string name="icon_back">muscle_icon_back</string>
+    <string name="icon_legs">muscle_icon_legs</string>
+    <string name="icon_arms">muscle_icon_arms</string>
+    <string name="icon_abs">muscle_icon_abs</string>
+    <string name="icon_cardio">muscle_icon_cardio</string>
+
+    <!-- Template Icons -->
+    <string name="icon_push_day">push_day_icon</string>
+    <string name="icon_pull_day">pull_day_icon</string>
+    <string name="icon_legs_day">legs_day_icon</string>
+    <string name="icon_full_body">full_body_icon</string>
+    <string name="icon_upper_body">upper_body_icon</string>
+    <string name="icon_lower_body">lower_body_icon</string>
+
 </resources>

@@ -14,7 +14,8 @@ fun User.toDb(): UserDb =
         email = email,
         avatarUrl = avatarUrl,
         currentWeight = currentWeight,
-        height = height
+        height = height,
+        passkey = passkey
     )
 
 fun User.toGdprDb(): GdprConsentDb? =
@@ -35,6 +36,7 @@ fun UserWithConsent.toDomain(): User =
         avatarUrl = user.avatarUrl,
         currentWeight = user.currentWeight,
         height = user.height,
+        passkey = user.passkey,
         gdprConsent = gdprConsent?.let {
             GdprConsent(
                 isAccepted = it.isAccepted,

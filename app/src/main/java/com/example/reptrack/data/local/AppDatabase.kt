@@ -10,11 +10,14 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper.Callback
 import com.example.reptrack.data.local.converters.DateTimeConverters
 import com.example.reptrack.data.local.converters.ExerciseConverters
 import com.example.reptrack.data.local.dao.ExerciseDao
+import com.example.reptrack.data.local.dao.FriendDao
 import com.example.reptrack.data.local.dao.StatisticDao
 import com.example.reptrack.data.local.dao.UserDao
+import com.example.reptrack.data.local.dao.WeightRecordDao
 import com.example.reptrack.data.local.dao.WorkoutDao
 import com.example.reptrack.data.local.dao.WorkoutTemplateDao
 import com.example.reptrack.data.local.models.ExerciseDb
+import com.example.reptrack.data.local.models.FriendDb
 import com.example.reptrack.data.local.models.GdprConsentDb
 import com.example.reptrack.data.local.models.TemplateExerciseDb
 import com.example.reptrack.data.local.models.UserDb
@@ -27,6 +30,11 @@ import com.example.reptrack.data.local.models.statistics.ChartTemplateDb
 import com.example.reptrack.data.local.models.statistics.ExerciseLineConfigDb
 import com.example.reptrack.data.local.models.statistics.FriendConfigDb
 import com.example.reptrack.data.local.models.statistics.SetConfigDb
+import com.example.reptrack.data.seeder.DatabaseSeeder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 @Database(
     entities = [
         ExerciseDb::class,
@@ -41,7 +49,8 @@ import com.example.reptrack.data.local.models.statistics.SetConfigDb
         ChartTemplateDb::class,
         ExerciseLineConfigDb::class,
         FriendConfigDb::class,
-        SetConfigDb::class
+        SetConfigDb::class,
+        FriendDb::class
     ],
     version = 1,
     exportSchema = false
@@ -54,25 +63,48 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun templateDao(): WorkoutTemplateDao
     abstract fun userDao(): UserDao
     abstract fun statisticDao(): StatisticDao
+    abstract fun friendDao(): FriendDao
+    abstract fun weightRecordDao(): WeightRecordDao
 
     companion object {
+        private val instances = mutableMapOf<String, AppDatabase>()
+
         fun getInstance(context: Context, userId: String): AppDatabase {
-            val dbName = "workout_db_$userId"
-            return Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                dbName
-            )
-                .fallbackToDestructiveMigration()
-                .addCallback(object : Callback() {
-                    override fun onOpen(db: SupportSQLiteDatabase) {
-                        super.onOpen(db)
-                        // Включаем Foreign Keys для CASCADE
-                        db.execSQL("PRAGMA foreign_keys=ON")
-                        android.util.Log.d("AppDatabase", "Foreign Keys enabled")
-                    }
-                })
-                .build()
+            return instances.getOrPut(userId) {
+                val dbName = "workout_db_$userId"
+                Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    dbName
+                )
+                    .fallbackToDestructiveMigration()
+                    .addCallback(object : Callback() {
+                        override fun onCreate(db: SupportSQLiteDatabase) {
+                            super.onCreate(db)
+                            // Seed default data after database is created
+                            // We'll get the instance after it's built
+                        }
+
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
+                            // Включаем Foreign Keys для CASCADE
+                            db.execSQL("PRAGMA foreign_keys=ON")
+                            android.util.Log.d("AppDatabase", "Foreign Keys enabled for user: $userId")
+                        }
+                    })
+                    .build()
+            }
+        }
+
+        fun closeInstance(userId: String) {
+            instances.remove(userId)?.close()
+            android.util.Log.d("AppDatabase", "Closed database for user: $userId")
+        }
+
+        fun closeAll() {
+            instances.values.forEach { it.close() }
+            instances.clear()
+            android.util.Log.d("AppDatabase", "Closed all database instances")
         }
 
         fun deleteUserDatabase(context: Context, userId: String): Boolean {

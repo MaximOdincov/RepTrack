@@ -17,7 +17,7 @@ import java.time.LocalDateTime
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("userId")]
+    indices = [Index("userId"), Index("templateId")]
 )
 data class WorkoutSessionDb(
     @PrimaryKey val id: String,
@@ -27,6 +27,7 @@ data class WorkoutSessionDb(
     val name: String,
     val durationSeconds: Long,
     val comment: String?,
+    val templateId: String? = null,
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val deletedAt: LocalDateTime? = null
 )
