@@ -174,6 +174,10 @@ internal class StatisticsStoreFactory(
         }
 
         private fun changeDateRange(from: LocalDateTime, to: LocalDateTime, state: StatisticsStore.State) {
+            android.util.Log.d("StatisticsStore", "=== changeDateRange called ===")
+            android.util.Log.d("StatisticsStore", "New date range: $from to $to")
+            android.util.Log.d("StatisticsStore", "Current date range in state: ${state.dateRange.from} to ${state.dateRange.to}")
+            android.util.Log.d("StatisticsStore", "Selected exerciseId: ${state.selectedExerciseId}")
             dispatch(Msg.DateRangeChanged(DateRange(from, to)))
             loadData(state.copy(dateRange = DateRange(from, to)))
         }
@@ -462,10 +466,58 @@ internal class StatisticsStoreFactory(
                     )
                     android.util.Log.d("StatisticsStore", "Data size: ${msg.data.size}")
                     android.util.Log.d("StatisticsStore", "New visibleSets: ${msg.data.keys}")
+                    android.util.Log.d("StatisticsStore", "Existing setColors: $setColors")
+
+                    // Default colors for sets (deterministic by index)
+                    // Format: 0xAARRGGBB where AA is alpha (0xFF = fully opaque)
+                    val defaultColors = listOf(
+                        0xFFFF6366F1L, // Indigo
+                        0xFFFFEC4899L, // Pink
+                        0xFFFF10B981L, // Emerald
+                        0xFFFFF59E0BL, // Amber
+                        0xFFFFEF4444L, // Red
+                        0xFFFF8B5CF6L, // Violet
+                        0xFFFF06B6D4L, // Cyan
+                        0xFFFF84CC16L, // Lime
+                        0xFFFFF97316L, // Orange
+                        0xFFFF0EA5E9L  // Sky
+                    )
+
+                    // Check if sets have changed and if we need to update colors
+                    val newSetIndices = msg.data.keys.toSet()
+                    val existingSetIndices = setColors.keys.toSet()
+
+                    android.util.Log.d("StatisticsStore", "New set indices: $newSetIndices")
+                    android.util.Log.d("StatisticsStore", "Existing set indices: $existingSetIndices")
+
+                    // Only update colors if there are new sets that don't have colors yet
+                    val setsWithoutColors = newSetIndices - existingSetIndices
+                    android.util.Log.d("StatisticsStore", "Sets without colors: $setsWithoutColors")
+
+                    val newSetColors = if (setsWithoutColors.isEmpty() && newSetIndices == existingSetIndices) {
+                        // No changes needed - keep existing colors
+                        android.util.Log.d("StatisticsStore", "No new sets, keeping existing colors")
+                        setColors
+                    } else {
+                        // Add colors for new sets
+                        android.util.Log.d("StatisticsStore", "Adding colors for new sets")
+                        val updatedColors = setColors.toMutableMap()
+                        msg.data.keys.forEach { setIndex ->
+                            if (!updatedColors.containsKey(setIndex)) {
+                                updatedColors[setIndex] = defaultColors.getOrElse(setIndex) {
+                                    // If out of default colors, cycle through them
+                                    defaultColors[setIndex % defaultColors.size]
+                                }
+                            }
+                        }
+                        android.util.Log.d("StatisticsStore", "Updated setColors: $updatedColors")
+                        updatedColors
+                    }
 
                     copy(
                         exerciseData = msg.data,
                         visibleSets = msg.data.keys,
+                        setColors = newSetColors,
                         isLoading = false
                     )
                 }
@@ -483,8 +535,13 @@ internal class StatisticsStoreFactory(
                     android.util.Log.d("StatisticsStore", "Set index: ${msg.setIndex}")
                     android.util.Log.d("StatisticsStore", "Color Long: 0x${msg.color.toString(16)}")
                     android.util.Log.d("StatisticsStore", "Old setColors: $setColors")
+                    android.util.Log.d("StatisticsStore", "Old setColors.size: ${setColors.size}")
+                    android.util.Log.d("StatisticsStore", "Old setColors keys: ${setColors.keys}")
                     val newSetColors = setColors + (msg.setIndex to msg.color)
                     android.util.Log.d("StatisticsStore", "New setColors: $newSetColors")
+                    android.util.Log.d("StatisticsStore", "New setColors.size: ${newSetColors.size}")
+                    android.util.Log.d("StatisticsStore", "New setColors keys: ${newSetColors.keys}")
+                    android.util.Log.d("StatisticsStore", "New color for set ${msg.setIndex}: 0x${newSetColors[msg.setIndex]!!.toString(16)}")
                     copy(setColors = newSetColors)
                 }
 

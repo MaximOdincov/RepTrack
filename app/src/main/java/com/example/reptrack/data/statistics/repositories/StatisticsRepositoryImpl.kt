@@ -83,7 +83,7 @@ class StatisticsRepositoryImpl(
                     val point = ExerciseDataPoint(
                         date = data.date.toLocalDate(),
                         value = data.weight ?: 0f,
-                        setIndex = data.setOrder.coerceIn(0, maxSets - 1),
+                        setIndex = (data.setOrder - 1).coerceIn(0, maxSets - 1),
                         userId = userId,
                         userName = userName
                     )

@@ -86,6 +86,9 @@ interface WorkoutDao {
     @Query("UPDATE workout_sessions SET status = :status, updatedAt = :updatedAt WHERE id = :sessionId")
     suspend fun updateSessionStatus(sessionId: String, status: String, updatedAt: java.time.LocalDateTime)
 
+    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId LIMIT 1")
+    suspend fun getSessionById(sessionId: String): WorkoutSessionDb?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExercises(exercises: List<WorkoutExerciseDb>)
 
@@ -200,7 +203,8 @@ interface WorkoutDao {
         AND we.exerciseId = :exerciseId
         AND s.status IN ('COMPLETED', 'IN_PROGRESS')
         AND ws.isCompleted = 1
-        AND s.date BETWEEN :fromDate AND :toDate
+        AND s.date >= :fromDate
+        AND s.date < :toDate
         ORDER BY s.date ASC, ws.setOrder ASC
     """)
     fun observeExerciseProgress(

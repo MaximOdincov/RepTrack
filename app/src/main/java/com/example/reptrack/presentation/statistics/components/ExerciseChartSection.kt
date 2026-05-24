@@ -50,6 +50,7 @@ import com.example.reptrack.presentation.statistics.components.common.FriendChip
 
 @Composable
 fun ExerciseChartSection(
+    key: String? = null,
     selectedExerciseId: String?,
     exercises: List<ExerciseInfo>,
     exerciseData: Map<Int, List<Pair<Float, Float>>>, // setIndex -> (timestamp, weight)
@@ -187,9 +188,28 @@ fun ExerciseChartSection(
                 ) {
                     items(items = exerciseData.keys.sorted().toList().take(10), key = { it: Int -> it }) { setIndex ->
                         val isVisible = setIndex in visibleSets
+
+                        // Default colors for sets (deterministic by index) - same as in StatisticsStore
+                        val defaultColors = listOf(
+                            Color(0xFF6366F1), // Indigo
+                            Color(0xFFEC4899), // Pink
+                            Color(0xFF10B981), // Emerald
+                            Color(0xFFF59E0B), // Amber
+                            Color(0xFFEF4444), // Red
+                            Color(0xFF8B5CF6), // Violet
+                            Color(0xFF06B6D4), // Cyan
+                            Color(0xFF84CC16), // Lime
+                            Color(0xFFF97316), // Orange
+                            Color(0xFF0EA5E9)  // Sky
+                        )
+
                         val color = if (setColors[setIndex] == null) {
-                            android.util.Log.d("ExerciseChartSection", "Set $setIndex: color from DB is null, using Gray")
-                            Color.Gray
+                            android.util.Log.d("ExerciseChartSection", "Set $setIndex: color from state is null, using default color")
+                            val defaultColor = defaultColors.getOrElse(setIndex) {
+                                defaultColors[setIndex % defaultColors.size]
+                            }
+                            android.util.Log.d("ExerciseChartSection", "Default color for set $setIndex: $defaultColor")
+                            defaultColor
                         } else {
                             // Unpack ARGB from Long - divide by 255 to get Float (0.0-1.0)
                             val argb = setColors[setIndex]!!
@@ -199,8 +219,7 @@ fun ExerciseChartSection(
                             val blue = (argb and 0xFF).toInt() / 255f
                             val unpackedColor = Color(red, green, blue, alpha)
                             android.util.Log.d("ExerciseChartSection", "Set $setIndex: ARGB from DB = 0x${argb.toString(16)}")
-                            android.util.Log.d("ExerciseChartSection", "  Int A=$alpha, R=$red, G=$green, B=$blue")
-                            android.util.Log.d("ExerciseChartSection", "  Float A=${alpha * 255}, R=${red * 255}, G=${green * 255}, B=${blue * 255}")
+                            android.util.Log.d("ExerciseChartSection", "  Float A=$alpha, R=$red, G=$green, B=$blue")
                             android.util.Log.d("ExerciseChartSection", "  Unpacked Color = $unpackedColor")
                             unpackedColor
                         }
@@ -246,11 +265,35 @@ fun ExerciseChartSection(
                         .mapValues { it.value }
 
                     if (visibleData.isNotEmpty() && visibleData.keys.isNotEmpty()) {
+                        // Build map of series name to set index for color lookup
+                        val seriesToSetIndex: Map<String, Int> = exerciseData
+                            .filter { (setIndex, _) -> setIndex in visibleSets }
+                            .keys
+                            .associateBy { setIndex -> "Set ${setIndex + 1}" }
+
+                        // Default colors for sets (deterministic by index) - same as in StatisticsStore
+                        val defaultColors = listOf(
+                            Color(0xFF6366F1), // Indigo
+                            Color(0xFFEC4899), // Pink
+                            Color(0xFF10B981), // Emerald
+                            Color(0xFFF59E0B), // Amber
+                            Color(0xFFEF4444), // Red
+                            Color(0xFF8B5CF6), // Violet
+                            Color(0xFF06B6D4), // Cyan
+                            Color(0xFF84CC16), // Lime
+                            Color(0xFFF97316), // Orange
+                            Color(0xFF0EA5E9)  // Sky
+                        )
+
                         val colors = visibleData.keys.associateWith { seriesName ->
-                            val setIndex = seriesName.removePrefix("Set ").toIntOrNull() ?: 0
+                            val setIndex = seriesToSetIndex[seriesName] ?: 0
                             val color = if (setColors[setIndex] == null) {
-                                android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: color from DB is null, using Blue")
-                                Color.Blue
+                                android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: color from state is null, using default color")
+                                val defaultColor = defaultColors.getOrElse(setIndex) {
+                                    defaultColors[(setIndex) % defaultColors.size]
+                                }
+                                android.util.Log.d("ExerciseChartSection", "Default color for set $setIndex: $defaultColor")
+                                defaultColor
                             } else {
                                 val argb = setColors[setIndex]!!
                                 val alpha = ((argb shr 24) and 0xFF).toInt() / 255f
@@ -259,13 +302,15 @@ fun ExerciseChartSection(
                                 val blue = (argb and 0xFF).toInt() / 255f
                                 val unpackedColor = Color(red, green, blue, alpha)
                                 android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: ARGB from DB = 0x${argb.toString(16)}")
-                                android.util.Log.d("ExerciseChartSection", "  A=$alpha, R=$red, G=$green, B=$blue")
+                                android.util.Log.d("ExerciseChartSection", "  Float A=$alpha, R=$red, G=$green, B=$blue")
                                 android.util.Log.d("ExerciseChartSection", "  Unpacked Color = $unpackedColor")
                                 unpackedColor
                             }
                             color
                         }
 
+                        // Add key to force recomposition when data changes
+                        android.util.Log.d("ExerciseChartSection", "LineChartView key: ${visibleData.keys.joinToString(",") + visibleData.values.map { it.size }.joinToString(",")}")
                         LineChartView(
                             data = visibleData,
                             seriesColors = colors,

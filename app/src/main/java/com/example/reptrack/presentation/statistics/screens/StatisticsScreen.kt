@@ -249,6 +249,7 @@ private fun ExerciseTab(
     ) {
         item {
             ExerciseChartSection(
+                key = state.dateRange.from.toString() + state.dateRange.to.toString(),
                 selectedExerciseId = state.selectedExerciseId,
                 exercises = exerciseInfoList,
                 exerciseData = state.exerciseData.mapValues { entry ->

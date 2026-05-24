@@ -25,6 +25,7 @@ import androidx.navigation.navArgument
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.App
 import com.example.reptrack.domain.profile.usecases.AddUserUseCase
+import com.example.reptrack.domain.profile.usecases.InitializeDatabaseUseCase
 import com.example.reptrack.domain.auth.usecases.GetCurrentUserUseCase
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.navigation.components.BottomBar
@@ -173,6 +174,7 @@ fun AppNavGraph(){
                     val store: MainScreenStore = getKoin().get()
                     val calendarUseCase: CalendarUseCase = getKoin().get()
                     val addUserUseCase: AddUserUseCase = getKoin().get()
+                    val initializeDatabaseUseCase: InitializeDatabaseUseCase = getKoin().get()
                     val getCurrentUserUseCase: GetCurrentUserUseCase = getKoin().get()
                     val getCurrentUserProfileUseCase: com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase = getKoin().get()
                     val firebaseUserDataSource: com.example.reptrack.data.auth.FirebaseUserDataSource = getKoin().get()
@@ -183,6 +185,9 @@ fun AppNavGraph(){
                         authUser?.let { auth ->
                             // Add user to local database
                             addUserUseCase(auth.toDomain())
+
+                            // Initialize database with default exercises and templates
+                            initializeDatabaseUseCase()
 
                             // Wait a bit for database to be ready
                             kotlinx.coroutines.delay(100)

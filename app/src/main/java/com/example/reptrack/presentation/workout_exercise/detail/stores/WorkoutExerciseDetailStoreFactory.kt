@@ -7,6 +7,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.example.reptrack.domain.workout.entities.Exercise
 import com.example.reptrack.domain.workout.entities.WorkoutExercise
 import com.example.reptrack.domain.workout.entities.WorkoutSet
+import com.example.reptrack.domain.workout.entities.WorkoutStatus
 import com.example.reptrack.domain.workout.usecases.exercises.ObserveExerciseByIdUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveWorkoutExerciseByIdUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.UpdateWorkoutExerciseUseCase
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import java.time.LocalDateTime
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 
@@ -311,6 +313,21 @@ internal class WorkoutExerciseDetailStoreFactory(
             android.util.Log.d("task1", "Stack trace:", Exception())
 
             return saveMutex.withLock {
+                // Update session status to IN_PROGRESS if it's PLANNED
+                try {
+                    val currentSession = workoutDao.getSessionById(workoutExercise.workoutSessionId)
+                    if (currentSession != null && currentSession.status == WorkoutStatus.PLANNED) {
+                        android.util.Log.d("task1", "Updating session status from PLANNED to IN_PROGRESS")
+                        workoutDao.updateSessionStatus(
+                            sessionId = workoutExercise.workoutSessionId,
+                            status = WorkoutStatus.IN_PROGRESS.name,
+                            updatedAt = LocalDateTime.now()
+                        )
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("task1", "Failed to update session status: ${e.message}")
+                }
+
                 // Удаляем все сеты упражнения и вставляем новые (как в saveSetsOnlySynchronous)
                 android.util.Log.d("task1", "DELETE then INSERT - deleting ALL sets for exercise: ${workoutExercise.id}")
                 workoutDao.deleteSetsByExercise(workoutExercise.id)
