@@ -72,6 +72,8 @@ internal class FriendsStoreFactory(
 
     private inner class ExecutorImpl : CoroutineExecutor<FriendsStore.Intent, Nothing, FriendsStore.State, Msg, FriendsStore.Label>() {
         override fun executeIntent(intent: FriendsStore.Intent, getState: () -> FriendsStore.State) {
+            android.util.Log.d("important", "=== FriendsStore executor ===")
+            android.util.Log.d("important", "Intent: $intent")
             when (intent) {
                 FriendsStore.Intent.LoadFriends -> loadFriends()
                 is FriendsStore.Intent.AddFriend -> addFriend(intent.email, intent.passkey)
@@ -83,14 +85,19 @@ internal class FriendsStoreFactory(
         }
 
         private fun loadFriends() = scope.launch {
+            android.util.Log.d("important", "=== loadFriends called ===")
             dispatch(Msg.Loading)
             try {
                 getFriendsUseCase().catch { e ->
+                    android.util.Log.e("important", "❌ ERROR loading friends: ${e.message}")
                     dispatch(Msg.Error(e.message ?: "Failed to load friends"))
                 }.collect { friends ->
+                    android.util.Log.d("important", "✅ Friends received from use case: ${friends.size}")
+                    android.util.Log.d("important", "Friends: ${friends.map { it.friendUserId to (it.username ?: "Unknown") }}")
                     dispatch(Msg.FriendsLoaded(friends))
                 }
             } catch (e: Exception) {
+                android.util.Log.e("important", "❌ EXCEPTION in loadFriends: ${e.message}")
                 dispatch(Msg.Error(e.message ?: "Failed to load friends"))
             }
         }
@@ -147,11 +154,15 @@ internal class FriendsStoreFactory(
                     isLoading = true,
                     error = null
                 )
-                is Msg.FriendsLoaded -> copy(
-                    friends = msg.friends,
-                    isLoading = false,
-                    error = null
-                )
+                is Msg.FriendsLoaded -> {
+                    android.util.Log.d("important", "=== Reducer: FriendsLoaded ===")
+                    android.util.Log.d("important", "Friends count: ${msg.friends.size}")
+                    copy(
+                        friends = msg.friends,
+                        isLoading = false,
+                        error = null
+                    )
+                }
                 is Msg.Error -> copy(
                     isLoading = false,
                     isAddingFriend = false,

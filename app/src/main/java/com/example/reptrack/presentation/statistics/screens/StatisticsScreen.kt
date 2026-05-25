@@ -44,6 +44,7 @@ import com.example.reptrack.presentation.statistics.components.WeightChartSectio
 import com.example.reptrack.presentation.statistics.components.dialogs.AddFriendDialog
 import com.example.reptrack.presentation.statistics.components.dialogs.FriendExerciseErrorDialog
 import com.example.reptrack.presentation.statistics.stores.StatisticsStore
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -58,6 +59,27 @@ fun StatisticsScreen(
     modifier: Modifier = Modifier
 ) {
     val state: StatisticsStore.State = store.states.collectAsState(StatisticsStore.State()).value
+
+    // Load friends locally in StatisticsScreen
+    var availableFriends by remember { mutableStateOf<List<Friend>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        android.util.Log.d("important", "=== Loading friends in StatisticsScreen ===")
+        getFriendsUseCase().catch { e ->
+            android.util.Log.e("important", "❌ ERROR loading friends: ${e.message}")
+        }.collect { friends ->
+            android.util.Log.d("important", "✅ Friends loaded in StatisticsScreen: ${friends.size}")
+            android.util.Log.d("important", "Friends: ${friends.map { it.friendUserId to (it.username ?: "Unknown") }}")
+            availableFriends = friends
+        }
+    }
+
+    // Log friends when received
+    LaunchedEffect(availableFriends) {
+        android.util.Log.d("important", "=== Friends state changed in StatisticsScreen ===")
+        android.util.Log.d("important", "availableFriends size: ${availableFriends.size}")
+        android.util.Log.d("important", "availableFriends: ${availableFriends.map { it.friendUserId to (it.username ?: "Unknown") }}")
+    }
 
     // Log state changes for debugging
     LaunchedEffect(state.selectedExerciseId, state.exerciseData, state.setColors) {
@@ -128,9 +150,9 @@ fun StatisticsScreen(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> WeightTab(store, state, friends)
-                    1 -> ExerciseTab(store, state, exercises, friends)
-                    2 -> MuscleTab(store, state, friends, getFriendsUseCase)
+                    0 -> WeightTab(store, state, availableFriends)
+                    1 -> ExerciseTab(store, state, exercises, availableFriends)
+                    2 -> MuscleTab(store, state, availableFriends, getFriendsUseCase)
                 }
             }
         }
@@ -267,6 +289,18 @@ private fun ExerciseTab(
                 visibleSets = state.visibleSets,
                 setColors = state.setColors,
                 friends = state.exerciseFriends,
+                friendExerciseData = state.friendExerciseData.mapValues { entry ->
+                    android.util.Log.d("StatisticsScreen", "Mapping friend exercise data for friendId=${entry.key}")
+                    android.util.Log.d("StatisticsScreen", "Friend ${entry.key} has ${entry.value.size} points")
+                    entry.value.map { point ->
+                        Pair(
+                            point.date.toEpochDay().toFloat(),
+                            point.value
+                        )
+                    }
+                }.also {
+                    android.util.Log.d("StatisticsScreen", "Final friendExerciseData for UI: keys=${it.keys}, size=${it.size}")
+                },
                 dateRange = dateRangeText,
                 onExerciseSelect = { exerciseId ->
                     android.util.Log.d("StatisticsScreen", "onExerciseSelect called with exerciseId: $exerciseId")

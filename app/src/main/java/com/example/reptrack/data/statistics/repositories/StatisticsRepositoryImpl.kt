@@ -5,6 +5,7 @@ import com.example.reptrack.data.local.dao.WeightRecordDao
 import com.example.reptrack.data.local.dao.WorkoutDao
 import com.example.reptrack.data.local.models.WeightRecordDb
 import com.example.reptrack.data.local.models.statistics.FriendConfigDb
+import com.example.reptrack.data.local.models.statistics.FriendExerciseDebugInfo
 import com.example.reptrack.domain.statistics.repositories.StatisticsRepository
 import com.example.reptrack.domain.statistics.entities.*
 import com.example.reptrack.domain.workout.entities.MuscleGroup
@@ -112,7 +113,42 @@ class StatisticsRepositoryImpl(
     }
 
     override suspend fun friendHasExercise(friendId: String, exerciseId: String): Boolean {
-        return workoutDao.friendHasExercise(friendId, exerciseId)
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "=== 🔍 CHECKING FRIEND EXERCISE ===")
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "Friend ID: $friendId")
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "Looking for exercise ID: $exerciseId")
+
+        // Get all friend exercises for logging
+        val friendExercises = workoutDao.debugGetFriendExercises(friendId)
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "=== 📋 FRIEND'S ALL EXERCISES (COMPLETED SESSIONS) ===")
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "Total exercises: ${friendExercises.size}")
+        friendExercises.forEach { ex ->
+            android.util.Log.d("FRIEND_EXERCISE_DEBUG", "   🏋️ ID: ${ex.exerciseId} | Name: ${ex.exerciseName}")
+        }
+
+        // Get detailed info for the specific exercise
+        val details = workoutDao.debugGetFriendExerciseDetails(friendId, exerciseId)
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "=== 📋 DETAILED INFO FOR EXERCISE: $exerciseId ===")
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "Found ${details.size} records")
+        if (details.isEmpty()) {
+            android.util.Log.d("FRIEND_EXERCISE_DEBUG", "❌ NO RECORDS FOUND - Friend has no data for this exercise")
+        } else {
+            details.forEach { detail ->
+                android.util.Log.d("FRIEND_EXERCISE_DEBUG", "   📅 Session: ${detail.sessionId} (status: ${detail.sessionStatus})")
+                android.util.Log.d("FRIEND_EXERCISE_DEBUG", "   🏋️ Exercise: ${detail.workoutExerciseId} (ref: ${detail.exerciseRefId})")
+                android.util.Log.d("FRIEND_EXERCISE_DEBUG", "   🎯 Set: ${detail.setId} (completed: ${detail.setCompleted}, weight: ${detail.weight})")
+            }
+        }
+
+        val hasExercise = workoutDao.friendHasExercise(friendId, exerciseId)
+        android.util.Log.d("FRIEND_EXERCISE_DEBUG", "✓ Friend has exercise (with COMPLETED sets): $hasExercise")
+
+        return hasExercise
+    }
+
+    override suspend fun debugGetFriendExercises(friendId: String): List<com.example.reptrack.data.local.models.statistics.FriendExerciseDebugInfo> {
+        return workoutDao.debugGetFriendExercises(friendId).map {
+            com.example.reptrack.data.local.models.statistics.FriendExerciseDebugInfo(it.exerciseId, it.exerciseName)
+        }
     }
 
     override fun observeMuscleGroupData(userId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<MuscleGroupDataPoint>> {

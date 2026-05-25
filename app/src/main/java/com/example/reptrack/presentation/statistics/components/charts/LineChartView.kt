@@ -37,7 +37,7 @@ fun LineChartView(
     showPoints: Boolean = true
 ) {
     val density = LocalDensity.current
-    var tooltipData by remember { mutableStateOf<Pair<Float, Float>?>(null) }
+    var tooltipData by remember { mutableStateOf<Pair<Pair<Float, Float>, Offset>?>(null) }
 
     // Add key to force recomposition when data changes
     val dataKey = remember(data) { data.keys.joinToString(",") + data.values.map { it.size }.joinToString(",") }
@@ -53,9 +53,15 @@ fun LineChartView(
                 .background(Color.Transparent)
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->
+                        android.util.Log.d("important", "=== Chart tapped ===")
+                        android.util.Log.d("important", "Tap offset: x=${offset.x}, y=${offset.y}")
+                        android.util.Log.d("important", "Data size: ${data.size}, Data keys: ${data.keys}")
+                        android.util.Log.d("important", "Total points: ${data.values.flatten().toList().size}")
+
                         // Find closest point
                         val allPoints = data.values.flatten().toList()
                         if (allPoints.isNotEmpty()) {
+                            android.util.Log.d("important", "Finding closest point...")
                             val closest = allPoints.minByOrNull { point ->
                                 val screenPos = mapToScreenFn(point.first, point.second)
                                 val dx = screenPos.x - offset.x
@@ -69,12 +75,20 @@ fun LineChartView(
                             val dy = screenPos.y - offset.y
                             val distance = sqrt((dx * dx + dy * dy).toDouble())
 
-                            // Show tooltip if tap is within 30px of a point
-                            if (distance <= 30f) {
-                                tooltipData = closest
+                            android.util.Log.d("important", "Closest point: ${closest.first}, ${closest.second}")
+                            android.util.Log.d("important", "Closest point screen pos: x=${screenPos.x}, y=${screenPos.y}")
+                            android.util.Log.d("important", "Distance from tap: $distance")
+
+                            // Show tooltip if tap is within 100px of a point (increased from 30)
+                            if (distance <= 100f) {
+                                android.util.Log.d("important", "SHOWING TOOLTIP - distance $distance <= 100f")
+                                tooltipData = Pair(closest, screenPos)
                             } else {
+                                android.util.Log.d("important", "Distance too large ($distance > 100f), hiding tooltip")
                                 tooltipData = null
                             }
+                        } else {
+                            android.util.Log.d("important", "No points to search")
                         }
                     }
                 }
@@ -278,32 +292,26 @@ fun LineChartView(
             )
             drawContext.canvas.nativeCanvas.restore()
 
-            // X-axis label (Days on bottom)
-            drawContext.canvas.nativeCanvas.drawText(
-                "Дни",
-                size.width / 2f,
-                size.height - 6.dp.toPx(),
-                yAxisLabelPaint
-            )
+            // X-axis label (Days on bottom) - removed as requested
         }
 
         // Show tooltip if point selected
-        tooltipData?.let { (x, y) ->
+        tooltipData?.let { (dataPoint, screenPos) ->
             Surface(
                 modifier = Modifier
                     .padding(8.dp)
                     .offset {
                         IntOffset(
-                            x = (chartPadding).toInt(),
-                            y = 20
+                            x = (screenPos.x + 15).toInt(),
+                            y = (screenPos.y - 60).toInt()
                         )
                     },
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shadowElevation = 4.dp
+                shadowElevation = 8.dp
             ) {
                 Text(
-                    text = formatTooltip(x, y),
+                    text = formatTooltip(dataPoint.first, dataPoint.second),
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.bodySmall
                 )

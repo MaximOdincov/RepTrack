@@ -63,7 +63,11 @@ sealed class Screen(val route: String) {
     data object Profile: Screen("profile")
     data object Statistics: Screen("statistics")
     data object Library: Screen("library")
-    data object LibraryAddToWorkout: Screen("library/add_to_workout")
+    data object LibraryAddToWorkout: Screen("library/add_to_workout/{date}") {
+        fun createRoute(date: String) = "library/add_to_workout/$date"
+
+        const val DATE_ARG = "date"
+    }
     data object CrashlyticsTest: Screen("crashlytics_test")
     data object ExerciseList: Screen("exercises/{mode}") {
         fun createRoute(mode: ExerciseListMode) = "exercises/${mode.value}"

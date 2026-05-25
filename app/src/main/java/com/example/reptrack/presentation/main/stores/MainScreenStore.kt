@@ -128,52 +128,56 @@ internal class MainScreenStoreFactory(
             dispatch(Msg.LoadingChanged(true))
             currentLoadJob = scope.launch {
                 try {
-                    val weekCalendar = calendarUseCase.observeWeekCalendar(date).flowOn(Dispatchers.IO).firstOrNull()
-                    val calendarDay = weekCalendar?.days?.find { it.date == date }
-                    val templates = calendarDay?.applicableTemplates ?: emptyList()
+                    // Use collect instead of firstOrNull for continuous updates
+                    calendarUseCase.observeWeekCalendar(date)
+                        .flowOn(Dispatchers.IO)
+                        .collect { weekCalendar ->
+                            val calendarDay = weekCalendar?.days?.find { it.date == date }
+                            val templates = calendarDay?.applicableTemplates ?: emptyList()
 
-                    var session: WorkoutSession? = null
+                            var session: WorkoutSession? = null
 
-                    // If we have templates, always call UseCase - it will check if session exists
-                    if (templates.isNotEmpty()) {
-                        val template = templates.first()
-                        val userId = authRepository.getCurrentUser()?.id
+                            // If we have templates, always call UseCase - it will check if session exists
+                            if (templates.isNotEmpty()) {
+                                val template = templates.first()
+                                val userId = authRepository.getCurrentUser()?.id
 
-                        if (userId != null) {
-                            val result = createSessionFromTemplateUseCase(
-                                templateId = template.id,
-                                userId = userId,
-                                date = date
-                            )
+                                if (userId != null) {
+                                    val result = createSessionFromTemplateUseCase(
+                                        templateId = template.id,
+                                        userId = userId,
+                                        date = date
+                                    )
 
-                            if (result.isSuccess) {
-                                session = result.getOrNull()
-                            } else {
-                                android.util.Log.e("SessionDB", "Failed to create session: ${result.exceptionOrNull()?.message}")
+                                    if (result.isSuccess) {
+                                        session = result.getOrNull()
+                                    } else {
+                                        android.util.Log.e("SessionDB", "Failed to create session: ${result.exceptionOrNull()?.message}")
+                                    }
+                                }
+                            } else if (calendarDay?.workoutSession != null) {
+                                // No templates but have existing session (e.g., manually created)
+                                session = calendarDay.workoutSession
+                            }
+
+                            dispatch(Msg.LoadingChanged(false))
+                            dispatch(Msg.WorkoutSessionLoaded(session))
+                            dispatch(Msg.TemplatesLoaded(templates))
+
+                            // Load data for all exercises in the session
+                            session?.exercises?.forEach { workoutExercise ->
+                                loadExerciseData(workoutExercise)
+                            }
+
+                            // If no session but have templates, load template exercises
+                            if (session == null && templates.isNotEmpty()) {
+                                templates.forEach { template ->
+                                    template.exerciseIds.forEach { exerciseId ->
+                                        loadTemplateExerciseData(exerciseId)
+                                    }
+                                }
                             }
                         }
-                    } else if (calendarDay?.workoutSession != null) {
-                        // No templates but have existing session (e.g., manually created)
-                        session = calendarDay.workoutSession
-                    }
-
-                    dispatch(Msg.WorkoutSessionLoaded(session))
-                    dispatch(Msg.TemplatesLoaded(templates))
-                    dispatch(Msg.LoadingChanged(false))
-
-                    // Load data for all exercises in the session
-                    session?.exercises?.forEach { workoutExercise ->
-                        loadExerciseData(workoutExercise)
-                    }
-
-                    // If no session but have templates, load template exercises
-                    if (session == null && templates.isNotEmpty()) {
-                        templates.forEach { template ->
-                            template.exerciseIds.forEach { exerciseId ->
-                                loadTemplateExerciseData(exerciseId)
-                            }
-                        }
-                    }
                 } catch (e: Exception) {
                     dispatch(Msg.LoadingChanged(false))
                 }

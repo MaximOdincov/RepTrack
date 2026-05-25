@@ -57,6 +57,7 @@ fun ExerciseChartSection(
     visibleSets: Set<Int>,
     setColors: Map<Int, Long>,
     friends: List<FriendConfig>,
+    friendExerciseData: Map<String, List<Pair<Float, Float>>>, // friendId -> data points
     dateRange: String,
     onExerciseSelect: (String) -> Unit,
     onToggleSetVisibility: (Int) -> Unit,
@@ -67,12 +68,15 @@ fun ExerciseChartSection(
     modifier: Modifier = Modifier
 ) {
     // Log on every composition
-    android.util.Log.d("ExerciseChartSection", "=== ExerciseChartSection recomposed ===")
-    android.util.Log.d("ExerciseChartSection", "selectedExerciseId: $selectedExerciseId")
-    android.util.Log.d("ExerciseChartSection", "exerciseData size: ${exerciseData.size}")
-    android.util.Log.d("ExerciseChartSection", "exerciseData keys: ${exerciseData.keys}")
-    android.util.Log.d("ExerciseChartSection", "visibleSets: $visibleSets")
-    android.util.Log.d("ExerciseChartSection", "exercises count: ${exercises.size}")
+    android.util.Log.d("important", "=== ExerciseChartSection recomposed ===")
+    android.util.Log.d("important", "selectedExerciseId: $selectedExerciseId")
+    android.util.Log.d("important", "exerciseData size: ${exerciseData.size}")
+    android.util.Log.d("important", "exerciseData keys: ${exerciseData.keys}")
+    android.util.Log.d("important", "friendExerciseData size: ${friendExerciseData.size}")
+    android.util.Log.d("important", "friendExerciseData keys: ${friendExerciseData.keys}")
+    android.util.Log.d("important", "friends list: ${friends.map { it.friendId to it.friendName }}")
+    android.util.Log.d("important", "visibleSets: $visibleSets")
+    android.util.Log.d("important", "exercises count: ${exercises.size}")
 
     var showExerciseDropdown by remember { mutableStateOf(false) }
 
@@ -186,7 +190,10 @@ fun ExerciseChartSection(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(items = exerciseData.keys.sorted().toList().take(10), key = { it: Int -> it }) { setIndex ->
+                    items(
+                        items = exerciseData.keys.sorted().toList().take(10),
+                        key = { setIndex: Int -> setIndex.toString() }
+                    ) { setIndex ->
                         val isVisible = setIndex in visibleSets
 
                         // Default colors for sets (deterministic by index) - same as in StatisticsStore
@@ -259,10 +266,36 @@ fun ExerciseChartSection(
                         )
                     }
                 } else {
-                    val visibleData: Map<String, List<Pair<Float, Float>>> = exerciseData
-                        .filter { (setIndex, _) -> setIndex in visibleSets }
-                        .mapKeys { (setIndex, _) -> "Set ${setIndex + 1}" }
-                        .mapValues { it.value }
+                    android.util.Log.d("important", "=== Building visibleData ===")
+                    android.util.Log.d("important", "exerciseData: $exerciseData")
+                    android.util.Log.d("important", "friendExerciseData: $friendExerciseData")
+                    android.util.Log.d("important", "friends: ${friends.map { it.friendId to it.friendName }}")
+
+                    // Combine user exercise data and friend exercise data
+                    val visibleData: Map<String, List<Pair<Float, Float>>> = buildMap {
+                        // Add user's exercise data
+                        exerciseData
+                            .filter { (setIndex, _) -> setIndex in visibleSets }
+                            .forEach { (setIndex, points) ->
+                                android.util.Log.d("important", "Adding user set $setIndex with ${points.size} points")
+                                put("Set ${setIndex + 1}", points)
+                            }
+
+                        // Add friends' exercise data
+                        friendExerciseData.forEach { (friendId, points) ->
+                            val friend = friends.find { it.friendId == friendId }
+                            if (friend != null) {
+                                android.util.Log.d("important", "Adding friend ${friend.friendName} (${friendId}) with ${points.size} points")
+                                put(friend.friendName, points)
+                            } else {
+                                android.util.Log.d("important", "Friend $friendId found in friendExerciseData but not in friends list")
+                            }
+                        }
+                    }
+
+                    android.util.Log.d("important", "Final visibleData keys: ${visibleData.keys}")
+                    android.util.Log.d("important", "Final visibleData size: ${visibleData.size}")
+                    android.util.Log.d("important", "Final visibleData values: ${visibleData.values.map { it.size }}")
 
                     if (visibleData.isNotEmpty() && visibleData.keys.isNotEmpty()) {
                         // Build map of series name to set index for color lookup
@@ -286,31 +319,49 @@ fun ExerciseChartSection(
                         )
 
                         val colors = visibleData.keys.associateWith { seriesName ->
-                            val setIndex = seriesToSetIndex[seriesName] ?: 0
-                            val color = if (setColors[setIndex] == null) {
-                                android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: color from state is null, using default color")
-                                val defaultColor = defaultColors.getOrElse(setIndex) {
-                                    defaultColors[(setIndex) % defaultColors.size]
-                                }
-                                android.util.Log.d("ExerciseChartSection", "Default color for set $setIndex: $defaultColor")
-                                defaultColor
-                            } else {
-                                val argb = setColors[setIndex]!!
+                            // Check if this is a friend's data
+                            val friend = friends.find { it.friendName == seriesName }
+                            if (friend != null) {
+                                // Use friend's configured color
+                                val argb = friend.color
                                 val alpha = ((argb shr 24) and 0xFF).toInt() / 255f
                                 val red = ((argb shr 16) and 0xFF).toInt() / 255f
                                 val green = ((argb shr 8) and 0xFF).toInt() / 255f
                                 val blue = (argb and 0xFF).toInt() / 255f
                                 val unpackedColor = Color(red, green, blue, alpha)
-                                android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: ARGB from DB = 0x${argb.toString(16)}")
+                                android.util.Log.d("ExerciseChartSection", "Chart Friend $seriesName: ARGB from friendConfig = 0x${argb.toString(16)}")
                                 android.util.Log.d("ExerciseChartSection", "  Float A=$alpha, R=$red, G=$green, B=$blue")
                                 android.util.Log.d("ExerciseChartSection", "  Unpacked Color = $unpackedColor")
                                 unpackedColor
+                            } else {
+                                // This is user's set data
+                                val setIndex = seriesToSetIndex[seriesName] ?: 0
+                                val color = if (setColors[setIndex] == null) {
+                                    android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: color from state is null, using default color")
+                                    val defaultColor = defaultColors.getOrElse(setIndex) {
+                                        defaultColors[(setIndex) % defaultColors.size]
+                                    }
+                                    android.util.Log.d("ExerciseChartSection", "Default color for set $setIndex: $defaultColor")
+                                    defaultColor
+                                } else {
+                                    val argb = setColors[setIndex]!!
+                                    val alpha = ((argb shr 24) and 0xFF).toInt() / 255f
+                                    val red = ((argb shr 16) and 0xFF).toInt() / 255f
+                                    val green = ((argb shr 8) and 0xFF).toInt() / 255f
+                                    val blue = (argb and 0xFF).toInt() / 255f
+                                    val unpackedColor = Color(red, green, blue, alpha)
+                                    android.util.Log.d("ExerciseChartSection", "Chart Set $setIndex: ARGB from DB = 0x${argb.toString(16)}")
+                                    android.util.Log.d("ExerciseChartSection", "  Float A=$alpha, R=$red, G=$green, B=$blue")
+                                    android.util.Log.d("ExerciseChartSection", "  Unpacked Color = $unpackedColor")
+                                    unpackedColor
+                                }
+                                color
                             }
-                            color
                         }
 
                         // Add key to force recomposition when data changes
-                        android.util.Log.d("ExerciseChartSection", "LineChartView key: ${visibleData.keys.joinToString(",") + visibleData.values.map { it.size }.joinToString(",")}")
+                        android.util.Log.d("important", "LineChartView key: ${visibleData.keys.joinToString(",") + visibleData.values.map { it.size }.joinToString(",")}")
+                        android.util.Log.d("important", "Passing to LineChartView: data keys=${visibleData.keys}, colors keys=${colors.keys}")
                         LineChartView(
                             data = visibleData,
                             seriesColors = colors,

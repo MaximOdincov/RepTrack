@@ -256,6 +256,34 @@ interface WorkoutDao {
     """)
     suspend fun friendHasExercise(friendId: String, exerciseId: String): Boolean
 
+    // Получение всех упражнений друга для отладки
+    @Query("""
+        SELECT DISTINCT we.exerciseId as id, we.exerciseName as name
+        FROM workout_exercises we
+        INNER JOIN workout_sessions s ON we.workoutSessionId = s.id
+        WHERE s.userId = :friendId
+        AND s.status = 'COMPLETED'
+        ORDER BY we.exerciseName
+    """)
+    suspend fun debugGetFriendExercises(friendId: String): List<com.example.reptrack.data.local.models.statistics.ExerciseIdNamePair>
+
+    // Детальный дебаг - какие подходы есть у друга для конкретного упражнения
+    @Query("""
+        SELECT s.id as sessionId, s.status as sessionStatus,
+               we.id as exerciseId, we.exerciseId as exerciseRefId,
+               ws.id as setId, ws.isCompleted as setCompleted, ws.weight
+        FROM workout_sets ws
+        INNER JOIN workout_exercises we ON ws.workoutExerciseId = we.id
+        INNER JOIN workout_sessions s ON we.workoutSessionId = s.id
+        WHERE s.userId = :friendId
+        AND we.exerciseId = :exerciseId
+        LIMIT 10
+    """)
+    suspend fun debugGetFriendExerciseDetails(
+        friendId: String,
+        exerciseId: String
+    ): List<com.example.reptrack.data.local.models.statistics.FriendExerciseDebugDetails>
+
     // Лучший подход друга для упражнения
     @Query("""
         SELECT s.date, MAX(ws.weight) as bestWeight, ws.reps

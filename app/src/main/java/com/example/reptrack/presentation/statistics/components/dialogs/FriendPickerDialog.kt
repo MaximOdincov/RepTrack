@@ -46,6 +46,10 @@ fun AddFriendDialog(
     onAddFriend: (String, Long) -> Unit,
     showColorPicker: Boolean = false
 ) {
+    android.util.Log.d("important", "=== AddFriendDialog created ===")
+    android.util.Log.d("important", "availableFriends: ${availableFriends.map { it.friendUserId to (it.username ?: "Unknown") }}")
+    android.util.Log.d("important", "addedFriends: $addedFriends")
+
     var selectedFriendId by remember { mutableStateOf<String?>(null) }
     var initialColor = Color(android.graphics.Color.parseColor("#6200EE"))
     // Convert Color to ARGB Long
@@ -188,9 +192,13 @@ fun AddFriendDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    android.util.Log.d("important", "=== Add friend button clicked ===")
+                    android.util.Log.d("important", "selectedFriendId: $selectedFriendId")
+                    android.util.Log.d("important", "selectedColor: 0x${selectedColor.toString(16)}")
                     selectedFriendId?.let {
+                        android.util.Log.d("important", "Calling onAddFriend with friendId=$it, color=0x${selectedColor.toString(16)}")
                         onAddFriend(it, selectedColor)
-                    }
+                    } ?: android.util.Log.d("important", "No friend selected!")
                 },
                 enabled = selectedFriendId != null
             ) {

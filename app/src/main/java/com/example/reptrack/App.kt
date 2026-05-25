@@ -73,7 +73,8 @@ class App: Application() {
             com.example.reptrack.di.databaseModule,
             com.example.reptrack.di.friendsModule,
             com.example.reptrack.di.backupModule,
-            com.example.reptrack.di.statisticsModule
+            com.example.reptrack.di.statisticsModule,
+            com.example.reptrack.di.timerModule
         )
 
         /**

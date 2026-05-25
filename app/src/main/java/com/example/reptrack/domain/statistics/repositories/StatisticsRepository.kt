@@ -18,6 +18,7 @@ interface StatisticsRepository {
     fun observeExerciseData(userId: String, userName: String, exerciseId: String, fromDate: LocalDateTime, toDate: LocalDateTime, maxSets: Int = 10): Flow<List<ExerciseDataPoint>>
     fun observeFriendExerciseData(friendId: String, friendName: String, exerciseId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<ExerciseDataPoint>>
     suspend fun friendHasExercise(friendId: String, exerciseId: String): Boolean
+    suspend fun debugGetFriendExercises(friendId: String): List<com.example.reptrack.data.local.models.statistics.FriendExerciseDebugInfo>
 
     // Muscle Groups
     fun observeMuscleGroupData(userId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<MuscleGroupDataPoint>>

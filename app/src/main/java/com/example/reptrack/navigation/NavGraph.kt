@@ -22,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.App
 import com.example.reptrack.domain.profile.usecases.AddUserUseCase
@@ -60,6 +61,7 @@ import com.example.reptrack.data.auth.toDomain
 import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.usecases.templates.CreateWorkoutTemplateUseCase
 import com.example.reptrack.presentation.library.screens.LibraryScreen
+import com.example.reptrack.presentation.timer.stores.TimerStore
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
@@ -210,6 +212,8 @@ fun AppNavGraph(){
                         }
                     }
 
+                    val state by store.states.collectAsState(com.example.reptrack.presentation.main.stores.MainScreenStore.State())
+
                     MainScreen(
                         store = store,
                         calendarUseCase = calendarUseCase,
@@ -217,7 +221,7 @@ fun AppNavGraph(){
                             navController.navigate(Screen.WorkoutExerciseDetail.createRoute(workoutExerciseId))
                         },
                         onNavigateToLibrary = {
-                            navController.navigate(Screen.LibraryAddToWorkout.route)
+                            navController.navigate(Screen.LibraryAddToWorkout.createRoute(state.currentDate.toString()))
                         }
                     )
                 }
@@ -520,7 +524,23 @@ fun AppNavGraph(){
                 }
 
                 composable(Screen.Timer.route){
-                    TimerScreen()
+                    val storeFactory: com.example.reptrack.presentation.timer.stores.TimerStoreFactory = getKoin().get()
+                    val store = remember { storeFactory.create() }
+
+                    val state by store.states.collectAsState(initial = com.example.reptrack.presentation.timer.stores.TimerStore.State())
+
+                    LaunchedEffect(store) {
+                        store.labels.collect {label ->
+                            when (label) {
+                                TimerStore.Label.TimerCompleted -> {
+                                    // Timer completed - sound is played in the store
+                                }
+                                else -> {}
+                            }
+                        }
+                    }
+
+                    TimerScreen(store = store)
                 }
 
                 composable(Screen.Profile.route){
@@ -576,7 +596,10 @@ fun AppNavGraph(){
 
                     // Load exercises and friends
                     LaunchedEffect(Unit) {
+                        android.util.Log.d("important", "=== NavGraph LaunchedEffect - loading data ===")
+                        android.util.Log.d("important", "Calling statisticsStore.LoadData...")
                         statisticsStore.accept(com.example.reptrack.presentation.statistics.stores.StatisticsStore.Intent.LoadData)
+                        android.util.Log.d("important", "Calling friendsStore.LoadFriends...")
                         friendsStore.accept(com.example.reptrack.presentation.profile.stores.FriendsStore.Intent.LoadFriends)
                     }
 
@@ -585,7 +608,21 @@ fun AppNavGraph(){
                     LaunchedEffect(Unit) {
                         observeAllExercisesUseCase().collect { exerciseMap ->
                             exercises = exerciseMap.values.flatten()
+
+                            // Log all user exercises with IDs
+                            android.util.Log.d("EXERCISE_IDS", "=== 📋 USER'S EXERCISES ===")
+                            android.util.Log.d("EXERCISE_IDS", "Total exercises: ${exercises.size}")
+                            exercises.forEach { exercise ->
+                                android.util.Log.d("EXERCISE_IDS", "   🏋️ ID: ${exercise.id} | Name: ${exercise.name} | Custom: ${exercise.isCustom}")
+                            }
                         }
+                    }
+
+                    // Log friends state
+                    LaunchedEffect(friends.friends) {
+                        android.util.Log.d("important", "=== Friends state changed in NavGraph ===")
+                        android.util.Log.d("important", "friends size: ${friends.friends.size}")
+                        android.util.Log.d("important", "friends: ${friends.friends.map { it.friendUserId to (it.username ?: "Unknown") }}")
                     }
 
                     com.example.reptrack.presentation.statistics.screens.StatisticsScreen(
@@ -650,7 +687,18 @@ fun AppNavGraph(){
                     )
                 }
 
-                composable(Screen.LibraryAddToWorkout.route){
+                composable(
+                    route = Screen.LibraryAddToWorkout.route,
+                    arguments = listOf(
+                        navArgument(Screen.LibraryAddToWorkout.DATE_ARG) {
+                            type = NavType.StringType
+                            nullable = false
+                        }
+                    )
+                ) {
+                    val dateArg = it.arguments?.getString(Screen.LibraryAddToWorkout.DATE_ARG)
+                    val selectedDate = java.time.LocalDate.parse(dateArg)
+
                     val exerciseStore: ExerciseListStore = getKoin().get()
                     val templateStoreFactory: TemplateListStoreFactory = getKoin().get()
 
@@ -679,20 +727,17 @@ fun AppNavGraph(){
                         onAddExerciseToWorkout = { exercise ->
                             coroutineScope.launch {
                                 try {
-                                    // Get current date
-                                    val currentDate = java.time.LocalDate.now()
-
-                                    // Get or create session for today
-                                    var session = sessionRepository.getSessionByDate(currentDate)
+                                    // Get or create session for selected date
+                                    var session = sessionRepository.getSessionByDate(selectedDate)
                                     val currentUser = authRepository.getCurrentUser()
                                     val userId = currentUser?.id ?: ""
 
                                     if (session == null && userId.isNotEmpty()) {
-                                        // Create new session
+                                        // Create new session for selected date
                                         val newSession = com.example.reptrack.domain.workout.entities.WorkoutSession(
                                             id = java.util.UUID.randomUUID().toString(),
                                             userId = userId,
-                                            date = currentDate.atTime(9, 0),
+                                            date = selectedDate.atTime(9, 0),
                                             status = com.example.reptrack.domain.workout.entities.WorkoutStatus.IN_PROGRESS,
                                             name = "Тренировка",
                                             durationSeconds = 0,
@@ -748,7 +793,6 @@ fun AppNavGraph(){
                             coroutineScope.launch {
                                 val currentUser = authRepository.getCurrentUser()
                                 val userId = currentUser?.id ?: ""
-                                val currentDate = java.time.LocalDate.now()
 
                                 if (userId.isEmpty()) {
                                     io.github.aakira.napier.Napier.e(
@@ -762,7 +806,7 @@ fun AppNavGraph(){
                                 val result = createSessionFromTemplateUseCase(
                                     templateId = template.id,
                                     userId = userId,
-                                    date = currentDate,
+                                    date = selectedDate,
                                     sessionName = template.name,
                                     unlinkFromTemplate = true
                                 )

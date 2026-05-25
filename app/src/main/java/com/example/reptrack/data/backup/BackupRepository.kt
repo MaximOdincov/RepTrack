@@ -29,8 +29,8 @@ class BackupRepository(
 
             syncExercises(userId)
             syncWorkoutSessions(userId)
-            syncWorkoutSets(userId)
-            syncWorkoutExercises(userId)
+            syncWorkoutExercises(userId)  // Сначала синхронизируем упражнения в тренировке
+            syncWorkoutSets(userId)       // Потом подходы (зависят от упражнений)
             syncWorkoutTemplates(userId)
             syncTemplateExercises(userId)
             syncUsers(userId)
