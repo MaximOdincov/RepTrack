@@ -48,6 +48,10 @@ class StatisticsRepositoryImpl(
         }
     }
 
+    override suspend fun getCurrentWeight(userId: String): Float? {
+        return weightRecordDao.getLatestRecord(userId)?.value
+    }
+
     override suspend fun updateWeightRecord(userId: String, date: LocalDateTime, value: Float) {
         val startOfDay = date.toLocalDate().atStartOfDay()
         val endOfDay = date.toLocalDate().plusDays(1).atStartOfDay()

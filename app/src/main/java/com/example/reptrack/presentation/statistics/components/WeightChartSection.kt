@@ -3,6 +3,10 @@ package com.example.reptrack.presentation.statistics.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,16 +31,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.reptrack.domain.statistics.entities.FriendConfig
 import com.example.reptrack.presentation.statistics.components.charts.LineChartView
 import com.example.reptrack.presentation.statistics.components.common.FriendChip
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -44,14 +59,18 @@ import java.time.format.DateTimeFormatter
 fun WeightChartSection(
     currentWeight: Float?,
     weightData: List<Pair<Float, Float>>, // List of (timestamp, weight)
+    friendWeightData: Map<String, List<Pair<Float, Float>>>, // friendId -> data
     friends: List<FriendConfig>,
     dateRange: String,
-    onWeightChange: (Float) -> Unit,
+    onWeightSave: (Float) -> Unit,
     onAddFriend: () -> Unit,
     onRemoveFriend: (String) -> Unit,
     onChangeDateRange: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var editingWeight by remember { mutableStateOf(currentWeight ?: 0f) }
+    var showSaveButton by remember { mutableStateOf(false) }
+    var isPressed by remember { mutableStateOf(false) }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -77,56 +96,114 @@ fun WeightChartSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Weight counter with +/- buttons
-            Row(
+            // Compact weight controller (like in exercise)
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                IconButton(
-                    onClick = { currentWeight?.let { onWeightChange(it - 0.5f) } },
-                    modifier = Modifier.size(48.dp)
+                // Weight display with +/- buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Decrease weight",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Minus button
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                editingWeight = (editingWeight - 0.5f).coerceAtLeast(0f)
+                                showSaveButton = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
-                            text = "${currentWeight ?: "--"} kg",
-                            style = MaterialTheme.typography.headlineMedium,
+                            text = "−",
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
+                    }
+
+                    // Weight display
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val displayWeight = String.format("%.1f", editingWeight)
+                            android.util.Log.d("WeightChartSection", "Displaying weight: $editingWeight -> formatted: $displayWeight")
+                            Text(
+                                text = displayWeight,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "kg",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Plus button
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                editingWeight += 0.5f
+                                showSaveButton = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
-                            text = "Today",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                            text = "+",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
 
-                IconButton(
-                    onClick = { currentWeight?.let { onWeightChange(it + 0.5f) } },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Increase weight",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                // Save button
+                if (showSaveButton) {
+                    Button(
+                        onClick = {
+                            onWeightSave(editingWeight)
+                            showSaveButton = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Save Weight",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
 
@@ -150,12 +227,28 @@ fun WeightChartSection(
                         )
                     }
                 } else {
-                    val chartData = mapOf(
+                    val chartData = mutableMapOf(
                         "You" to weightData
                     )
+
+                    // Add friends' data
+                    friends.forEach { friend ->
+                        friendWeightData[friend.friendId]?.let { data ->
+                            chartData[friend.friendName] = data
+                        }
+                    }
+
+                    val seriesColors = mutableMapOf(
+                        "You" to MaterialTheme.colorScheme.primary
+                    )
+
+                    friends.forEach { friend ->
+                        seriesColors[friend.friendName] = Color(friend.color)
+                    }
+
                     LineChartView(
                         data = chartData,
-                        seriesColors = mapOf("You" to MaterialTheme.colorScheme.primary),
+                        seriesColors = seriesColors,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

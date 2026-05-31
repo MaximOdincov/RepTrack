@@ -42,6 +42,14 @@ fun LineChartView(
     // Add key to force recomposition when data changes
     val dataKey = remember(data) { data.keys.joinToString(",") + data.values.map { it.size }.joinToString(",") }
 
+    // Debug logging for weight values
+    data.forEach { (seriesName, points) ->
+        android.util.Log.d("LineChartView", "Series: $seriesName")
+        points.forEach { (x, y) ->
+            android.util.Log.d("LineChartView", "  Point: x=$x (date: ${java.time.LocalDate.ofEpochDay(x.toLong())}), y=$y")
+        }
+    }
+
     Box(modifier = modifier) {
         var chartPadding by remember { mutableStateOf(0f) }
         var chartSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }

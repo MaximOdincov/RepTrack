@@ -185,6 +185,20 @@ private fun WeightTab(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
+            // Debug logging for weight data
+            android.util.Log.d("StatisticsScreen", "=== Weight Data ===")
+            android.util.Log.d("StatisticsScreen", "currentWeight: ${state.currentWeight}")
+            state.weightData.forEach { dataPoint ->
+                android.util.Log.d("StatisticsScreen", "Local weight: date=${dataPoint.date}, value=${dataPoint.value}")
+            }
+
+            state.friendWeightData.forEach { (friendId, dataPoints) ->
+                android.util.Log.d("StatisticsScreen", "Friend $friendId weight data:")
+                dataPoints.forEach { dataPoint ->
+                    android.util.Log.d("StatisticsScreen", "  date=${dataPoint.date}, value=${dataPoint.value}")
+                }
+            }
+
             WeightChartSection(
                 currentWeight = state.currentWeight,
                 weightData = state.weightData.map {
@@ -192,10 +206,24 @@ private fun WeightTab(
                         it.date.toEpochDay().toFloat(),
                         it.value
                     )
+                }.also { mappedData ->
+                    android.util.Log.d("StatisticsScreen", "Mapped weight data:")
+                    mappedData.forEach { (x, y) ->
+                        android.util.Log.d("StatisticsScreen", "  x=$x (epoch day), y=$y")
+                    }
+                },
+                friendWeightData = state.friendWeightData.mapValues { entry ->
+                    entry.value.map { data ->
+                        Pair(
+                            data.date.toEpochDay().toFloat(),
+                            data.value
+                        )
+                    }
                 },
                 friends = state.friends,
                 dateRange = dateRangeText,
-                onWeightChange = { weight ->
+                onWeightSave = { weight ->
+                    android.util.Log.d("StatisticsScreen", "Saving weight: $weight")
                     store.accept(StatisticsStore.Intent.UpdateWeight(weight))
                 },
                 onAddFriend = { showAddFriendDialog = true },
@@ -385,7 +413,7 @@ private fun MuscleTab(
             MuscleGroupChartSection(
                 muscleGroupData = state.muscleGroupData,
                 friends = state.friends,
-                friendMuscleData = emptyMap(), // TODO: Load friend muscle data
+                friendMuscleData = state.friendMuscleGroupData,
                 dateRange = dateRangeText,
                 onAddFriend = { showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->

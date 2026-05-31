@@ -13,6 +13,7 @@ interface StatisticsRepository {
     fun observeWeightData(userId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<WeightDataPoint>>
     fun observeFriendWeightData(friendId: String, friendName: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<WeightDataPoint>>
     suspend fun updateWeightRecord(userId: String, date: LocalDateTime, value: Float)
+    suspend fun getCurrentWeight(userId: String): Float?
 
     // Exercise
     fun observeExerciseData(userId: String, userName: String, exerciseId: String, fromDate: LocalDateTime, toDate: LocalDateTime, maxSets: Int = 10): Flow<List<ExerciseDataPoint>>

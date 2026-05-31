@@ -102,6 +102,7 @@ internal class StatisticsStoreFactory(
         data class DateRangeChanged(val dateRange: DateRange) : Msg
         data class WeightDataLoaded(val data: List<WeightDataPoint>) : Msg
         data class CurrentWeightUpdated(val weight: Float) : Msg
+        data class CurrentWeightLoaded(val weight: Float) : Msg
         data class FriendAdded(val friendConfig: FriendConfig) : Msg
         data class FriendRemoved(val friendId: String) : Msg
         data class FriendColorChanged(val friendId: String, val color: Long) : Msg
