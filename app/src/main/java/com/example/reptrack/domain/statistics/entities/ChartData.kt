@@ -3,6 +3,7 @@ package com.example.reptrack.domain.statistics.entities
 import com.example.reptrack.domain.workout.entities.MuscleGroup
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlinx.serialization.Serializable
 
 data class ChartData(
     val type: ChartType,
@@ -74,6 +75,7 @@ data class DateRange(
     }
 }
 
+@Serializable
 data class FriendConfig(
     val friendId: String,
     val friendName: String,

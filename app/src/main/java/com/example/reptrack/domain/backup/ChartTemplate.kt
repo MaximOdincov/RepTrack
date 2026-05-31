@@ -1,5 +1,7 @@
 package com.example.reptrack.domain.workout.statistics
 
+import com.example.reptrack.domain.statistics.entities.FriendConfig
+
 data class ChartTemplate(
     val id: Long,
     val name: String,

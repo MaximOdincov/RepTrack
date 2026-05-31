@@ -22,30 +22,31 @@ interface StatisticsStore : Store<StatisticsStore.Intent, StatisticsStore.State,
         data class SelectExercise(val exerciseId: String) : Intent()
         data class ToggleSetVisibility(val setIndex: Int) : Intent()
         data class ChangeSetLineColor(val setIndex: Int, val color: Long) : Intent()
-        data class AddFriendToChart(val chartType: ChartType, val friendId: String, val color: Long) : Intent()
-        data class RemoveFriendFromChart(val chartType: ChartType, val friendId: String) : Intent()
-        data class ChangeFriendColor(val chartType: ChartType, val friendId: String, val color: Long) : Intent()
+        data class AddFriend(val friendId: String, val friendName: String) : Intent()
+        data class RemoveFriend(val friendId: String) : Intent()
+        data class ChangeFriendColor(val friendId: String, val color: Long) : Intent()
     }
 
     data class State(
         val isLoading: Boolean = false,
         val error: String? = null,
         val dateRange: DateRange = DateRange.last30Days(),
+        // Common friends list for all charts
+        val friends: List<FriendConfig> = emptyList(),
         // Weight
         val weightData: List<WeightDataPoint> = emptyList(),
         val currentWeight: Float? = null,
-        val weightFriends: List<FriendConfig> = emptyList(),
+        val friendWeightData: Map<String, List<WeightDataPoint>> = emptyMap(),
         // Exercise
         val selectedExerciseId: String? = null,
         val exerciseData: Map<Int, List<ExerciseDataPoint>> = emptyMap(),
         val visibleSets: Set<Int> = emptySet(),
         val setColors: Map<Int, Long> = emptyMap(),
-        val exerciseFriends: List<FriendConfig> = emptyList(),
         // Friend exercise data - map of friendId to list of exercise data points
         val friendExerciseData: Map<String, List<ExerciseDataPoint>> = emptyMap(),
         // Muscle Groups
         val muscleGroupData: List<MuscleGroupDataPoint> = emptyList(),
-        val muscleGroupFriends: List<FriendConfig> = emptyList(),
+        val friendMuscleGroupData: Map<String, List<MuscleGroupDataPoint>> = emptyMap(),
         // User info
         val userId: String? = null,
         val userName: String? = null
@@ -62,19 +63,35 @@ internal class StatisticsStoreFactory(
     private val getFriendWeightChartDataUseCase: GetFriendWeightChartDataUseCase,
     private val updateWeightUseCase: UpdateWeightUseCase,
     private val getExerciseChartDataUseCase: GetExerciseChartDataUseCase,
-    private val getFriendExerciseChartDataUseCase: GetFriendExerciseChartDataUseCase,
+    private val getFriendExerciseDataFromFirebaseUseCase: GetFriendExerciseDataFromFirebaseUseCase,
     private val getMuscleGroupChartDataUseCase: GetMuscleGroupChartDataUseCase,
     private val getFriendMuscleGroupChartDataUseCase: GetFriendMuscleGroupChartDataUseCase,
-    private val friendHasExerciseUseCase: FriendHasExerciseUseCase,
     private val getFriendsUseCase: GetFriendsUseCase,
-    private val getCurrentUserProfileUseCase: GetCurrentUserProfileUseCase
+    private val getCurrentUserProfileUseCase: GetCurrentUserProfileUseCase,
+    private val savedFriendsManager: com.example.reptrack.data.preferences.SavedFriendsManager
 ) {
 
     fun create(): StatisticsStore =
         object : StatisticsStore, Store<StatisticsStore.Intent, StatisticsStore.State, StatisticsStore.Label> by storeFactory.create(
             name = "StatisticsStore",
-            initialState = StatisticsStore.State(),
-            executorFactory = ::ExecutorImpl,
+            initialState = StatisticsStore.State(
+                friends = savedFriendsManager.loadFriends()
+            ),
+            executorFactory = {
+                ExecutorImpl(
+                    savedFriendsManager,
+                    storeFactory,
+                    getWeightChartDataUseCase,
+                    getFriendWeightChartDataUseCase,
+                    updateWeightUseCase,
+                    getExerciseChartDataUseCase,
+                    getFriendExerciseDataFromFirebaseUseCase,
+                    getMuscleGroupChartDataUseCase,
+                    getFriendMuscleGroupChartDataUseCase,
+                    getFriendsUseCase,
+                    getCurrentUserProfileUseCase
+                )
+            },
             reducer = ReducerImpl
         ) {}
 
@@ -84,24 +101,33 @@ internal class StatisticsStoreFactory(
         data class UserLoaded(val userId: String, val userName: String) : Msg
         data class DateRangeChanged(val dateRange: DateRange) : Msg
         data class WeightDataLoaded(val data: List<WeightDataPoint>) : Msg
-        data class FriendWeightDataLoaded(val data: List<WeightDataPoint>) : Msg
         data class CurrentWeightUpdated(val weight: Float) : Msg
-        data class FriendWeightAdded(val friendConfig: FriendConfig) : Msg
-        data class FriendWeightRemoved(val friendId: String) : Msg
-        data class FriendWeightColorChanged(val friendId: String, val color: Long) : Msg
+        data class FriendAdded(val friendConfig: FriendConfig) : Msg
+        data class FriendRemoved(val friendId: String) : Msg
+        data class FriendColorChanged(val friendId: String, val color: Long) : Msg
+        data class FriendWeightDataLoaded(val friendId: String, val data: List<WeightDataPoint>) : Msg
         data class ExerciseSelected(val exerciseId: String) : Msg
         data class ExerciseDataLoaded(val data: Map<Int, List<ExerciseDataPoint>>) : Msg
         data class SetVisibilityToggled(val setIndex: Int) : Msg
         data class SetLineColorChanged(val setIndex: Int, val color: Long) : Msg
-        data class FriendExerciseAdded(val friendConfig: FriendConfig) : Msg
-        data class FriendExerciseRemoved(val friendId: String) : Msg
         data class FriendExerciseDataLoaded(val friendId: String, val data: List<ExerciseDataPoint>) : Msg
         data class MuscleGroupDataLoaded(val data: List<MuscleGroupDataPoint>) : Msg
-        data class FriendMuscleGroupAdded(val friendConfig: FriendConfig) : Msg
-        data class FriendMuscleGroupRemoved(val friendId: String) : Msg
+        data class FriendMuscleGroupDataLoaded(val friendId: String, val data: List<MuscleGroupDataPoint>) : Msg
     }
 
-    private inner class ExecutorImpl : CoroutineExecutor<StatisticsStore.Intent, Nothing, StatisticsStore.State, Msg, StatisticsStore.Label>() {
+    private class ExecutorImpl(
+        private val savedFriendsManager: com.example.reptrack.data.preferences.SavedFriendsManager,
+        private val storeFactory: StoreFactory,
+        private val getWeightChartDataUseCase: GetWeightChartDataUseCase,
+        private val getFriendWeightChartDataUseCase: GetFriendWeightChartDataUseCase,
+        private val updateWeightUseCase: UpdateWeightUseCase,
+        private val getExerciseChartDataUseCase: GetExerciseChartDataUseCase,
+        private val getFriendExerciseDataFromFirebaseUseCase: GetFriendExerciseDataFromFirebaseUseCase,
+        private val getMuscleGroupChartDataUseCase: GetMuscleGroupChartDataUseCase,
+        private val getFriendMuscleGroupChartDataUseCase: GetFriendMuscleGroupChartDataUseCase,
+        private val getFriendsUseCase: GetFriendsUseCase,
+        private val getCurrentUserProfileUseCase: GetCurrentUserProfileUseCase
+    ) : CoroutineExecutor<StatisticsStore.Intent, Nothing, StatisticsStore.State, Msg, StatisticsStore.Label>() {
         override fun executeIntent(intent: StatisticsStore.Intent, getState: () -> StatisticsStore.State) {
             android.util.Log.d("StatisticsStore", "=== executeIntent called ===")
             android.util.Log.d("StatisticsStore", "Intent: $intent")
@@ -112,9 +138,13 @@ internal class StatisticsStoreFactory(
                 is StatisticsStore.Intent.SelectExercise -> selectExercise(intent.exerciseId, getState())
                 is StatisticsStore.Intent.ToggleSetVisibility -> dispatch(Msg.SetVisibilityToggled(intent.setIndex))
                 is StatisticsStore.Intent.ChangeSetLineColor -> dispatch(Msg.SetLineColorChanged(intent.setIndex, intent.color))
-                is StatisticsStore.Intent.AddFriendToChart -> addFriendToChart(intent.chartType, intent.friendId, intent.color, getState())
-                is StatisticsStore.Intent.RemoveFriendFromChart -> removeFriendFromChart(intent.chartType, intent.friendId, getState())
-                is StatisticsStore.Intent.ChangeFriendColor -> changeFriendColor(intent.chartType, intent.friendId, intent.color, getState())
+                is StatisticsStore.Intent.AddFriend -> addFriend(intent.friendId, intent.friendName, getState())
+                is StatisticsStore.Intent.RemoveFriend -> removeFriend(intent.friendId, getState())
+                is StatisticsStore.Intent.ChangeFriendColor -> {
+                    // Save to persistent storage
+                    savedFriendsManager.updateFriendColor(intent.friendId, intent.color)
+                    dispatch(Msg.FriendColorChanged(intent.friendId, intent.color))
+                }
             }
         }
 
@@ -125,7 +155,7 @@ internal class StatisticsStoreFactory(
             android.util.Log.d("important", "userId in state: ${state.userId}")
             android.util.Log.d("important", "selectedExerciseId in state: ${state.selectedExerciseId}")
             android.util.Log.d("important", "dateRange in state: ${state.dateRange.from} to ${state.dateRange.to}")
-            android.util.Log.d("important", "exerciseFriends in state: ${state.exerciseFriends}")
+            android.util.Log.d("important", "friends in state: ${state.friends}")
 
             scope.launch {
                 if (state.userId == null) {
@@ -210,7 +240,7 @@ internal class StatisticsStoreFactory(
             android.util.Log.d("important", "=== changeDateRange called ===")
             android.util.Log.d("important", "New date range: $from to $to")
             android.util.Log.d("important", "Selected exerciseId: ${state.selectedExerciseId}")
-            android.util.Log.d("important", "Exercise friends before: ${state.exerciseFriends}")
+            android.util.Log.d("important", "Friends before: ${state.friends}")
 
             val newState = state.copy(dateRange = DateRange(from, to))
 
@@ -221,7 +251,7 @@ internal class StatisticsStoreFactory(
             // Then reload friend exercise data with new date range (using current friends, not cleared ones)
             android.util.Log.d("important", "Reloading friend exercise data with new date range")
             if (newState.selectedExerciseId != null) {
-                state.exerciseFriends.forEach { friend ->
+                state.friends.forEach { friend ->
                     android.util.Log.d("important", "Loading friend ${friend.friendId} (${friend.friendName}) exercise data")
                     loadFriendExerciseData(friend.friendId, friend.friendName, newState.selectedExerciseId, newState)
                 }
@@ -253,6 +283,13 @@ internal class StatisticsStoreFactory(
             android.util.Log.d("EXERCISE_IDS", "User ID: $userId")
             android.util.Log.d("EXERCISE_IDS", "Selected Exercise ID: $exerciseId")
             loadExerciseData(exerciseId, state, userId, state.userName ?: "You")
+
+            // Load friend exercise data for the new exercise
+            android.util.Log.d("friends", "Loading friend exercise data for new exercise: $exerciseId")
+            state.friends.forEach { friend ->
+                android.util.Log.d("friends", "Loading data for friend: ${friend.friendName} (${friend.friendId})")
+                loadFriendExerciseData(friend.friendId, friend.friendName, exerciseId, state)
+            }
         }
 
         private fun loadExerciseData(exerciseId: String, state: StatisticsStore.State, userId: String, userName: String) {
@@ -288,102 +325,83 @@ internal class StatisticsStoreFactory(
             }
         }
 
-        private fun addFriendToChart(chartType: ChartType, friendId: String, color: Long, state: StatisticsStore.State) {
-            android.util.Log.d("friends", "=== 👤 Adding friend to chart ===")
-            android.util.Log.d("friends", "chartType: $chartType, friendId: $friendId, color: 0x${color.toString(16)}")
-            android.util.Log.d("friends", "selectedExerciseId: ${state.selectedExerciseId}")
+        private fun addFriend(friendId: String, friendName: String, state: StatisticsStore.State) {
+            android.util.Log.d("friends", "=== 👤 Adding friend ===")
+            android.util.Log.d("friends", "friendId: $friendId, friendName: $friendName")
+
+            // Check if friend already exists
+            if (state.friends.any { it.friendId == friendId }) {
+                android.util.Log.d("friends", "❌ Friend already exists!")
+                return
+            }
+
+            // Generate automatic color (first available color)
+            val availableColors = listOf(
+                0xFF6366F1L, // Indigo
+                0xFFEC4899L, // Pink
+                0xFF10B981L, // Emerald
+                0xFFF59E0BL, // Amber
+                0xFFEF4444L, // Red
+                0xFF8B5CF6L, // Violet
+                0xFF06B6D4L, // Cyan
+                0xFF84CC16L  // Lime
+            )
+
+            val usedColors = state.friends.map { it.color }.toSet()
+            val autoColor = availableColors.firstOrNull { it !in usedColors } ?: availableColors.first()
+
+            android.util.Log.d("friends", "Generated auto color: 0x${autoColor.toString(16)}")
 
             scope.launch {
                 try {
-                    // Get friend info
                     getFriendsUseCase().collect { friends ->
-                        android.util.Log.d("important", "Friends received from getFriendsUseCase: ${friends.size}")
-                        android.util.Log.d("important", "Looking for friendId: $friendId")
                         val friend = friends.find { it.friendUserId == friendId }
-                        android.util.Log.d("important", "Friend found: ${friend != null}")
                         if (friend != null) {
                             val friendConfig = FriendConfig(
                                 friendId = friendId,
-                                friendName = friend.username ?: "Friend",
-                                color = color
+                                friendName = friend.username ?: friendName,
+                                color = autoColor
                             )
-                            android.util.Log.d("important", "FriendConfig created: $friendConfig")
+                            android.util.Log.d("friends", "✅ FriendConfig created: $friendConfig")
+                            dispatch(Msg.FriendAdded(friendConfig))
 
-                            // For exercise chart, check if friend has this exercise
-                            if (chartType == ChartType.EXERCISE_LINE && state.selectedExerciseId != null) {
-                                android.util.Log.d("friends", "🔍 Checking if friend $friendId has exercise: ${state.selectedExerciseId}")
-                                val hasExercise = friendHasExerciseUseCase(friendId, state.selectedExerciseId)
-                                android.util.Log.d("friends", "✓ Friend has exercise: $hasExercise")
-                                if (!hasExercise) {
-                                    android.util.Log.d("friends", "❌ Friend doesn't have exercise, showing error")
-                                    publish(StatisticsStore.Label.ShowFriendExerciseError("Friend doesn't have this exercise"))
-                                    return@collect
-                                }
-                            }
+                            // Save to persistent storage
+                            savedFriendsManager.addFriend(friendConfig)
 
-                            android.util.Log.d("important", "Dispatching friend added message...")
-                            when (chartType) {
-                                ChartType.WEIGHT_LINE -> {
-                                    android.util.Log.d("important", "WEIGHT_LINE - dispatching FriendWeightAdded")
-                                    dispatch(Msg.FriendWeightAdded(friendConfig))
-                                    loadFriendWeightData(friendId, friendConfig.friendName, state)
-                                }
-                                ChartType.EXERCISE_LINE -> {
-                                    android.util.Log.d("important", "EXERCISE_LINE - dispatching FriendExerciseAdded")
-                                    dispatch(Msg.FriendExerciseAdded(friendConfig))
-                                    loadFriendExerciseData(friendId, friendConfig.friendName, state.selectedExerciseId, state)
-                                }
-                                ChartType.SPIDER -> {
-                                    android.util.Log.d("important", "SPIDER - dispatching FriendMuscleGroupAdded")
-                                    dispatch(Msg.FriendMuscleGroupAdded(friendConfig))
-                                    loadFriendMuscleGroupData(friendId, state)
-                                }
+                            // Load data for all chart types
+                            loadFriendWeightData(friendId, friendConfig.friendName, state)
+                            if (state.selectedExerciseId != null) {
+                                loadFriendExerciseData(friendId, friendConfig.friendName, state.selectedExerciseId, state)
                             }
-                        } else {
-                            android.util.Log.d("important", "Friend not found in friends list!")
+                            loadFriendMuscleGroupData(friendId, state)
                         }
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("important", "ERROR in addFriendToChart: ${e.message}", e)
-                    dispatch(Msg.Error(e.message ?: "Failed to add friend to chart"))
+                    android.util.Log.e("friends", "ERROR in addFriend: ${e.message}", e)
+                    dispatch(Msg.Error(e.message ?: "Failed to add friend"))
                 }
             }
         }
 
-        private fun removeFriendFromChart(chartType: ChartType, friendId: String, state: StatisticsStore.State) {
-            when (chartType) {
-                ChartType.WEIGHT_LINE -> dispatch(Msg.FriendWeightRemoved(friendId))
-                ChartType.EXERCISE_LINE -> dispatch(Msg.FriendExerciseRemoved(friendId))
-                ChartType.SPIDER -> dispatch(Msg.FriendMuscleGroupRemoved(friendId))
-            }
-        }
+        private fun removeFriend(friendId: String, state: StatisticsStore.State) {
+            android.util.Log.d("friends", "=== 🗑️ Removing friend ===")
+            android.util.Log.d("friends", "friendId: $friendId")
+            dispatch(Msg.FriendRemoved(friendId))
 
-        private fun changeFriendColor(chartType: ChartType, friendId: String, color: Long, state: StatisticsStore.State) {
-            when (chartType) {
-                ChartType.WEIGHT_LINE -> dispatch(Msg.FriendWeightColorChanged(friendId, color))
-                ChartType.EXERCISE_LINE -> {
-                    // Update friend color in exercise friends
-                    val updatedFriends = state.exerciseFriends.map {
-                        if (it.friendId == friendId) it.copy(color = color) else it
-                    }
-                    // This would need to be handled differently in the reducer
-                }
-                ChartType.SPIDER -> {
-                    // Similar for muscle groups
-                }
-            }
+            // Remove from persistent storage
+            savedFriendsManager.removeFriend(friendId)
         }
 
         private fun loadFriendWeightData(friendId: String, friendName: String, state: StatisticsStore.State) {
             scope.launch {
                 getFriendWeightChartDataUseCase(friendId, friendName, state.dateRange.from, state.dateRange.to)
                     .catch { e -> dispatch(Msg.Error(e.message ?: "Failed to load friend weight data")) }
-                    .collect { data -> dispatch(Msg.FriendWeightDataLoaded(data)) }
+                    .collect { data -> dispatch(Msg.FriendWeightDataLoaded(friendId, data)) }
             }
         }
 
         private fun loadFriendExerciseData(friendId: String, friendName: String, exerciseId: String?, state: StatisticsStore.State) {
-            android.util.Log.d("friends", "=== 📊 Loading friend exercise data ===")
+            android.util.Log.d("friends", "=== 📊 Loading friend exercise data from Firebase ===")
             android.util.Log.d("friends", "FriendId: $friendId, FriendName: $friendName, ExerciseId: $exerciseId")
             android.util.Log.d("friends", "Date range: ${state.dateRange.from} to ${state.dateRange.to}")
 
@@ -392,15 +410,24 @@ internal class StatisticsStoreFactory(
                 return
             }
             scope.launch {
-                android.util.Log.d("friends", "Calling getFriendExerciseChartDataUseCase...")
-                getFriendExerciseChartDataUseCase(friendId, friendName, exerciseId, state.dateRange.from, state.dateRange.to)
+                android.util.Log.d("friends", "Calling getFriendExerciseDataFromFirebaseUseCase...")
+                getFriendExerciseDataFromFirebaseUseCase(friendId, friendName, exerciseId, state.dateRange.from, state.dateRange.to)
                     .catch { e ->
-                        android.util.Log.e("friends", "❌ ERROR: ${e.message}", e)
+                        android.util.Log.e("friends", "❌ ERROR loading from Firebase: ${e.message}", e)
                         dispatch(Msg.Error(e.message ?: "Failed to load friend exercise data"))
+                        // Show error if no data found
+                        if (e.message?.contains("no data", ignoreCase = true) == true ||
+                            e.message?.contains("empty", ignoreCase = true) == true) {
+                            publish(StatisticsStore.Label.ShowFriendExerciseError("Friend doesn't have data for this exercise in the selected date range"))
+                        }
                     }
                     .collect { data ->
-                        android.util.Log.d("friends", "✅ Friend exercise data loaded: ${data.size} points")
+                        android.util.Log.d("friends", "✅ Friend exercise data loaded from Firebase: ${data.size} points")
                         android.util.Log.d("friends", "Data: $data")
+                        if (data.isEmpty()) {
+                            android.util.Log.d("friends", "❌ No data found - friend has no records for this exercise")
+                            publish(StatisticsStore.Label.ShowFriendExerciseError("Friend doesn't have data for this exercise in the selected date range"))
+                        }
                         dispatch(Msg.FriendExerciseDataLoaded(friendId, data))
                     }
             }
@@ -470,26 +497,35 @@ internal class StatisticsStoreFactory(
                 )
 
                 is Msg.FriendWeightDataLoaded -> copy(
-                    weightData = weightData + msg.data
+                    friendWeightData = friendWeightData + (msg.friendId to msg.data)
                 )
 
                 is Msg.CurrentWeightUpdated -> copy(
                     currentWeight = msg.weight
                 )
 
-                is Msg.FriendWeightAdded -> copy(
-                    weightFriends = weightFriends + msg.friendConfig
-                )
+                is Msg.FriendAdded -> copy(
+                    friends = friends + msg.friendConfig
+                ).also {
+                    android.util.Log.d("friends", "✅ Friend added: ${msg.friendConfig.friendName} (${msg.friendConfig.friendId})")
+                }
 
-                is Msg.FriendWeightRemoved -> copy(
-                    weightFriends = weightFriends.filter { it.friendId != msg.friendId }
-                )
+                is Msg.FriendRemoved -> copy(
+                    friends = friends.filter { it.friendId != msg.friendId },
+                    friendWeightData = friendWeightData.filterKeys { it != msg.friendId },
+                    friendExerciseData = friendExerciseData.filterKeys { it != msg.friendId },
+                    friendMuscleGroupData = friendMuscleGroupData.filterKeys { it != msg.friendId }
+                ).also {
+                    android.util.Log.d("friends", "🗑️ Friend removed: ${msg.friendId}")
+                }
 
-                is Msg.FriendWeightColorChanged -> copy(
-                    weightFriends = weightFriends.map {
+                is Msg.FriendColorChanged -> copy(
+                    friends = friends.map {
                         if (it.friendId == msg.friendId) it.copy(color = msg.color) else it
                     }
-                )
+                ).also {
+                    android.util.Log.d("friends", "🎨 Friend color changed: ${msg.friendId} -> 0x${msg.color.toString(16)}")
+                }
 
                 is Msg.ExerciseSelected -> {
                     android.util.Log.d("StatisticsStore", "=== Reducer: ExerciseSelected ===")
@@ -630,41 +666,16 @@ internal class StatisticsStoreFactory(
                     copy(setColors = newSetColors)
                 }
 
-                is Msg.FriendExerciseAdded -> copy(
-                    exerciseFriends = exerciseFriends + msg.friendConfig
-                ).also {
-                    android.util.Log.d("friends", "✅ Friend added to chart: ${msg.friendConfig.friendName} (${msg.friendConfig.friendId})")
-                }
-
-                is Msg.FriendExerciseRemoved -> copy(
-                    exerciseFriends = exerciseFriends.filter { it.friendId != msg.friendId },
-                    friendExerciseData = friendExerciseData.filterKeys { it != msg.friendId }
-                ).also {
-                    android.util.Log.d("friends", "🗑️ Friend removed from chart: $msg.friendId")
-                }
-
                 is Msg.FriendExerciseDataLoaded -> {
                     android.util.Log.d("friends", "=== 📊 Friend exercise data loaded ===")
                     android.util.Log.d("friends", "FriendId: ${msg.friendId}")
                     android.util.Log.d("friends", "Exercise data points: ${msg.data.size}")
-                    msg.data.forEach { point ->
-                        android.util.Log.d("friends", "   📅 ${point.date} 💪 ${point.value}kg 🏋️ Set ${point.setIndex}")
-                        android.util.Log.d("friends", "      Exercise ID in DB: ${point.userId}")
-                    }
-
-                    // Check what exercises friend has recorded
-                    val friendExercises = msg.data.map { it.userId }.distinct()
-                    android.util.Log.d("friends", "📋 Friend's recorded exercise IDs:")
-                    friendExercises.forEach { exerciseId ->
-                        android.util.Log.d("friends", "   - $exerciseId")
-                    }
 
                     copy(
                         friendExerciseData = friendExerciseData + (msg.friendId to msg.data),
                         isLoading = false
                     ).also {
-                        android.util.Log.d("friends", "✅ Friend data added to state")
-                        android.util.Log.d("friends", "   Total friends with data: ${it.friendExerciseData.size}")
+                        android.util.Log.d("friends", "✅ Friend exercise data added to state")
                     }
                 }
 
@@ -673,17 +684,11 @@ internal class StatisticsStoreFactory(
                     isLoading = false
                 )
 
-                is Msg.FriendMuscleGroupAdded -> copy(
-                    muscleGroupFriends = muscleGroupFriends + msg.friendConfig
-                )
-
-                is Msg.FriendMuscleGroupRemoved -> copy(
-                    muscleGroupFriends = muscleGroupFriends.filter { it.friendId != msg.friendId }
+                is Msg.FriendMuscleGroupDataLoaded -> copy(
+                    friendMuscleGroupData = friendMuscleGroupData + (msg.friendId to msg.data),
+                    isLoading = false
                 ).also {
-                    android.util.Log.d(
-                        "StatisticsStore",
-                        "After FriendMuscleGroupRemoved reducer: userId=${it.userId}"
-                    )
+                    android.util.Log.d("friends", "✅ Friend muscle group data added to state")
                 }
             }.also { newState ->
                 android.util.Log.d("StatisticsStore", "=== Reducer finished ===")

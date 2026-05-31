@@ -311,4 +311,33 @@ interface WorkoutDao {
         ORDER BY date ASC
     """)
     fun observeFriendWeightRecords(friendId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<WeightRecordDb>>
+
+    // ========== Friend Data Management ==========
+
+    // Delete all workout sessions for a user
+    @Query("DELETE FROM workout_sessions WHERE userId = :userId")
+    suspend fun deleteAllSessionsForUser(userId: String)
+
+    // Delete all workout exercises for a user (via userId in workout_sessions)
+    @Query("""
+        DELETE FROM workout_exercises
+        WHERE id IN (
+            SELECT we.id FROM workout_exercises we
+            INNER JOIN workout_sessions s ON we.workoutSessionId = s.id
+            WHERE s.userId = :userId
+        )
+    """)
+    suspend fun deleteAllExercisesForUser(userId: String)
+
+    // Delete all workout sets for a user (via userId in workout_sessions)
+    @Query("""
+        DELETE FROM workout_sets
+        WHERE workoutExerciseId IN (
+            SELECT ws.workoutExerciseId FROM workout_sets ws
+            INNER JOIN workout_exercises we ON ws.workoutExerciseId = we.id
+            INNER JOIN workout_sessions s ON we.workoutSessionId = s.id
+            WHERE s.userId = :userId
+        )
+    """)
+    suspend fun deleteAllSetsForUser(userId: String)
 }

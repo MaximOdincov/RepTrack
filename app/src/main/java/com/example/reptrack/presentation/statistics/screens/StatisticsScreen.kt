@@ -193,17 +193,14 @@ private fun WeightTab(
                         it.value
                     )
                 },
-                friends = state.weightFriends,
+                friends = state.friends,
                 dateRange = dateRangeText,
                 onWeightChange = { weight ->
                     store.accept(StatisticsStore.Intent.UpdateWeight(weight))
                 },
                 onAddFriend = { showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->
-                    store.accept(StatisticsStore.Intent.RemoveFriendFromChart(
-                        com.example.reptrack.domain.statistics.entities.ChartType.WEIGHT_LINE,
-                        friendId
-                    ))
+                    store.accept(StatisticsStore.Intent.RemoveFriend(friendId))
                 },
                 onChangeDateRange = { showDateRangeDialog = true }
             )
@@ -213,14 +210,10 @@ private fun WeightTab(
     if (showAddFriendDialog) {
         AddFriendDialog(
             availableFriends = friends,
-            addedFriends = state.weightFriends.map { it.friendId },
+            addedFriends = state.friends.map { it.friendId },
             onDismiss = { showAddFriendDialog = false },
-            onAddFriend = { friendId, color ->
-                store.accept(StatisticsStore.Intent.AddFriendToChart(
-                    com.example.reptrack.domain.statistics.entities.ChartType.WEIGHT_LINE,
-                    friendId,
-                    color
-                ))
+            onAddFriend = { friendId, friendName ->
+                store.accept(StatisticsStore.Intent.AddFriend(friendId, friendName))
             }
         )
     }
@@ -288,7 +281,7 @@ private fun ExerciseTab(
                 },
                 visibleSets = state.visibleSets,
                 setColors = state.setColors,
-                friends = state.exerciseFriends,
+                friends = state.friends,
                 friendExerciseData = state.friendExerciseData.mapValues { entry ->
                     android.util.Log.d("StatisticsScreen", "Mapping friend exercise data for friendId=${entry.key}")
                     android.util.Log.d("StatisticsScreen", "Friend ${entry.key} has ${entry.value.size} points")
@@ -327,10 +320,19 @@ private fun ExerciseTab(
                 },
                 onAddFriend = { showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->
-                    store.accept(StatisticsStore.Intent.RemoveFriendFromChart(
-                        com.example.reptrack.domain.statistics.entities.ChartType.EXERCISE_LINE,
-                        friendId
-                    ))
+                    store.accept(StatisticsStore.Intent.RemoveFriend(friendId))
+                },
+                onFriendColorChange = { friendId, color ->
+                    // Convert Color to Long by packing ARGB components
+                    val argb = ((color.alpha * 255).toInt().toLong() shl 24) or
+                               ((color.red * 255).toInt().toLong() shl 16) or
+                               ((color.green * 255).toInt().toLong() shl 8) or
+                               (color.blue * 255).toInt().toLong()
+                    android.util.Log.d("StatisticsScreen", "=== onFriendColorChange called ===")
+                    android.util.Log.d("StatisticsScreen", "Friend ID: $friendId")
+                    android.util.Log.d("StatisticsScreen", "Input Color: $color")
+                    android.util.Log.d("StatisticsScreen", "Packed ARGB Long: 0x${argb.toString(16)}")
+                    store.accept(StatisticsStore.Intent.ChangeFriendColor(friendId, argb))
                 },
                 onChangeDateRange = { showDateRangeDialog = true }
             )
@@ -340,14 +342,10 @@ private fun ExerciseTab(
     if (showAddFriendDialog) {
         AddFriendDialog(
             availableFriends = friends,
-            addedFriends = state.exerciseFriends.map { it.friendId },
+            addedFriends = state.friends.map { it.friendId },
             onDismiss = { showAddFriendDialog = false },
-            onAddFriend = { friendId, color ->
-                store.accept(StatisticsStore.Intent.AddFriendToChart(
-                    com.example.reptrack.domain.statistics.entities.ChartType.EXERCISE_LINE,
-                    friendId,
-                    color
-                ))
+            onAddFriend = { friendId, friendName ->
+                store.accept(StatisticsStore.Intent.AddFriend(friendId, friendName))
             }
         )
     }
@@ -386,15 +384,12 @@ private fun MuscleTab(
         item {
             MuscleGroupChartSection(
                 muscleGroupData = state.muscleGroupData,
-                friends = state.muscleGroupFriends,
+                friends = state.friends,
                 friendMuscleData = emptyMap(), // TODO: Load friend muscle data
                 dateRange = dateRangeText,
                 onAddFriend = { showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->
-                    store.accept(StatisticsStore.Intent.RemoveFriendFromChart(
-                        com.example.reptrack.domain.statistics.entities.ChartType.SPIDER,
-                        friendId
-                    ))
+                    store.accept(StatisticsStore.Intent.RemoveFriend(friendId))
                 },
                 onChangeDateRange = { showDateRangeDialog = true }
             )
@@ -404,14 +399,10 @@ private fun MuscleTab(
     if (showAddFriendDialog) {
         AddFriendDialog(
             availableFriends = friends,
-            addedFriends = state.muscleGroupFriends.map { it.friendId },
+            addedFriends = state.friends.map { it.friendId },
             onDismiss = { showAddFriendDialog = false },
-            onAddFriend = { friendId, color ->
-                store.accept(StatisticsStore.Intent.AddFriendToChart(
-                    com.example.reptrack.domain.statistics.entities.ChartType.SPIDER,
-                    friendId,
-                    color
-                ))
+            onAddFriend = { friendId, friendName ->
+                store.accept(StatisticsStore.Intent.AddFriend(friendId, friendName))
             }
         )
     }

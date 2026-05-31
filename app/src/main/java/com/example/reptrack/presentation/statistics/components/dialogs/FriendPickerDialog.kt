@@ -43,31 +43,14 @@ fun AddFriendDialog(
     addedFriends: List<String>,
     isLoading: Boolean = false,
     onDismiss: () -> Unit,
-    onAddFriend: (String, Long) -> Unit,
-    showColorPicker: Boolean = false
+    onAddFriend: (String, String) -> Unit
 ) {
     android.util.Log.d("important", "=== AddFriendDialog created ===")
-    android.util.Log.d("important", "availableFriends: ${availableFriends.map { it.friendUserId to (it.username ?: "Unknown") }}")
+    android.util.Log.d("important", "availableFriends: ${availableFriends.map { it.friendUserId to (it.username ?: it.email ?: "Unknown") }}")
     android.util.Log.d("important", "addedFriends: $addedFriends")
 
     var selectedFriendId by remember { mutableStateOf<String?>(null) }
-    var initialColor = Color(android.graphics.Color.parseColor("#6200EE"))
-    // Convert Color to ARGB Long
-    var selectedColor by remember { mutableLongStateOf(
-        (initialColor.alpha.toLong() shl 24) or
-        (initialColor.red.toLong() shl 16) or
-        (initialColor.green.toLong() shl 8) or
-        initialColor.blue.toLong()
-    ) }
-    var showColorPickerDialog by remember { mutableStateOf(false) }
-
-    if (showColorPickerDialog) {
-        ColorPickerDialog(
-            selectedColor = selectedColor,
-            onColorSelected = { selectedColor = it; showColorPickerDialog = false },
-            onDismiss = { showColorPickerDialog = false }
-        )
-    }
+    var selectedFriendName by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -107,83 +90,47 @@ fun AddFriendDialog(
                             )
                         } else {
                             LazyColumn(
-                                modifier = Modifier.height(200.dp)
+                                modifier = Modifier.height(80.dp)
                             ) {
                                 items(selectableFriends) { friend ->
+                                    val friendDisplayName = friend.username ?: friend.email ?: "Friend ${friend.friendUserId.take(8)}"
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
+                                            .clickable {
+                                                android.util.Log.d("important", "=== Friend row clicked ===")
+                                                android.util.Log.d("important", "friendUserId: ${friend.friendUserId}")
+                                                android.util.Log.d("important", "username: ${friend.username}")
+                                                android.util.Log.d("important", "email: ${friend.email}")
+                                                android.util.Log.d("important", "friendDisplayName: $friendDisplayName")
+                                                selectedFriendId = friend.friendUserId
+                                                selectedFriendName = friendDisplayName
+                                                android.util.Log.d("important", "After selection: selectedFriendId=$selectedFriendId, selectedFriendName=$selectedFriendName")
+                                            }
+                                            .padding(vertical = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         RadioButton(
                                             selected = selectedFriendId == friend.friendUserId,
-                                            onClick = { selectedFriendId = friend.friendUserId }
+                                            onClick = {
+                                                android.util.Log.d("important", "=== RadioButton clicked ===")
+                                                android.util.Log.d("important", "friendUserId: ${friend.friendUserId}")
+                                                android.util.Log.d("important", "username: ${friend.username}")
+                                                android.util.Log.d("important", "email: ${friend.email}")
+                                                android.util.Log.d("important", "friendDisplayName: $friendDisplayName")
+                                                selectedFriendId = friend.friendUserId
+                                                selectedFriendName = friendDisplayName
+                                                android.util.Log.d("important", "After selection: selectedFriendId=$selectedFriendId, selectedFriendName=$selectedFriendName")
+                                            }
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
-                                            text = friend.username ?: "Unknown",
+                                            text = friendDisplayName,
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }
                             }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Color selection
-                    Text(
-                        text = "Select chart color:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val availableColors = remember {
-                            listOf(
-                                Color(0xFF6200EE),
-                                Color(0xFF6366F1),
-                                Color(0xFFEC4899),
-                                Color(0xFF10B981),
-                                Color(0xFFF59E0B),
-                                Color(0xFFEF4444)
-                            )
-                        }
-
-                        availableColors.forEach { color ->
-                            val colorArgb = (color.alpha.toLong() shl 24) or
-                                            (color.red.toLong() shl 16) or
-                                            (color.green.toLong() shl 8) or
-                                            color.blue.toLong()
-                            val isSelected = selectedColor == colorArgb
-
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = if (isSelected) {
-                                            color
-                                        } else {
-                                            color.copy(alpha = 0.6f)
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .border(
-                                        width = if (isSelected) 3.dp else 1.dp,
-                                        color = if (isSelected) {
-                                            MaterialTheme.colorScheme.onPrimary
-                                        } else {
-                                            Color.Transparent
-                                        },
-                                        shape = CircleShape
-                                    )
-                                    .clickable { selectedColor = colorArgb }
-                            )
                         }
                     }
                 }
@@ -194,10 +141,13 @@ fun AddFriendDialog(
                 onClick = {
                     android.util.Log.d("important", "=== Add friend button clicked ===")
                     android.util.Log.d("important", "selectedFriendId: $selectedFriendId")
-                    android.util.Log.d("important", "selectedColor: 0x${selectedColor.toString(16)}")
-                    selectedFriendId?.let {
-                        android.util.Log.d("important", "Calling onAddFriend with friendId=$it, color=0x${selectedColor.toString(16)}")
-                        onAddFriend(it, selectedColor)
+                    android.util.Log.d("important", "selectedFriendName: $selectedFriendName")
+                    selectedFriendId?.let { friendId ->
+                        selectedFriendName?.let { friendName ->
+                            android.util.Log.d("important", "Calling onAddFriend with friendId=$friendId, friendName=$friendName")
+                            onAddFriend(friendId, friendName)
+                            onDismiss() // Close dialog after adding
+                        }
                     } ?: android.util.Log.d("important", "No friend selected!")
                 },
                 enabled = selectedFriendId != null

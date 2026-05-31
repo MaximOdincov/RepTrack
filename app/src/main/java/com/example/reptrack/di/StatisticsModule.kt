@@ -1,13 +1,14 @@
 package com.example.reptrack.di
 
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.example.reptrack.data.backup.FirebaseBackupDataSource
 import com.example.reptrack.data.statistics.repositories.StatisticsRepositoryImpl
 import com.example.reptrack.domain.friends.usecases.GetFriendsUseCase
 import com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase
 import com.example.reptrack.domain.statistics.repositories.StatisticsRepository
-import com.example.reptrack.domain.statistics.usecases.FriendHasExerciseUseCase
 import com.example.reptrack.domain.statistics.usecases.GetExerciseChartDataUseCase
 import com.example.reptrack.domain.statistics.usecases.GetFriendExerciseChartDataUseCase
+import com.example.reptrack.domain.statistics.usecases.GetFriendExerciseDataFromFirebaseUseCase
 import com.example.reptrack.domain.statistics.usecases.GetFriendMuscleGroupChartDataUseCase
 import com.example.reptrack.domain.statistics.usecases.GetFriendWeightChartDataUseCase
 import com.example.reptrack.domain.statistics.usecases.GetMuscleGroupChartDataUseCase
@@ -53,8 +54,9 @@ val statisticsModule = module {
     }
 
     factory {
-        GetFriendExerciseChartDataUseCase(
-            repository = get()
+        GetFriendExerciseDataFromFirebaseUseCase(
+            firebaseDataSource = get(),
+            exerciseDao = get()
         )
     }
 
@@ -70,12 +72,6 @@ val statisticsModule = module {
         )
     }
 
-    factory {
-        FriendHasExerciseUseCase(
-            repository = get()
-        )
-    }
-
     // Store Factory
     factory<StatisticsStoreFactory> {
         StatisticsStoreFactory(
@@ -84,12 +80,12 @@ val statisticsModule = module {
             getFriendWeightChartDataUseCase = get(),
             updateWeightUseCase = get(),
             getExerciseChartDataUseCase = get(),
-            getFriendExerciseChartDataUseCase = get(),
+            getFriendExerciseDataFromFirebaseUseCase = get(),
             getMuscleGroupChartDataUseCase = get(),
             getFriendMuscleGroupChartDataUseCase = get(),
-            friendHasExerciseUseCase = get(),
             getFriendsUseCase = get(),
-            getCurrentUserProfileUseCase = get()
+            getCurrentUserProfileUseCase = get(),
+            savedFriendsManager = get()
         )
     }
 

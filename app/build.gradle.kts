@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.firebase.crashlytics)
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {

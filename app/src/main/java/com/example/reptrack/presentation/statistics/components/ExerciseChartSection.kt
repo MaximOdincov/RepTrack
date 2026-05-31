@@ -64,6 +64,7 @@ fun ExerciseChartSection(
     onSetColorChange: (Int, Color) -> Unit,
     onAddFriend: () -> Unit,
     onRemoveFriend: (String) -> Unit,
+    onFriendColorChange: (String, Color) -> Unit,
     onChangeDateRange: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -427,7 +428,8 @@ fun ExerciseChartSection(
                             FriendChip(
                                 name = friend.friendName,
                                 color = friendColor,
-                                onRemove = { onRemoveFriend(friend.friendId) }
+                                onRemove = { onRemoveFriend(friend.friendId) },
+                                onChangeColor = { newColor -> onFriendColorChange(friend.friendId, newColor) }
                             )
                         }
                     }
