@@ -1,5 +1,6 @@
 package com.example.reptrack.presentation.statistics.stores
 
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -454,7 +455,7 @@ internal class StatisticsStoreFactory(
                     isLoading = true,
                     error = null
                 ).also {
-                    android.util.Log.d(
+                    Log.d(
                         "StatisticsStore",
                         "After Loading reducer: userId=${it.userId}"
                     )
@@ -464,7 +465,7 @@ internal class StatisticsStoreFactory(
                     isLoading = false,
                     error = msg.error
                 ).also {
-                    android.util.Log.d(
+                    Log.d(
                         "StatisticsStore",
                         "After Error reducer: userId=${it.userId}"
                     )
@@ -474,7 +475,7 @@ internal class StatisticsStoreFactory(
                     userId = msg.userId,
                     userName = msg.userName
                 ).also {
-                    android.util.Log.d(
+                    Log.d(
                         "StatisticsStore",
                         "After UserLoaded reducer: userId=${it.userId}, userName=${it.userName}"
                     )
@@ -486,7 +487,7 @@ internal class StatisticsStoreFactory(
                     // User exercise data will be replaced when new data loads
                     friendExerciseData = emptyMap()
                 ).also {
-                    android.util.Log.d(
+                    Log.d(
                         "important",
                         "After DateRangeChanged reducer: userId=${it.userId}, user data kept, friend data cleared"
                     )
@@ -508,7 +509,7 @@ internal class StatisticsStoreFactory(
                 is Msg.FriendAdded -> copy(
                     friends = friends + msg.friendConfig
                 ).also {
-                    android.util.Log.d("friends", "✅ Friend added: ${msg.friendConfig.friendName} (${msg.friendConfig.friendId})")
+                    Log.d("friends", "✅ Friend added: ${msg.friendConfig.friendName} (${msg.friendConfig.friendId})")
                 }
 
                 is Msg.FriendRemoved -> copy(
@@ -517,7 +518,7 @@ internal class StatisticsStoreFactory(
                     friendExerciseData = friendExerciseData.filterKeys { it != msg.friendId },
                     friendMuscleGroupData = friendMuscleGroupData.filterKeys { it != msg.friendId }
                 ).also {
-                    android.util.Log.d("friends", "🗑️ Friend removed: ${msg.friendId}")
+                    Log.d("friends", "🗑️ Friend removed: ${msg.friendId}")
                 }
 
                 is Msg.FriendColorChanged -> copy(
@@ -525,17 +526,17 @@ internal class StatisticsStoreFactory(
                         if (it.friendId == msg.friendId) it.copy(color = msg.color) else it
                     }
                 ).also {
-                    android.util.Log.d("friends", "🎨 Friend color changed: ${msg.friendId} -> 0x${msg.color.toString(16)}")
+                    Log.d("friends", "🎨 Friend color changed: ${msg.friendId} -> 0x${msg.color.toString(16)}")
                 }
 
                 is Msg.ExerciseSelected -> {
-                    android.util.Log.d("StatisticsStore", "=== Reducer: ExerciseSelected ===")
-                    android.util.Log.d("StatisticsStore", "New exerciseId: ${msg.exerciseId}")
-                    android.util.Log.d(
+                    Log.d("StatisticsStore", "=== Reducer: ExerciseSelected ===")
+                    Log.d("StatisticsStore", "New exerciseId: ${msg.exerciseId}")
+                    Log.d(
                         "StatisticsStore",
                         "Old selectedExerciseId: $selectedExerciseId"
                     )
-                    android.util.Log.d(
+                    Log.d(
                         "StatisticsStore",
                         "Is different exercise: ${selectedExerciseId != msg.exerciseId}"
                     )
@@ -544,35 +545,35 @@ internal class StatisticsStoreFactory(
                         selectedExerciseId = msg.exerciseId,
                         // Clear exercise data and friends only if switching to a different exercise
                         exerciseData = if (selectedExerciseId != msg.exerciseId) {
-                            android.util.Log.d("StatisticsStore", "Clearing exerciseData")
+                            Log.d("StatisticsStore", "Clearing exerciseData")
                             emptyMap()
                         } else {
-                            android.util.Log.d("StatisticsStore", "Keeping existing exerciseData")
+                            Log.d("StatisticsStore", "Keeping existing exerciseData")
                             exerciseData
                         },
                         visibleSets = if (selectedExerciseId != msg.exerciseId) {
-                            android.util.Log.d("StatisticsStore", "Clearing visibleSets")
+                            Log.d("StatisticsStore", "Clearing visibleSets")
                             emptySet()
                         } else {
-                            android.util.Log.d("StatisticsStore", "Keeping existing visibleSets")
+                            Log.d("StatisticsStore", "Keeping existing visibleSets")
                             visibleSets
                         },
                         setColors = if (selectedExerciseId != msg.exerciseId) {
-                            android.util.Log.d("StatisticsStore", "Clearing setColors")
+                            Log.d("StatisticsStore", "Clearing setColors")
                             emptyMap()
                         } else {
-                            android.util.Log.d("StatisticsStore", "Keeping existing setColors")
+                            Log.d("StatisticsStore", "Keeping existing setColors")
                             setColors
                         },
                         friendExerciseData = if (selectedExerciseId != msg.exerciseId) {
-                            android.util.Log.d("StatisticsStore", "Clearing friendExerciseData")
+                            Log.d("StatisticsStore", "Clearing friendExerciseData")
                             emptyMap()
                         } else {
-                            android.util.Log.d("StatisticsStore", "Keeping existing friendExerciseData")
+                            Log.d("StatisticsStore", "Keeping existing friendExerciseData")
                             friendExerciseData
                         }
                     ).also {
-                        android.util.Log.d(
+                        Log.d(
                             "StatisticsStore",
                             "After ExerciseSelected reducer: userId=${it.userId}, userName=${it.userName}"
                         )
@@ -580,13 +581,13 @@ internal class StatisticsStoreFactory(
                 }
 
                 is Msg.ExerciseDataLoaded -> {
-                    android.util.Log.d("friends", "=== 🏋️ User exercise data loaded ===")
-                    android.util.Log.d("friends", "Data points: ${msg.data.size}, Sets: ${msg.data.keys}")
-                    android.util.Log.d("friends", "User's exercise recordings:")
+                    Log.d("friends", "=== 🏋️ User exercise data loaded ===")
+                    Log.d("friends", "Data points: ${msg.data.size}, Sets: ${msg.data.keys}")
+                    Log.d("friends", "User's exercise recordings:")
                     msg.data.forEach { (setIndex, points) ->
-                        android.util.Log.d("friends", "   🎯 Set $setIndex: ${points.size} points")
+                        Log.d("friends", "   🎯 Set $setIndex: ${points.size} points")
                         points.forEach { point ->
-                            android.util.Log.d("friends", "      📅 ${point.date} 💪 ${point.value}kg")
+                            Log.d("friends", "      📅 ${point.date} 💪 ${point.value}kg")
                         }
                     }
 
@@ -609,20 +610,20 @@ internal class StatisticsStoreFactory(
                     val newSetIndices = msg.data.keys.toSet()
                     val existingSetIndices = setColors.keys.toSet()
 
-                    android.util.Log.d("StatisticsStore", "New set indices: $newSetIndices")
-                    android.util.Log.d("StatisticsStore", "Existing set indices: $existingSetIndices")
+                    Log.d("StatisticsStore", "New set indices: $newSetIndices")
+                    Log.d("StatisticsStore", "Existing set indices: $existingSetIndices")
 
                     // Only update colors if there are new sets that don't have colors yet
                     val setsWithoutColors = newSetIndices - existingSetIndices
-                    android.util.Log.d("StatisticsStore", "Sets without colors: $setsWithoutColors")
+                    Log.d("StatisticsStore", "Sets without colors: $setsWithoutColors")
 
                     val newSetColors = if (setsWithoutColors.isEmpty() && newSetIndices == existingSetIndices) {
                         // No changes needed - keep existing colors
-                        android.util.Log.d("StatisticsStore", "No new sets, keeping existing colors")
+                        Log.d("StatisticsStore", "No new sets, keeping existing colors")
                         setColors
                     } else {
                         // Add colors for new sets
-                        android.util.Log.d("StatisticsStore", "Adding colors for new sets")
+                        Log.d("StatisticsStore", "Adding colors for new sets")
                         val updatedColors = setColors.toMutableMap()
                         msg.data.keys.forEach { setIndex ->
                             if (!updatedColors.containsKey(setIndex)) {
@@ -632,7 +633,7 @@ internal class StatisticsStoreFactory(
                                 }
                             }
                         }
-                        android.util.Log.d("StatisticsStore", "Updated setColors: $updatedColors")
+                        Log.d("StatisticsStore", "Updated setColors: $updatedColors")
                         updatedColors
                     }
 
@@ -653,30 +654,30 @@ internal class StatisticsStoreFactory(
                 )
 
                 is Msg.SetLineColorChanged -> {
-                    android.util.Log.d("StatisticsStore", "=== Reducer: SetLineColorChanged ===")
-                    android.util.Log.d("StatisticsStore", "Set index: ${msg.setIndex}")
-                    android.util.Log.d("StatisticsStore", "Color Long: 0x${msg.color.toString(16)}")
-                    android.util.Log.d("StatisticsStore", "Old setColors: $setColors")
-                    android.util.Log.d("StatisticsStore", "Old setColors.size: ${setColors.size}")
-                    android.util.Log.d("StatisticsStore", "Old setColors keys: ${setColors.keys}")
+                    Log.d("StatisticsStore", "=== Reducer: SetLineColorChanged ===")
+                    Log.d("StatisticsStore", "Set index: ${msg.setIndex}")
+                    Log.d("StatisticsStore", "Color Long: 0x${msg.color.toString(16)}")
+                    Log.d("StatisticsStore", "Old setColors: $setColors")
+                    Log.d("StatisticsStore", "Old setColors.size: ${setColors.size}")
+                    Log.d("StatisticsStore", "Old setColors keys: ${setColors.keys}")
                     val newSetColors = setColors + (msg.setIndex to msg.color)
-                    android.util.Log.d("StatisticsStore", "New setColors: $newSetColors")
-                    android.util.Log.d("StatisticsStore", "New setColors.size: ${newSetColors.size}")
-                    android.util.Log.d("StatisticsStore", "New setColors keys: ${newSetColors.keys}")
-                    android.util.Log.d("StatisticsStore", "New color for set ${msg.setIndex}: 0x${newSetColors[msg.setIndex]!!.toString(16)}")
+                    Log.d("StatisticsStore", "New setColors: $newSetColors")
+                    Log.d("StatisticsStore", "New setColors.size: ${newSetColors.size}")
+                    Log.d("StatisticsStore", "New setColors keys: ${newSetColors.keys}")
+                    Log.d("StatisticsStore", "New color for set ${msg.setIndex}: 0x${newSetColors[msg.setIndex]!!.toString(16)}")
                     copy(setColors = newSetColors)
                 }
 
                 is Msg.FriendExerciseDataLoaded -> {
-                    android.util.Log.d("friends", "=== 📊 Friend exercise data loaded ===")
-                    android.util.Log.d("friends", "FriendId: ${msg.friendId}")
-                    android.util.Log.d("friends", "Exercise data points: ${msg.data.size}")
+                    Log.d("friends", "=== 📊 Friend exercise data loaded ===")
+                    Log.d("friends", "FriendId: ${msg.friendId}")
+                    Log.d("friends", "Exercise data points: ${msg.data.size}")
 
                     copy(
                         friendExerciseData = friendExerciseData + (msg.friendId to msg.data),
                         isLoading = false
                     ).also {
-                        android.util.Log.d("friends", "✅ Friend exercise data added to state")
+                        Log.d("friends", "✅ Friend exercise data added to state")
                     }
                 }
 
@@ -689,8 +690,10 @@ internal class StatisticsStoreFactory(
                     friendMuscleGroupData = friendMuscleGroupData + (msg.friendId to msg.data),
                     isLoading = false
                 ).also {
-                    android.util.Log.d("friends", "✅ Friend muscle group data added to state")
+                    Log.d("friends", "✅ Friend muscle group data added to state")
                 }
+
+                is Msg.CurrentWeightLoaded -> TODO()
             }.also { newState ->
                 android.util.Log.d("StatisticsStore", "=== Reducer finished ===")
                 android.util.Log.d(

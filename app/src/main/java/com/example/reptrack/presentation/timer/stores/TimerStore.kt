@@ -1,6 +1,11 @@
 package com.example.reptrack.presentation.timer.stores
 
+import com.arkivanov.mvikotlin.core.store.Reducer
 import com.arkivanov.mvikotlin.core.store.Store
+import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
+import com.example.reptrack.service.sound.TimerSoundManager
+import kotlinx.coroutines.launch
 
 interface TimerStore : Store<TimerStore.Intent, TimerStore.State, TimerStore.Label> {
 
@@ -25,7 +30,11 @@ interface TimerStore : Store<TimerStore.Intent, TimerStore.State, TimerStore.Lab
             get() = if (durationSeconds > 0) remainingSeconds.toFloat() / durationSeconds else 1f
 
         val formattedTime: String
-            get() = String.format("%02d:%02d:%02d", remainingSeconds / 3600, (remainingSeconds % 3600) / 60, remainingSeconds % 60)
+            get() = String.format("%02d:%02d:%02d",
+                remainingSeconds / 3600,
+                (remainingSeconds % 3600) / 60,
+                remainingSeconds % 60
+            )
     }
 
     sealed interface Label {

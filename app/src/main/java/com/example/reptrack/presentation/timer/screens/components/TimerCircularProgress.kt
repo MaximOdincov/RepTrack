@@ -2,14 +2,12 @@ package com.example.reptrack.presentation.timer.screens.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,14 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.em
 import com.example.reptrack.presentation.theme.LightAccentOrange
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun TimerCircularProgress(
@@ -38,41 +35,47 @@ fun TimerCircularProgress(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    // Animated progress
+    // Анимированный прогресс с плавным переходом
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
         label = "progress_animation"
     )
 
-    // Pulsing effect when running
-    val pulseScale by animateFloatAsState(
-        targetValue = if (isRunning) 1.02f else 1f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
-        label = "pulse_animation"
+    // Анимация вращения для бегущего таймера
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (isRunning) 360f else 0f,
+        animationSpec = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
+        label = "rotation_animation"
     )
 
     Box(
-        modifier = modifier.size(300.dp),
+        modifier = modifier.size(280.dp),
         contentAlignment = Alignment.Center
     ) {
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(onClick = onClick, enabled = !isRunning),
-            onDraw = {
-                drawTimerProgress(
-                    progress = animatedProgress,
-                    pulseScale = pulseScale,
-                    isRunning = isRunning
-                )
-            }
-        )
+                .clickable(onClick = onClick, enabled = !isRunning)
+        ) {
+            // Фоновый круг (светлый для белого фона)
+            drawCircle(
+                color = Color(0xFFF5F5F5),
+                radius = size.minDimension / 2,
+                center = center
+            )
 
-        // Time display inside the circle
+            drawTimerProgress(
+                progress = animatedProgress,
+                isRunning = isRunning,
+                rotationAngle = rotationAngle
+            )
+        }
+
+        // Отображение времени внутри круга
         androidx.compose.material3.Text(
             text = formattedTime,
-            style = androidx.compose.material3.MaterialTheme.typography.displayLarge,
+            fontSize = 48.sp,
             fontWeight = FontWeight.Bold,
             color = LightAccentOrange,
             modifier = Modifier.align(Alignment.Center)
@@ -82,15 +85,32 @@ fun TimerCircularProgress(
 
 private fun DrawScope.drawTimerProgress(
     progress: Float,
-    pulseScale: Float,
-    isRunning: Boolean
+    isRunning: Boolean,
+    rotationAngle: Float
 ) {
-    val size = size.width
-    val strokeWidth = size * 0.06f
-    val center = Offset(size / 2, size / 2)
-    val radius = (size - strokeWidth) / 2 * pulseScale
+    val strokeWidth = size.width * 0.08f
+    val radius = (size.width - strokeWidth) / 2
+    val center = Offset(size.width / 2, size.height / 2)
 
-    // Draw background circle (grey)
+    if (isRunning) {
+        // Эффект вращающихся точек для визуализации работы таймера
+        rotate(rotationAngle) {
+            for (i in 0..11) {
+                val angle = (i * 30).toDouble()
+                val pointRadius = radius * 0.85f
+                val x = center.x + (pointRadius * cos(Math.toRadians(angle))).toFloat()
+                val y = center.y + (pointRadius * sin(Math.toRadians(angle))).toFloat()
+
+                drawCircle(
+                    color = LightAccentOrange.copy(alpha = 0.3f),
+                    radius = 4f,
+                    center = Offset(x, y)
+                )
+            }
+        }
+    }
+
+    // Фоновый круг прогресса
     drawCircle(
         color = Color(0xFFE0E0E0),
         radius = radius,
@@ -98,58 +118,38 @@ private fun DrawScope.drawTimerProgress(
         style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
     )
 
-    // Draw progress arc (orange)
+    // Основной прогресс с градиентом
     if (progress > 0f) {
-        drawProgressArc(
-            center = center,
-            radius = radius,
-            strokeWidth = strokeWidth,
-            progress = progress,
-            isRunning = isRunning
-        )
-    }
-}
+        val sweepAngle = 360f * progress
+        val startAngle = -90f
 
-private fun DrawScope.drawProgressArc(
-    center: Offset,
-    radius: Float,
-    strokeWidth: Float,
-    progress: Float,
-    isRunning: Boolean
-) {
-    // Start from top (-90 degrees)
-    val startAngle = -90f
-    val sweepAngle = 360f * progress
-
-    // Add glow effect when running
-    if (isRunning) {
-        // Outer glow
+        // Тень/свечение
         drawArc(
             color = LightAccentOrange.copy(alpha = 0.3f),
             startAngle = startAngle,
             sweepAngle = sweepAngle,
             useCenter = false,
             topLeft = Offset(center.x - radius - strokeWidth, center.y - radius - strokeWidth),
-            size = Size(radius * 2 + strokeWidth * 2, radius * 2 + strokeWidth * 2),
-            style = Stroke(width = strokeWidth * 2, cap = StrokeCap.Round)
+            size = Size((radius + strokeWidth) * 2, (radius + strokeWidth) * 2),
+            style = Stroke(width = strokeWidth + 4f, cap = StrokeCap.Round)
+        )
+
+        // Основная дуга прогресса
+        drawArc(
+            brush = Brush.sweepGradient(
+                colors = listOf(
+                    LightAccentOrange,
+                    LightAccentOrange.copy(alpha = 0.7f),
+                    LightAccentOrange
+                ),
+                center = center
+            ),
+            startAngle = startAngle,
+            sweepAngle = sweepAngle,
+            useCenter = false,
+            topLeft = Offset(center.x - radius, center.y - radius),
+            size = Size(radius * 2, radius * 2),
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
         )
     }
-
-    // Main progress arc with gradient
-    drawArc(
-        brush = Brush.linearGradient(
-            colors = listOf(
-                LightAccentOrange.copy(alpha = 0.8f),
-                LightAccentOrange
-            ),
-            start = Offset(center.x - radius, center.y + radius),
-            end = Offset(center.x + radius, center.y - radius)
-        ),
-        startAngle = startAngle,
-        sweepAngle = sweepAngle,
-        useCenter = false,
-        topLeft = Offset(center.x - radius, center.y - radius),
-        size = Size(radius * 2, radius * 2),
-        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-    )
 }

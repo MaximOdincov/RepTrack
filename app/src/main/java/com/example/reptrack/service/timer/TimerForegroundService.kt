@@ -30,7 +30,7 @@ class TimerForegroundService : Service() {
         const val EXTRA_REMAINING = "remaining"
     }
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var timerJob: Job? = null
     private var remainingSeconds by mutableStateOf(0)
     private var totalDuration by mutableStateOf(0)
@@ -72,12 +72,10 @@ class TimerForegroundService : Service() {
         // Start new timer
         timerJob = serviceScope.launch {
             while (remainingSeconds > 0) {
+                delay(1000)
                 if (!isPaused) {
-                    delay(1000)
                     remainingSeconds--
                     updateNotification()
-
-                    // Send tick broadcast to UI
                     sendTickBroadcast()
 
                     if (remainingSeconds == 0) {
@@ -85,7 +83,8 @@ class TimerForegroundService : Service() {
                         stopSelf()
                     }
                 } else {
-                    delay(100) // Check frequently if paused
+                    // If paused, keep checking but don't decrement
+                    updateNotification()
                 }
             }
         }
@@ -93,12 +92,35 @@ class TimerForegroundService : Service() {
 
     private fun pauseTimer() {
         isPaused = true
+        timerJob?.cancel()
         updateNotification()
     }
 
     private fun resumeTimer() {
-        isPaused = false
-        updateNotification()
+        if (isPaused && remainingSeconds > 0) {
+            isPaused = false
+            updateNotification()
+            
+            // Resume timer
+            timerJob = serviceScope.launch {
+                while (remainingSeconds > 0) {
+                    delay(1000)
+                    if (!isPaused) {
+                        remainingSeconds--
+                        updateNotification()
+                        sendTickBroadcast()
+
+                        if (remainingSeconds == 0) {
+                            sendCompletedBroadcast()
+                            stopSelf()
+                        }
+                    } else {
+                        // If paused, keep checking but don't decrement
+                        updateNotification()
+                    }
+                }
+            }
+        }
     }
 
     private fun stopTimer() {
@@ -114,12 +136,15 @@ class TimerForegroundService : Service() {
     private fun sendTickBroadcast() {
         val intent = Intent(BROADCAST_TICK).apply {
             putExtra(EXTRA_REMAINING, remainingSeconds)
+            setPackage(packageName)
         }
         sendBroadcast(intent)
     }
 
     private fun sendCompletedBroadcast() {
-        val intent = Intent(BROADCAST_COMPLETED)
+        val intent = Intent(BROADCAST_COMPLETED).apply {
+            setPackage(packageName)
+        }
         sendBroadcast(intent)
     }
 
