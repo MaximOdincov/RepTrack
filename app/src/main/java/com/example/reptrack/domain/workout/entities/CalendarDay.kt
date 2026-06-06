@@ -9,7 +9,8 @@ enum class DayWorkoutStatus {
     SKIPPED,
     COMPLETED,
     PLANNED,
-    OVERDUE
+    OVERDUE,
+    IN_PROGRESS
 }
 
 /**

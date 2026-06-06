@@ -87,6 +87,8 @@ class CalendarUseCase(
                 }
 
                 when {
+                    session.status == com.example.reptrack.domain.workout.entities.WorkoutStatus.COMPLETED -> DayWorkoutStatus.COMPLETED
+                    session.status == com.example.reptrack.domain.workout.entities.WorkoutStatus.IN_PROGRESS -> DayWorkoutStatus.IN_PROGRESS
                     hasCompletedSets -> DayWorkoutStatus.COMPLETED
                     date.isBefore(now) -> DayWorkoutStatus.OVERDUE
                     else -> DayWorkoutStatus.PLANNED

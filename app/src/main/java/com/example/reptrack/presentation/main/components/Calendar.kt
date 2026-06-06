@@ -219,10 +219,11 @@ private fun NumberCell(
                 .background(
                     when {
                         isToday && calendarDay.status == null -> Color(0xFFFF9800) // Orange for today without workout
-                        calendarDay.status == DayWorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
-                        calendarDay.status == DayWorkoutStatus.PLANNED -> Color(0xFFBDBDBD)
-                        calendarDay.status == DayWorkoutStatus.OVERDUE -> Color(0xFFF44336)
-                        calendarDay.status == DayWorkoutStatus.SKIPPED -> Color(0xFF9E9E9E)
+                        calendarDay.status == DayWorkoutStatus.COMPLETED -> Color(0xFF4CAF50) // Green for completed
+                        calendarDay.status == DayWorkoutStatus.IN_PROGRESS -> Color(0xFFFF9800) // Orange for in progress
+                        calendarDay.status == DayWorkoutStatus.PLANNED -> Color(0xFFBDBDBD) // Grey for planned/not started
+                        calendarDay.status == DayWorkoutStatus.OVERDUE -> Color(0xFFF44336) // Red for overdue
+                        calendarDay.status == DayWorkoutStatus.SKIPPED -> Color(0xFF9E9E9E) // Grey for skipped
                         else -> Color.Transparent
                     }
                 )
