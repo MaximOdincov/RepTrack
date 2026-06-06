@@ -171,7 +171,7 @@ private fun ExerciseTabContent(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(searchInput) {
         if (searchInput.isNotBlank()) {
             exerciseStore.accept(ExerciseListStore.Intent.SearchChanged(searchInput))
         }
@@ -299,7 +299,7 @@ private fun TemplateTabContent(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(searchInput) {
         if (searchInput.isNotBlank()) {
             templateStore.accept(TemplateListStore.Intent.SearchChanged(searchInput))
         }
