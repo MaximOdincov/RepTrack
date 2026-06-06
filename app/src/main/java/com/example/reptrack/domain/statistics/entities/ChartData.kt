@@ -44,31 +44,36 @@ data class DateRange(
 ) {
     companion object {
         fun last7Days(): DateRange {
-            val to = LocalDateTime.now()
+            val now = LocalDateTime.now()
+            val to = now.toLocalDate().atTime(23, 59, 59)
             val from = to.minusDays(7)
             return DateRange(from, to)
         }
 
         fun last30Days(): DateRange {
-            val to = LocalDateTime.now()
+            val now = LocalDateTime.now()
+            val to = now.toLocalDate().atTime(23, 59, 59)
             val from = to.minusDays(30)
             return DateRange(from, to)
         }
 
         fun last3Months(): DateRange {
-            val to = LocalDateTime.now()
+            val now = LocalDateTime.now()
+            val to = now.toLocalDate().atTime(23, 59, 59)
             val from = to.minusMonths(3)
             return DateRange(from, to)
         }
 
         fun lastYear(): DateRange {
-            val to = LocalDateTime.now()
+            val now = LocalDateTime.now()
+            val to = now.toLocalDate().atTime(23, 59, 59)
             val from = to.minusYears(1)
             return DateRange(from, to)
         }
 
         fun allTime(): DateRange {
-            val to = LocalDateTime.now()
+            val now = LocalDateTime.now()
+            val to = now.toLocalDate().atTime(23, 59, 59)
             val from = LocalDateTime.of(2020, 1, 1, 0, 0)
             return DateRange(from, to)
         }
