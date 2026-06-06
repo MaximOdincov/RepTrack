@@ -14,6 +14,7 @@ import com.example.reptrack.domain.workout.usecases.exercises.ObserveExerciseByI
 import com.example.reptrack.domain.workout.usecases.workout_exercises.DeleteWorkoutExerciseUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveBestSetFromLastWorkoutUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveWorkoutExerciseByIdUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.CompleteWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
 import kotlinx.coroutines.Dispatchers
@@ -27,25 +28,26 @@ import java.time.LocalDate
 internal interface MainScreenStore : Store<MainScreenStore.Intent, MainScreenStore.State, MainScreenStore.Label> {
 
     sealed interface Intent {
-        data class SelectDate(val date: LocalDate) : Intent
+        data class SelectDate(val date: java.time.LocalDate) : Intent
         data class ExerciseClicked(val workoutExerciseId: String) : Intent
         data class TemplateExerciseClicked(val exerciseId: String, val templateId: String) : Intent
         data class DeleteExercise(val workoutExerciseId: String) : Intent
+        data object CompleteWorkout : Intent
     }
 
     data class State constructor(
-        val currentDate: LocalDate = LocalDate.now(),
+        val currentDate: java.time.LocalDate = java.time.LocalDate.now(),
         val isLoading: Boolean = false,
-        val workoutSession: WorkoutSession? = null,
+        val workoutSession: com.example.reptrack.domain.workout.entities.WorkoutSession? = null,
         val exerciseData: Map<String, ExerciseData> = emptyMap(),
-        val applicableTemplates: List<WorkoutTemplate> = emptyList(),
-        val templateExerciseData: Map<String, Exercise> = emptyMap()
+        val applicableTemplates: List<com.example.reptrack.domain.workout.entities.WorkoutTemplate> = emptyList(),
+        val templateExerciseData: Map<String, com.example.reptrack.domain.workout.entities.Exercise> = emptyMap()
     )
 
     data class ExerciseData(
-        val exercise: Exercise,
-        val workoutExercise: WorkoutExercise,
-        val bestSet: WorkoutSet?
+        val exercise: com.example.reptrack.domain.workout.entities.Exercise,
+        val workoutExercise: com.example.reptrack.domain.workout.entities.WorkoutExercise,
+        val bestSet: com.example.reptrack.domain.workout.entities.WorkoutSet?
     )
 
     sealed interface Label {
@@ -63,6 +65,7 @@ internal class MainScreenStoreFactory(
     private val createSessionFromTemplateUseCase: CreateWorkoutSessionFromTemplateUseCase,
     private val shouldUpdateSessionFromTemplateUseCase: ShouldUpdateSessionFromTemplateUseCase,
     private val deleteWorkoutExerciseUseCase: DeleteWorkoutExerciseUseCase,
+    private val completeWorkoutSessionUseCase: CompleteWorkoutSessionUseCase,
     private val unlinkSessionFromTemplateUseCase: com.example.reptrack.domain.workout.usecases.sessions.UnlinkSessionFromTemplateUseCase,
     private val authRepository: com.example.reptrack.domain.auth.AuthRepository
 ) {
@@ -85,6 +88,7 @@ internal class MainScreenStoreFactory(
         data class ExerciseDeleted(val workoutExerciseId: String) : Msg
         data object ExerciseDataCleared : Msg
         data object TemplateExerciseDataCleared : Msg
+        data class WorkoutCompleted(val session: WorkoutSession?) : Msg
     }
 
     private inner class ExecutorImpl : CoroutineExecutor<MainScreenStore.Intent, Nothing, MainScreenStore.State, Msg, MainScreenStore.Label>() {
@@ -120,6 +124,9 @@ internal class MainScreenStoreFactory(
                 }
                 is MainScreenStore.Intent.DeleteExercise -> {
                     deleteExercise(intent.workoutExerciseId)
+                }
+                is MainScreenStore.Intent.CompleteWorkout -> {
+                    completeWorkout(getState)
                 }
             }
         }
@@ -246,6 +253,20 @@ internal class MainScreenStoreFactory(
                 }
             }
         }
+
+        private fun completeWorkout(getState: () -> MainScreenStore.State) {
+            val currentState = getState()
+            val sessionId = currentState.workoutSession?.id
+
+            if (sessionId != null) {
+                scope.launch {
+                    val result = completeWorkoutSessionUseCase(sessionId)
+                    if (result.isSuccess) {
+                        dispatch(Msg.WorkoutCompleted(currentState.workoutSession))
+                    }
+                }
+            }
+        }
     }
 
     private object ReducerImpl : Reducer<MainScreenStore.State, Msg> {
@@ -283,6 +304,7 @@ internal class MainScreenStoreFactory(
                         exerciseData = updatedExerciseData
                     )
                 }
+                is Msg.WorkoutCompleted -> copy(workoutSession = message.session)
                 is Msg.ExerciseDataCleared -> copy(exerciseData = emptyMap())
                 is Msg.TemplateExerciseDataCleared -> copy(templateExerciseData = emptyMap())
             }

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -151,6 +152,7 @@ internal fun MainScreen(
                 state.workoutSession != null -> {
                     WorkoutDetails(
                         workout = state.workoutSession!!,
+                        store = store,
                         exerciseData = state.exerciseData,
                         onExerciseClick = { workoutExerciseId ->
                             store.accept(MainScreenStore.Intent.ExerciseClicked(workoutExerciseId))
@@ -342,6 +344,7 @@ private fun NoWorkoutPlaceholder() {
 @Composable
 private fun WorkoutDetails(
     workout: WorkoutSession,
+    store: MainScreenStore,
     exerciseData: Map<String, MainScreenStore.ExerciseData>,
     onExerciseClick: (String) -> Unit = {},
     onExerciseDelete: (String) -> Unit = {},
@@ -452,6 +455,17 @@ private fun WorkoutDetails(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            }
+
+            // Complete workout button (only show if IN_PROGRESS)
+            if (workout.status == WorkoutStatus.IN_PROGRESS) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CompleteWorkoutButton(
+                        onClick = { store.accept(MainScreenStore.Intent.CompleteWorkout) }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
@@ -729,6 +743,29 @@ private fun MuscleGroupChip(muscleGroup: MuscleGroup) {
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
             color = textColor
+        )
+    }
+}
+
+@Composable
+private fun CompleteWorkoutButton(
+    onClick: () -> Unit
+) {
+    androidx.compose.material3.Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+    ) {
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.Default.CheckCircle,
+            contentDescription = "Complete Workout",
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(
+            "Complete Workout",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium
         )
     }
 }

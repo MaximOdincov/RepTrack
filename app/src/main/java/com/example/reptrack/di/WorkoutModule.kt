@@ -13,6 +13,7 @@ import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.domain.workout.usecases.exercises.*
+import com.example.reptrack.domain.workout.usecases.sessions.CompleteWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
@@ -92,6 +93,7 @@ val workoutModule = module {
     factory { CreateWorkoutSessionUseCase(get()) }
     factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get()) }
     factory { UpdateWorkoutSessionUseCase(get()) }
+    factory { CompleteWorkoutSessionUseCase(get()) }
     factory { UnlinkSessionFromTemplateUseCase(get()) }
     factory { UpdateLinkedSessionsUseCase(get(), get(), get()) }
     factory { ShouldUpdateSessionFromTemplateUseCase() }
@@ -115,6 +117,7 @@ val workoutModule = module {
             createSessionFromTemplateUseCase = get(),
             shouldUpdateSessionFromTemplateUseCase = get(),
             deleteWorkoutExerciseUseCase = get(),
+            completeWorkoutSessionUseCase = get(),
             unlinkSessionFromTemplateUseCase = get(),
             authRepository = get()
         ).create()
@@ -130,6 +133,7 @@ val workoutModule = module {
             createSessionFromTemplateUseCase = get(),
             shouldUpdateSessionFromTemplateUseCase = get(),
             deleteWorkoutExerciseUseCase = get(),
+            completeWorkoutSessionUseCase = get(),
             unlinkSessionFromTemplateUseCase = get(),
             authRepository = get()
         )
