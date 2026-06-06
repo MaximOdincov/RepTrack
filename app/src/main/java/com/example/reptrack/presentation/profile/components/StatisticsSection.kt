@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,8 +44,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.statistics.entities.WeightDataPoint
 import com.example.reptrack.presentation.statistics.components.charts.LineChartView
 import com.example.reptrack.presentation.statistics.stores.StatisticsStore
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Composable
 fun StatisticsSection(
@@ -55,10 +54,14 @@ fun StatisticsSection(
 ) {
     val state = store.states.collectAsState((StatisticsStore.State())).value
 
-    // Get today's weight from data
-    val todayWeight = state.weightData
-        .firstOrNull { it.date == LocalDate.now() }?.value
-    val displayWeight = state.currentWeight ?: todayWeight
+    // Load data on first show
+    LaunchedEffect(store) {
+        store.accept(StatisticsStore.Intent.LoadData)
+    }
+
+    // Get the latest weight from data (same logic as WeightChartSection)
+    val latestWeightFromData = state.weightData.lastOrNull()?.value
+    val displayWeight = state.currentWeight ?: latestWeightFromData
 
     Card(
         modifier = modifier
@@ -92,6 +95,15 @@ fun StatisticsSection(
             // Compact weight controller (from WeightChartSection)
             var editingWeight by remember { mutableStateOf(displayWeight ?: 0f) }
             var showSaveButton by remember { mutableStateOf(false) }
+
+            // Update editingWeight when state changes
+            LaunchedEffect(state.currentWeight, state.weightData) {
+                val latestWeightFromData = state.weightData.lastOrNull()?.value
+                val newWeight = state.currentWeight ?: latestWeightFromData ?: 0f
+                if (editingWeight != newWeight) {
+                    editingWeight = newWeight
+                }
+            }
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -181,10 +193,11 @@ fun StatisticsSection(
                     }
                 }
 
-                // Save button - only show for non-guest users
-                if (showSaveButton && !isGuest) {
+                // Save button
+                if (showSaveButton) {
                     Button(
                         onClick = {
+                            android.util.Log.d("StatisticsSection", "Saving weight: $editingWeight")
                             store.accept(StatisticsStore.Intent.UpdateWeight(editingWeight))
                             showSaveButton = false
                         },

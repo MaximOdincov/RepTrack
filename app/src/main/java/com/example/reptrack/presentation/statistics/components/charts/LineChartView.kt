@@ -196,13 +196,6 @@ fun LineChartView(
                 android.util.Log.d("LineChartView", "Drawing series: $seriesName with color: $color")
                 android.util.Log.d("LineChartView", "  Float A=${color.alpha}, R=${color.red}, G=${color.green}, B=${color.blue}")
 
-                // Log all points to check for +2kg offset
-                android.util.Log.d("LineChartView", "  Points in series '$seriesName':")
-                points.forEach { (x, y) ->
-                    android.util.Log.d("LineChartView", "    x=$x (date: ${java.time.LocalDate.ofEpochDay(x.toLong())}), y=$y")
-                }
-
-                // REMOVED: Artificial 2kg subtraction - now using original points directly
                 // Draw line using original points
                 val path = Path().apply {
                     points.sortedBy { it.first }.forEachIndexed { index, (x, y) ->

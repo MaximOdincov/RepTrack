@@ -54,12 +54,14 @@ class StatisticsRepositoryImpl(
     }
 
     override suspend fun updateWeightRecord(userId: String, date: LocalDateTime, value: Float) {
+        android.util.Log.d("StatisticsRepository", "=== updateWeightRecord called ===")
+        android.util.Log.d("StatisticsRepository", "userId: $userId, value: $value")
         
         val startOfDay = date.toLocalDate().atStartOfDay()
         val endOfDay = date.toLocalDate().plusDays(1).atStartOfDay()
 
         val existingRecord = weightRecordDao.getRecordForDate(userId, startOfDay, endOfDay)
-        
+        android.util.Log.d("StatisticsRepository", "existingRecord: $existingRecord")
 
         val record = existingRecord?.copy(
             value = value,
@@ -70,6 +72,7 @@ class StatisticsRepositoryImpl(
             date = date,
             value = value
         )
+        android.util.Log.d("StatisticsRepository", "Saving record: id=${record.id}, value=${record.value}")
 
         weightRecordDao.insertOrUpdate(record)
     }

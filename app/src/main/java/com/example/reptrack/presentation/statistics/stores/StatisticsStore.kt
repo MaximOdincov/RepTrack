@@ -321,6 +321,8 @@ internal class StatisticsStoreFactory(
         }
 
         private fun updateWeight(value: Float, state: StatisticsStore.State) {
+            android.util.Log.d("StatisticsStore", "=== updateWeight called ===")
+            android.util.Log.d("StatisticsStore", "value: $value")
             val userId = state.userId ?: return
             val dateRange = state.dateRange
 
@@ -798,7 +800,9 @@ internal class StatisticsStoreFactory(
                     Log.d("friends", "✅ Friend muscle group data added to state")
                 }
 
-                is Msg.CurrentWeightLoaded -> TODO()
+                is Msg.CurrentWeightLoaded -> copy(
+                    currentWeight = msg.weight
+                )
             }.also { newState ->
                 android.util.Log.d("StatisticsStore", "=== Reducer finished ===")
                 android.util.Log.d(
