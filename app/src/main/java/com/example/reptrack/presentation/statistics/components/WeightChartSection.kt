@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.example.reptrack.domain.statistics.entities.FriendConfig
 import com.example.reptrack.presentation.statistics.components.charts.LineChartView
 import com.example.reptrack.presentation.statistics.components.common.FriendChip
+import com.example.reptrack.presentation.statistics.utils.colorFromArgb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,10 +66,24 @@ fun WeightChartSection(
     onWeightSave: (Float) -> Unit,
     onAddFriend: () -> Unit,
     onRemoveFriend: (String) -> Unit,
+    onFriendColorChange: (String, Color) -> Unit,
     onChangeDateRange: () -> Unit,
+    isGuest: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    var editingWeight by remember { mutableStateOf(currentWeight ?: 0f) }
+    // Try to get the latest weight from weightData if currentWeight is null
+    val latestWeightFromData = weightData.lastOrNull()?.second
+
+    var editingWeight by remember { mutableStateOf(currentWeight ?: latestWeightFromData ?: 0f) }
+
+    // Update editingWeight when data changes
+    LaunchedEffect(currentWeight, weightData) {
+        val newWeight = currentWeight ?: weightData.lastOrNull()?.second ?: 0f
+        if (editingWeight != newWeight) {
+            android.util.Log.d("WeightChartSection", "Updating editingWeight: $editingWeight -> $newWeight")
+            editingWeight = newWeight
+        }
+    }
     var showSaveButton by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
     Card(
@@ -207,13 +222,13 @@ fun WeightChartSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Chart
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(150.dp)
             ) {
                 if (weightData.isEmpty()) {
                     Box(
@@ -243,7 +258,9 @@ fun WeightChartSection(
                     )
 
                     friends.forEach { friend ->
-                        seriesColors[friend.friendName] = Color(friend.color)
+                        val friendColor = colorFromArgb(friend.color)
+                        android.util.Log.d("WeightChart", "Friend ${friend.friendName} color: ARGB=0x${friend.color.toString(16)}, Color=$friendColor")
+                        seriesColors[friend.friendName] = friendColor
                     }
 
                     LineChartView(
@@ -256,43 +273,46 @@ fun WeightChartSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Friends section
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Friends",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    if (friends.size < 3) {
-                        Button(onClick = onAddFriend) {
-                            Text("Add Friend")
-                        }
-                    }
-                }
-
-                if (friends.isEmpty()) {
-                    Text(
-                        text = "No friends added yet",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                } else {
+            // Friends section - only show if not guest
+            if (!isGuest) {
+                Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        friends.forEach { friend ->
-                            FriendChip(
-                                name = friend.friendName,
-                                color = Color(friend.color),
-                                onRemove = { onRemoveFriend(friend.friendId) }
-                            )
+                        Text(
+                            text = "Friends",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (friends.size < 3) {
+                            Button(onClick = onAddFriend) {
+                                Text("Add Friend")
+                            }
+                        }
+                    }
+
+                    if (friends.isEmpty()) {
+                        Text(
+                            text = "No friends added yet",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            friends.forEach { friend ->
+                                FriendChip(
+                                    name = friend.friendName,
+                                    color = colorFromArgb(friend.color),
+                                    onRemove = { onRemoveFriend(friend.friendId) },
+                                    onChangeColor = { newColor -> onFriendColorChange(friend.friendId, newColor) }
+                                )
+                            }
                         }
                     }
                 }
@@ -305,3 +325,4 @@ fun formatDate(date: LocalDate): String {
     val formatter = DateTimeFormatter.ofPattern("MMM dd")
     return date.format(formatter)
 }
+

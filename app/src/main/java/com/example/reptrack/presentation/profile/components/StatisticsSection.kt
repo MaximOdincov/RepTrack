@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -48,6 +50,7 @@ import java.time.LocalDateTime
 fun StatisticsSection(
     store: StatisticsStore,
     onNavigateToStatistics: () -> Unit,
+    isGuest: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val state = store.states.collectAsState((StatisticsStore.State())).value
@@ -86,102 +89,116 @@ fun StatisticsSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Weight counter with +/- buttons
-            Row(
+            // Compact weight controller (from WeightChartSection)
+            var editingWeight by remember { mutableStateOf(displayWeight ?: 0f) }
+            var showSaveButton by remember { mutableStateOf(false) }
+
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                IconButton(
-                    onClick = {
-                        displayWeight?.let {
-                            store.accept(StatisticsStore.Intent.UpdateWeight(it - 0.5f))
-                        }
-                    },
-                    modifier = Modifier.size(48.dp)
+                // Weight display with +/- buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Decrease weight",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "${displayWeight?.let { "%.1f".format(it) } ?: "--"} kg",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            text = "Today",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-
-                IconButton(
-                    onClick = {
-                        displayWeight?.let {
-                            store.accept(StatisticsStore.Intent.UpdateWeight(it + 0.5f))
-                        }
-                    },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Increase weight",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Mini weight chart (last 7 days)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            ) {
-                if (state.weightData.isEmpty()) {
+                    // Minus button
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                editingWeight = (editingWeight - 0.5f).coerceAtLeast(0f)
+                                showSaveButton = true
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No weight data yet",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "−",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                } else {
-                    val last7DaysData: List<Pair<Float, Float>> = state.weightData
-                        .takeLast(7)
-                        .map { point: com.example.reptrack.domain.statistics.entities.WeightDataPoint ->
-                            Pair(
-                                point.date.toEpochDay().toFloat(),
-                                point.value
+
+                    // Weight display
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val displayWeight = String.format("%.1f", editingWeight)
+                            Text(
+                                text = displayWeight,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "kg",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                    }
 
-                    LineChartView(
-                        data = mapOf("You" to last7DaysData),
-                        seriesColors = mapOf("You" to MaterialTheme.colorScheme.primary),
-                        modifier = Modifier.fillMaxSize(),
-                        showPoints = true
-                    )
+                    // Plus button
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                editingWeight += 0.5f
+                                showSaveButton = true
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "+",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+
+                // Save button - only show for non-guest users
+                if (showSaveButton && !isGuest) {
+                    Button(
+                        onClick = {
+                            store.accept(StatisticsStore.Intent.UpdateWeight(editingWeight))
+                            showSaveButton = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Save Weight",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }

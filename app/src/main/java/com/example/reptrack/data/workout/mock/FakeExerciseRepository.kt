@@ -166,7 +166,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#E53935",
+            iconColor = "#FF6B6B",
             backgroundRes = null,
             backgroundColor = "#FFEBEE",
             isCustom = false
@@ -177,7 +177,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#FA34D3",
+            iconColor = "#FF6B6B",
             backgroundRes = null,
             backgroundColor = "#FFEBEE",
             isCustom = false
@@ -188,7 +188,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#D81B60",
+            iconColor = "#FF6B6B",
             backgroundRes = null,
             backgroundColor = "#FFEBEE",
             isCustom = false
@@ -199,7 +199,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CHEST,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#C62828",
+            iconColor = "#FF6B6B",
             backgroundRes = null,
             backgroundColor = "#FFEBEE",
             isCustom = false
@@ -212,7 +212,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.BACK,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#009688",
+            iconColor = "#4ECDC4",
             backgroundRes = null,
             backgroundColor = "#E0F7FA",
             isCustom = false
@@ -223,7 +223,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.BACK,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#4DB6AC",
+            iconColor = "#4ECDC4",
             backgroundRes = null,
             backgroundColor = "#E0F7FA",
             isCustom = false
@@ -234,7 +234,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.BACK,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#26A69A",
+            iconColor = "#4ECDC4",
             backgroundRes = null,
             backgroundColor = "#E0F7FA",
             isCustom = false
@@ -245,7 +245,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.BACK,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#00897B",
+            iconColor = "#4ECDC4",
             backgroundRes = null,
             backgroundColor = "#E0F7FA",
             isCustom = false
@@ -269,7 +269,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.LEGS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#43A047",
+            iconColor = "#45B7D1",
             backgroundRes = null,
             backgroundColor = "#E8F5E9",
             isCustom = false
@@ -280,7 +280,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.LEGS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#388E3C",
+            iconColor = "#45B7D1",
             backgroundRes = null,
             backgroundColor = "#E8F5E9",
             isCustom = false
@@ -291,7 +291,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.LEGS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#2E7D32",
+            iconColor = "#45B7D1",
             backgroundRes = null,
             backgroundColor = "#E8F5E9",
             isCustom = false
@@ -302,7 +302,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.LEGS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#1B5E20",
+            iconColor = "#45B7D1",
             backgroundRes = null,
             backgroundColor = "#E8F5E9",
             isCustom = false
@@ -313,7 +313,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.LEGS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#66BB6A",
+            iconColor = "#45B7D1",
             backgroundRes = null,
             backgroundColor = "#E8F5E9",
             isCustom = false
@@ -326,7 +326,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ARMS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#E64A19",
+            iconColor = "#9B59B6",
             backgroundRes = null,
             backgroundColor = "#FFF3E0",
             isCustom = false
@@ -337,7 +337,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ARMS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#F57C00",
+            iconColor = "#9B59B6",
             backgroundRes = null,
             backgroundColor = "#FFF3E0",
             isCustom = false
@@ -348,7 +348,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ARMS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#FF9800",
+            iconColor = "#9B59B6",
             backgroundRes = null,
             backgroundColor = "#FFF3E0",
             isCustom = false
@@ -359,7 +359,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ARMS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#FB8C00",
+            iconColor = "#9B59B6",
             backgroundRes = null,
             backgroundColor = "#FFF3E0",
             isCustom = false
@@ -370,7 +370,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ARMS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#EF6C00",
+            iconColor = "#9B59B6",
             backgroundRes = null,
             backgroundColor = "#FFF3E0",
             isCustom = false
@@ -383,7 +383,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ABS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#7E57C2",
+            iconColor = "#F39C12",
             backgroundRes = null,
             backgroundColor = "#F3E5F5",
             isCustom = false
@@ -394,7 +394,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ABS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#9575CD",
+            iconColor = "#F39C12",
             backgroundRes = null,
             backgroundColor = "#F3E5F5",
             isCustom = false
@@ -405,7 +405,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ABS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#673AB7",
+            iconColor = "#F39C12",
             backgroundRes = null,
             backgroundColor = "#F3E5F5",
             isCustom = false
@@ -416,7 +416,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ABS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#5E35B1",
+            iconColor = "#F39C12",
             backgroundRes = null,
             backgroundColor = "#F3E5F5",
             isCustom = false
@@ -427,7 +427,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.ABS,
             type = ExerciseType.WEIGHT_REPS,
             iconRes = getNextIcon(),
-            iconColor = "#512DA8",
+            iconColor = "#F39C12",
             backgroundRes = null,
             backgroundColor = "#F3E5F5",
             isCustom = false
@@ -440,7 +440,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CARDIO,
             type = ExerciseType.TIME_DISTANCE,
             iconRes = getNextIcon(),
-            iconColor = "#EC407A",
+            iconColor = "#2ECC71",
             backgroundRes = null,
             backgroundColor = "#FCE4EC",
             isCustom = false
@@ -451,7 +451,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CARDIO,
             type = ExerciseType.TIME_DISTANCE,
             iconRes = getNextIcon(),
-            iconColor = "#D81B60",
+            iconColor = "#2ECC71",
             backgroundRes = null,
             backgroundColor = "#FCE4EC",
             isCustom = false
@@ -462,7 +462,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CARDIO,
             type = ExerciseType.TIME_DISTANCE,
             iconRes = getNextIcon(),
-            iconColor = "#C2185B",
+            iconColor = "#2ECC71",
             backgroundRes = null,
             backgroundColor = "#FCE4EC",
             isCustom = false
@@ -473,7 +473,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CARDIO,
             type = ExerciseType.TIME_DISTANCE,
             iconRes = getNextIcon(),
-            iconColor = "#AD1457",
+            iconColor = "#2ECC71",
             backgroundRes = null,
             backgroundColor = "#FCE4EC",
             isCustom = false
@@ -484,7 +484,7 @@ class FakeExerciseRepository : ExerciseRepository {
             muscleGroup = MuscleGroup.CARDIO,
             type = ExerciseType.TIME_DISTANCE,
             iconRes = getNextIcon(),
-            iconColor = "#880E4F",
+            iconColor = "#2ECC71",
             backgroundRes = null,
             backgroundColor = "#FCE4EC",
             isCustom = false

@@ -49,14 +49,18 @@ class StatisticsRepositoryImpl(
     }
 
     override suspend fun getCurrentWeight(userId: String): Float? {
-        return weightRecordDao.getLatestRecord(userId)?.value
+        val latestRecord = weightRecordDao.getLatestRecord(userId)
+                return latestRecord?.value
     }
 
     override suspend fun updateWeightRecord(userId: String, date: LocalDateTime, value: Float) {
+        
         val startOfDay = date.toLocalDate().atStartOfDay()
         val endOfDay = date.toLocalDate().plusDays(1).atStartOfDay()
 
         val existingRecord = weightRecordDao.getRecordForDate(userId, startOfDay, endOfDay)
+        
+
         val record = existingRecord?.copy(
             value = value,
             updatedAt = LocalDateTime.now()
@@ -156,32 +160,72 @@ class StatisticsRepositoryImpl(
     }
 
     override fun observeMuscleGroupData(userId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<MuscleGroupDataPoint>> {
+        android.util.Log.d("StatisticsRepository", "=== observeMuscleGroupData called ===")
+        android.util.Log.d("StatisticsRepository", "userId: $userId")
+        android.util.Log.d("StatisticsRepository", "fromDate: $fromDate")
+        android.util.Log.d("StatisticsRepository", "toDate: $toDate")
+
         return workoutDao.observeMuscleGroupFrequency(userId, fromDate, toDate).map { frequencyData ->
-            frequencyData.mapNotNull { data ->
+            android.util.Log.d("StatisticsRepository", "Raw frequency data received: ${frequencyData.size} items")
+            frequencyData.forEach { data ->
+                android.util.Log.d("StatisticsRepository", "  ${data.muscleGroup}: ${data.frequency}")
+            }
+
+            val mappedData = frequencyData.mapNotNull { data ->
                 try {
+                    val muscleGroup = MuscleGroup.valueOf(data.muscleGroup)
+                    android.util.Log.d("StatisticsRepository", "✅ Successfully mapped: ${data.muscleGroup} -> $muscleGroup")
                     MuscleGroupDataPoint(
-                        muscleGroup = MuscleGroup.valueOf(data.muscleGroup),
+                        muscleGroup = muscleGroup,
                         frequency = data.frequency
                     )
                 } catch (e: IllegalArgumentException) {
+                    android.util.Log.e("StatisticsRepository", "❌ Failed to map muscle group: ${data.muscleGroup}", e)
                     null
                 }
             }
+
+            android.util.Log.d("StatisticsRepository", "Final mapped data: ${mappedData.size} items")
+            mappedData.forEach { data ->
+                android.util.Log.d("StatisticsRepository", "  ${data.muscleGroup}: ${data.frequency}")
+            }
+
+            mappedData
         }
     }
 
     override fun observeFriendMuscleGroupData(friendId: String, fromDate: LocalDateTime, toDate: LocalDateTime): Flow<List<MuscleGroupDataPoint>> {
+        android.util.Log.d("StatisticsRepository", "=== observeFriendMuscleGroupData called ===")
+        android.util.Log.d("StatisticsRepository", "friendId: $friendId")
+        android.util.Log.d("StatisticsRepository", "fromDate: $fromDate")
+        android.util.Log.d("StatisticsRepository", "toDate: $toDate")
+
         return workoutDao.observeMuscleGroupFrequency(friendId, fromDate, toDate).map { frequencyData ->
-            frequencyData.mapNotNull { data ->
+            android.util.Log.d("StatisticsRepository", "Raw friend frequency data received: ${frequencyData.size} items")
+            frequencyData.forEach { data ->
+                android.util.Log.d("StatisticsRepository", "  ${data.muscleGroup}: ${data.frequency}")
+            }
+
+            val mappedData = frequencyData.mapNotNull { data ->
                 try {
+                    val muscleGroup = MuscleGroup.valueOf(data.muscleGroup)
+                    android.util.Log.d("StatisticsRepository", "✅ Successfully mapped friend data: ${data.muscleGroup} -> $muscleGroup")
                     MuscleGroupDataPoint(
-                        muscleGroup = MuscleGroup.valueOf(data.muscleGroup),
+                        muscleGroup = muscleGroup,
                         frequency = data.frequency
                     )
                 } catch (e: IllegalArgumentException) {
+                    android.util.Log.e("StatisticsRepository", "❌ Failed to map friend muscle group: ${data.muscleGroup}", e)
                     null
                 }
             }
+
+            android.util.Log.d("StatisticsRepository", "Final mapped friend data: ${mappedData.size} items")
+            mappedData.forEach { data ->
+                android.util.Log.d("StatisticsRepository", "  ${data.muscleGroup}: ${data.frequency}")
+            }
+
+            mappedData
         }
     }
 

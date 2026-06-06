@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.reptrack.presentation.statistics.utils.colorToArgb
 
 @Composable
 fun FriendChip(
@@ -32,6 +33,7 @@ fun FriendChip(
     onRemove: () -> Unit,
     onChangeColor: (Color) -> Unit = {}
 ) {
+    android.util.Log.d("FriendChip", "FriendChip created: name=$name, color=$color")
     var showColorPicker by androidx.compose.runtime.remember { mutableStateOf(false) }
     val availableColors = androidx.compose.runtime.remember {
         listOf(
@@ -44,6 +46,11 @@ fun FriendChip(
             Color(0xFF06B6D4), // Cyan
             Color(0xFF84CC16)  // Lime
         )
+    }
+
+    // Convert available colors to ARGB Long for comparison
+    val availableColorsArgb = androidx.compose.runtime.remember {
+        availableColors.map { com.example.reptrack.presentation.statistics.utils.colorToArgb(it) }
     }
 
     Row(
@@ -87,6 +94,9 @@ fun FriendChip(
             selectedColor = color,
             availableColors = availableColors,
             onColorSelected = { newColor ->
+                android.util.Log.d("FriendChip", "Friend selected color: $newColor")
+                val argb = colorToArgb(newColor)
+                android.util.Log.d("FriendChip", "Friend selected ARGB: 0x${argb.toString(16)}")
                 onChangeColor(newColor)
                 showColorPicker = false
             },

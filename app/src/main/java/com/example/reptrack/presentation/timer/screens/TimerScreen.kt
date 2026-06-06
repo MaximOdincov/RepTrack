@@ -11,13 +11,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
@@ -43,6 +48,7 @@ import com.example.reptrack.presentation.timer.screens.components.TimePickerDial
 import com.example.reptrack.presentation.timer.stores.TimerStore
 import com.example.reptrack.service.timer.TimerForegroundService
 import com.example.reptrack.presentation.theme.LightAccentOrange
+import com.example.reptrack.R
 
 @Composable
 fun TimerScreen(store: TimerStore) {
@@ -206,16 +212,31 @@ fun TimerScreen(store: TimerStore) {
                 stopTimerService(context)
             },
             title = {
-                Text(
-                    text = "⏰ Time's Up!",
-                    color = LightAccentOrange,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_timer),
+                        contentDescription = null,
+                        tint = LightAccentOrange,
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Время вышло!",
+                        color = LightAccentOrange,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
             },
             text = {
                 Text(
-                    text = "Timer completed. Would you like to start again?",
-                    color = Color.White
+                    text = "Таймер завершён. Хотите запустить его снова?",
+                    color = Color.Black
                 )
             },
             confirmButton = {
@@ -228,7 +249,7 @@ fun TimerScreen(store: TimerStore) {
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = LightAccentOrange)
                 ) {
-                    Text("Start Again", color = Color.White)
+                    Text("Запустить снова", color = Color.White)
                 }
             },
             dismissButton = {
@@ -238,12 +259,12 @@ fun TimerScreen(store: TimerStore) {
                         store.accept(TimerStore.Intent.ResetTimer)
                         stopTimerService(context)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3A3A3C))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDDDDDD))
                 ) {
-                    Text("Close", color = Color.White)
+                    Text("Закрыть", color = Color.Black)
                 }
             },
-            containerColor = Color(0xFF1C1C1E)
+            containerColor = Color.White
         )
     }
 }

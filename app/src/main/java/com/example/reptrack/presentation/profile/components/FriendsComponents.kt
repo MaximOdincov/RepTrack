@@ -1,5 +1,6 @@
 package com.example.reptrack.presentation.profile.components
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -17,11 +18,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +71,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.friends.Friend
 import com.example.reptrack.presentation.profile.stores.FriendsStore
+import com.example.reptrack.presentation.statistics.components.dialogs.AddFriendDialog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -75,11 +80,11 @@ fun ProfileHeader(
     username: String?,
     email: String?,
     avatarUrl: String?,
+    isGuest: Boolean = false,
     isSyncing: Boolean = false,
     syncError: String? = null,
     lastSyncTime: Long = 0,
     onAvatarClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     onSyncClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -140,58 +145,66 @@ fun ProfileHeader(
 
         // Sync and Settings Icons
         Row {
-            // Sync Icon
-            if (isSyncing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            } else {
-                Box {
-                    IconButton(onClick = onSyncClick) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Sync",
-                            tint = if (syncError != null) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
-                        )
-                    }
-                    // Sync status indicator
-                    if (syncError != null) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Sync Error",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .offset(x = 12.dp, y = (-8).dp)
-                        )
-                    } else if (lastSyncTime > 0) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Synced",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(12.dp)
-                                .offset(x = 10.dp, y = (-6).dp)
-                        )
+            // Sync Icon with text - only show if not guest
+            if (!isGuest) {
+                if (isSyncing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Box {
+                        IconButton(onClick = onSyncClick) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Sync",
+                                tint = if (syncError != null) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        // Sync status indicator
+                        if (syncError != null) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Sync Error",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .offset(x = 12.dp, y = (-6).dp)
+                            )
+                        } else if (lastSyncTime > 0) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Synced",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .offset(x = 16.dp, y = (-6).dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Settings Icon
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onSurface
+                // Sync text - bigger and centered
+                Text(
+                    text = "SYNC",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (syncError != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+                    },
+                    modifier = Modifier.padding(start = 8.dp),
+                    textAlign = TextAlign.Center
                 )
+
+                Spacer(modifier = Modifier.width(16.dp))
             }
         }
     }
@@ -278,28 +291,6 @@ fun FriendsSection(
                 Column {
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Add Friend Button
-                    Button(
-                        onClick = {
-                            android.util.Log.d("FriendsSection", "Opening Add Friend Dialog")
-                            showAddFriendDialog = true
-                            store.accept(FriendsStore.Intent.ClearError)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Friend"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Friend")
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Friends List
                     if (state.isLoading && state.friends.isEmpty()) {
                         Box(
@@ -316,7 +307,7 @@ fun FriendsSection(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
                     } else {
                         Column(
@@ -338,6 +329,28 @@ fun FriendsSection(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Add Friend Button at the bottom
+                    Button(
+                        onClick = {
+                            Log.d("FriendsSection", "Opening Add Friend Dialog")
+                            showAddFriendDialog = true
+                            store.accept(FriendsStore.Intent.ClearError)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Friend"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Add Friend")
+                    }
                 }
             }
         }
@@ -346,14 +359,14 @@ fun FriendsSection(
     // Show error/success
     LaunchedEffect(state.error) {
         if (state.error != null) {
-            android.util.Log.e("FriendsSection", "Error: ${state.error}")
+            Log.e("FriendsSection", "Error: ${state.error}")
         }
     }
 
     LaunchedEffect(state.successMessage) {
         if (state.successMessage != null) {
-            android.util.Log.d("FriendsSection", "Success: ${state.successMessage}")
-            kotlinx.coroutines.delay(2000)
+            Log.d("FriendsSection", "Success: ${state.successMessage}")
+            delay(2000)
             store.accept(FriendsStore.Intent.ClearSuccessMessage)
         }
     }
@@ -362,16 +375,17 @@ fun FriendsSection(
     if (showAddFriendDialog) {
         AddFriendDialog(
             onDismiss = {
-                android.util.Log.d("FriendsSection", "Closing Add Friend Dialog")
+                Log.d("FriendsSection", "Closing Add Friend Dialog")
                 showAddFriendDialog = false
                 store.accept(FriendsStore.Intent.ClearError)
             },
-            onAddFriend = { email, passkey ->
-                android.util.Log.d("FriendsSection", "Adding friend: $email")
+            onAddFriend = { email: String, passkey: String ->
+                Log.d("FriendsSection", "Adding friend: $email")
                 store.accept(FriendsStore.Intent.AddFriend(email, passkey))
             },
             isLoading = state.isAddingFriend,
-            error = state.error
+            availableFriends = TODO(),
+            addedFriends = TODO()
         )
     }
 }
@@ -412,28 +426,36 @@ fun FriendItem(
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                    } else {
-                        Text(
-                            text = friend.username?.firstOrNull()?.toString() ?: "?",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
+                } else {
+                    Text(
+                        text = friend.username?.firstOrNull()?.toString() ?: "?",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 // Username
                 Text(
                     text = friend.username ?: "Unknown",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
+
+                // Friend email
+                Text(
+                    text = friend.email ?: "Unknown email",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Delete button
+            // Delete button on the right side
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Close,
@@ -442,10 +464,11 @@ fun FriendItem(
                 )
             }
         }
+    }
 }
 
 @Composable
-fun AddFriendDialog(
+private fun AddFriendDialog(
     onDismiss: () -> Unit,
     onAddFriend: (String, String) -> Unit,
     isLoading: Boolean = false,
@@ -479,7 +502,7 @@ fun AddFriendDialog(
     LaunchedEffect(isLoading, error) {
         if (!isLoading && error == null && (email.isNotBlank() || passkey.isNotBlank())) {
             // Success - close dialog after a short delay
-            kotlinx.coroutines.delay(500)
+            delay(500)
             onDismiss()
         }
     }
@@ -597,18 +620,24 @@ fun AddFriendDialog(
                 // Add Button
                 Button(
                     onClick = {
-                        android.util.Log.d("AddFriendDialog", "Add Friend button clicked")
-                        android.util.Log.d("AddFriendDialog", "Email: $email, Passkey: $passkey")
+                        Log.d("AddFriendDialog", "Add Friend button clicked")
+                        Log.d(
+                            "AddFriendDialog",
+                            "Email: $email, Passkey: $passkey"
+                        )
 
                         if (email.isBlank() || passkey.isBlank()) {
                             localError = "Please fill in all fields"
-                            android.util.Log.d("AddFriendDialog", "Validation failed - empty fields")
+                            Log.d(
+                                "AddFriendDialog",
+                                "Validation failed - empty fields"
+                            )
                             return@Button
                         }
 
                         localIsLoading = true
                         localError = null
-                        android.util.Log.d("AddFriendDialog", "Calling onAddFriend...")
+                        Log.d("AddFriendDialog", "Calling onAddFriend...")
                         onAddFriend(email, passkey)
                     },
                     modifier = Modifier.fillMaxWidth(),

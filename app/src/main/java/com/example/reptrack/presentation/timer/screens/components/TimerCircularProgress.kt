@@ -58,13 +58,6 @@ fun TimerCircularProgress(
                 .fillMaxSize()
                 .clickable(onClick = onClick, enabled = !isRunning)
         ) {
-            // Фоновый круг (светлый для белого фона)
-            drawCircle(
-                color = Color(0xFFF5F5F5),
-                radius = size.minDimension / 2,
-                center = center
-            )
-
             drawTimerProgress(
                 progress = animatedProgress,
                 isRunning = isRunning,
@@ -110,29 +103,10 @@ private fun DrawScope.drawTimerProgress(
         }
     }
 
-    // Фоновый круг прогресса
-    drawCircle(
-        color = Color(0xFFE0E0E0),
-        radius = radius,
-        center = center,
-        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-    )
-
     // Основной прогресс с градиентом
     if (progress > 0f) {
         val sweepAngle = 360f * progress
         val startAngle = -90f
-
-        // Тень/свечение
-        drawArc(
-            color = LightAccentOrange.copy(alpha = 0.3f),
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            useCenter = false,
-            topLeft = Offset(center.x - radius - strokeWidth, center.y - radius - strokeWidth),
-            size = Size((radius + strokeWidth) * 2, (radius + strokeWidth) * 2),
-            style = Stroke(width = strokeWidth + 4f, cap = StrokeCap.Round)
-        )
 
         // Основная дуга прогресса
         drawArc(

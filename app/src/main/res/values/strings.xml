@@ -259,4 +259,89 @@
     <string name="icon_upper_body">upper_body_icon</string>
     <string name="icon_lower_body">lower_body_icon</string>
 
+    <!-- ==================== AUTHENTICATION ==================== -->
+
+    <!-- Screen Titles -->
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_sign_up">Sign Up</string>
+    <string name="auth_welcome_back">Welcome Back!</string>
+    <string name="auth_create_account">Create Account</string>
+    <string name="auth_guest_mode">Continue as Guest</string>
+
+    <!-- Form Fields -->
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_username">Username</string>
+    <string name="auth_confirm_password">Confirm Password</string>
+    <string name="auth_email_placeholder">Enter your email</string>
+    <string name="auth_password_placeholder">Enter your password</string>
+    <string name="auth_username_placeholder">Choose a username</string>
+    <string name="auth_confirm_password_placeholder">Confirm your password</string>
+
+    <!-- Buttons -->
+    <string name="auth_sign_in_button">Sign In</string>
+    <string name="auth_sign_up_button">Sign Up</string>
+    <string name="auth_forgot_password">Forgot Password?</string>
+    <string name="auth_dont_have_account">Don\'t have an account?</string>
+    <string name="auth_already_have_account">Already have an account?</string>
+    <string name="auth_continue_with_google">Continue with Google</string>
+    <string name="auth_or_continue_with">or continue with</string>
+
+    <!-- Validation Messages -->
+    <string name="auth_error_email_required">Email is required</string>
+    <string name="auth_error_email_invalid">Please enter a valid email address</string>
+    <string name="auth_error_email_invalid_chars">Email contains invalid characters</string>
+    <string name="auth_error_email_too_long">Email address is too long</string>
+
+    <string name="auth_error_password_required">Password is required</string>
+    <string name="auth_error_password_too_short">Password must be at least 8 characters</string>
+    <string name="auth_error_password_no_uppercase">Password must contain at least one uppercase letter</string>
+    <string name="auth_error_password_no_lowercase">Password must contain at least one lowercase letter</string>
+    <string name="auth_error_password_no_digit">Password must contain at least one number</string>
+    <string name="auth_error_password_invalid_chars">Password contains invalid characters</string>
+    <string name="auth_error_password_weak">This is a commonly used password</string>
+
+    <string name="auth_error_username_required">Username is required</string>
+    <string name="auth_error_username_too_short">Username must be at least 3 characters</string>
+    <string name="auth_error_username_too_long">Username must be less than 20 characters</string>
+    <string name="auth_error_username_invalid_chars">Username can only contain letters, numbers, and underscores</string>
+    <string name="auth_error_username_starts_with_number">Username cannot start with a number</string>
+    <string name="auth_error_username_invalid">Username is not available</string>
+
+    <string name="auth_error_password_mismatch">Passwords do not match</string>
+    <string name="auth_error_field_required">This field is required</string>
+
+    <!-- Privacy Policy -->
+    <string name="auth_privacy_policy_title">Privacy Policy</string>
+    <string name="auth_privacy_policy_checkbox">I accept the Privacy Policy</string>
+    <string name="auth_privacy_policy_checkbox_text">Privacy Policy</string>
+    <string name="auth_error_privacy_required">Please accept the privacy policy to continue</string>
+    <string name="auth_data_processing">I agree to data processing</string>
+
+    <!-- Error Messages -->
+    <string name="auth_error_sign_in_failed">Sign in failed. Please check your credentials and try again.</string>
+    <string name="auth_error_sign_up_failed">Sign up failed. Please try again.</string>
+    <string name="auth_error_network">Network error. Please check your connection.</string>
+    <string name="auth_error_unknown">An error occurred. Please try again later.</string>
+    <string name="auth_error_loading">Loading...</string>
+
+    <!-- Success Messages -->
+    <string name="auth_success_password_reset">Password reset email sent</string>
+    <string name="auth_success_signed_in">Successfully signed in</string>
+    <string name="auth_success_signed_up">Account created successfully</string>
+
+    <!-- Password Strength -->
+    <string name="auth_password_strength_very_weak">Very Weak</string>
+    <string name="auth_password_strength_weak">Weak</string>
+    <string name="auth_password_strength_medium">Medium</string>
+    <string name="auth_password_strength_strong">Strong</string>
+    <string name="auth_password_strength_very_strong">Very Strong</string>
+    <string name="auth_password_strength_requirements">Requirements:</string>
+
+    <!-- Loading States -->
+    <string name="auth_loading_signing_in">Signing in...</string>
+    <string name="auth_loading_signing_up">Creating account...</string>
+    <string name="auth_loading_resetting_password">Sending reset email...</string>
+    <string name="auth_loading_signing_in_with_google">Signing in with Google...</string>
+
 </resources>

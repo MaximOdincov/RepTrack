@@ -33,7 +33,7 @@ import com.example.reptrack.navigation.components.BottomBar
 import kotlinx.coroutines.flow.first
 import com.example.reptrack.presentation.auth.signIn.SignInScreen
 import com.example.reptrack.presentation.auth.signIn.SignInStore
-import com.example.reptrack.presentation.auth.signUp.SignUpScreen
+import com.example.reptrack.presentation.auth.signUp.screens.SignUpScreen
 import com.example.reptrack.presentation.auth.signUp.SignUpStore
 import com.example.reptrack.presentation.auth.splash.SplashScreen
 import com.example.reptrack.presentation.auth.splash.SplashStore
@@ -49,7 +49,6 @@ import com.example.reptrack.presentation.template.list.screens.TemplateListScree
 import com.example.reptrack.presentation.template.list.stores.TemplateListStore
 import com.example.reptrack.presentation.template.list.stores.TemplateListStoreFactory
 import com.example.reptrack.presentation.workout_exercise.detail.screens.WorkoutExerciseDetailScreen
-import com.example.reptrack.presentation.workout_exercise.detail.stores.WorkoutExerciseDetailStore
 import com.example.reptrack.presentation.workout_exercise.detail.stores.WorkoutExerciseDetailStoreFactory
 import com.example.reptrack.presentation.main.stores.MainScreenStore
 import com.example.reptrack.presentation.profile.screens.ProfileScreen
@@ -62,7 +61,6 @@ import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.usecases.templates.CreateWorkoutTemplateUseCase
 import com.example.reptrack.presentation.library.screens.LibraryScreen
 import com.example.reptrack.presentation.timer.stores.TimerStore
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 
@@ -86,7 +84,9 @@ private fun shouldShowBottomBar(navController: NavController): Boolean {
 }
 
 @Composable
-fun AppNavGraph(){
+fun AppNavGraph(
+    onThemeChanged: (Boolean) -> Unit = {}
+) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
     var authenticatedModulesLoaded = remember { false }
@@ -149,6 +149,9 @@ fun AppNavGraph(){
                         },
                         onOpenSignUp = {
                             navController.navigate(Screen.SignUp.route)
+                        },
+                        onNavigateBack = {
+                            navController.popBackStack()
                         }
                     )
                 }
@@ -169,6 +172,11 @@ fun AppNavGraph(){
                                 popUpTo(Screen.SignUp.route){inclusive = true}
                             }
                         },
+                        onBackToSignIn = {
+                            navController.navigate(Screen.SignIn.route) {
+                                popUpTo(Screen.SignUp.route) { inclusive = true }
+                            }
+                        }
                     )
                 }
 
@@ -544,6 +552,14 @@ fun AppNavGraph(){
                 }
 
                 composable(Screen.Profile.route){
+                    // Load authenticated modules before creating ProfileScreen
+                    LaunchedEffect(Unit) {
+                        if (!authenticatedModulesLoaded) {
+                            App.loadAuthenticatedModules()
+                            authenticatedModulesLoaded = true
+                        }
+                    }
+
                     val storeFactory: ProfileStoreFactory = getKoin().get()
                     val friendsStoreFactory: FriendsStoreFactory = getKoin().get()
                     val statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore = getKoin().get()
@@ -576,9 +592,6 @@ fun AppNavGraph(){
                                 App.unloadAuthenticatedModules()
                             }
                         },
-                        onNavigateToCrashlyticsTest = {
-                            navController.navigate(Screen.CrashlyticsTest.route)
-                        },
                         onNavigateToStatistics = {
                             navController.navigate(Screen.Statistics.route)
                         }
@@ -590,9 +603,18 @@ fun AppNavGraph(){
                     val friendsStore: com.example.reptrack.presentation.profile.stores.FriendsStore = getKoin().get()
                     val getFriendsUseCase: com.example.reptrack.domain.friends.usecases.GetFriendsUseCase = getKoin().get()
                     val observeAllExercisesUseCase: com.example.reptrack.domain.workout.usecases.exercises.ObserveAllExercisesUseCase = getKoin().get()
+                    val getCurrentUserProfileUseCase: com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase = getKoin().get()
 
                     // Collect friends state
                     val friends by friendsStore.states.collectAsState(com.example.reptrack.presentation.profile.stores.FriendsStore.State())
+
+                    // Get current user
+                    var user by remember { mutableStateOf<com.example.reptrack.domain.profile.User?>(null) }
+                    LaunchedEffect(Unit) {
+                        getCurrentUserProfileUseCase().collect { userProfile ->
+                            user = userProfile
+                        }
+                    }
 
                     // Load exercises and friends
                     LaunchedEffect(Unit) {
@@ -630,6 +652,7 @@ fun AppNavGraph(){
                         getFriendsUseCase = getFriendsUseCase,
                         exercises = exercises,
                         friends = friends.friends,
+                        isGuest = user?.isGuest ?: true,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

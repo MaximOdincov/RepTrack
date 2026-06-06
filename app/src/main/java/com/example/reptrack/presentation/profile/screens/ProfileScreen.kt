@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,9 +35,11 @@ import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.profile.User
 import com.example.reptrack.presentation.profile.components.FriendsSection
 import com.example.reptrack.presentation.profile.components.ProfileHeader
+import com.example.reptrack.presentation.profile.components.SettingsSection
 import com.example.reptrack.presentation.profile.components.StatisticsSection
 import com.example.reptrack.presentation.profile.stores.FriendsStore
 import com.example.reptrack.presentation.profile.stores.ProfileStore
+import com.example.reptrack.presentation.statistics.components.WeightCounter
 
 @Composable
 fun ProfileScreen(
@@ -43,7 +47,6 @@ fun ProfileScreen(
     friendsStore: FriendsStore,
     statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore,
     onSignedOut: () -> Unit = {},
-    onNavigateToCrashlyticsTest: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {}
 ) {
     LaunchedEffect(store) {
@@ -75,7 +78,18 @@ fun ProfileScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         when {
-            state.value.isLoading -> {
+            state.value.isLoggingOut -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Signing out...")
+                }
+            }
+            false -> {
                 android.util.Log.d("ProfileScreen", "Showing loading")
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -87,7 +101,7 @@ fun ProfileScreen(
                     Text("Loading profile...")
                 }
             }
-            state.value.error != null -> {
+            null != null -> {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -96,7 +110,7 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Error: ${state.value.error}",
+                        text = "Error: ${null}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -116,9 +130,9 @@ fun ProfileScreen(
                     lastSyncTime = state.value.lastSyncTime,
                     friendsStore = friendsStore,
                     statisticsStore = statisticsStore,
+                    store = store,
                     onSignOut = { store.accept(ProfileStore.Intent.SignOut) },
                     onSync = { store.accept(ProfileStore.Intent.SyncData) },
-                    onNavigateToCrashlyticsTest = onNavigateToCrashlyticsTest,
                     onNavigateToStatistics = onNavigateToStatistics
                 )
             }
@@ -135,6 +149,7 @@ private fun ProfileContent(
     lastSyncTime: Long,
     friendsStore: FriendsStore,
     statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore,
+    store: ProfileStore,
     onSignOut: () -> Unit,
     onSync: () -> Unit,
     onNavigateToCrashlyticsTest: () -> Unit = {},
@@ -146,89 +161,86 @@ private fun ProfileContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        // Error message if any
+        if (syncError != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Sync error: $syncError",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    IconButton(
+                        onClick = { store.accept(ProfileStore.Intent.Retry) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Retry",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         // Profile Header with Avatar
         ProfileHeader(
             username = user.username,
             email = user.email,
             avatarUrl = user.avatarUrl,
+            isGuest = user.isGuest,
             isSyncing = isSyncing,
             syncError = syncError,
             lastSyncTime = lastSyncTime,
             onAvatarClick = {
                 // TODO: Implement avatar selection
             },
-            onSettingsClick = {
-                // TODO: Implement settings
-            },
             onSyncClick = onSync
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Friends Section
-        FriendsSection(
-            store = friendsStore
-        )
+        // Friends Section - only show if not guest
+        if (!user.isGuest) {
+            FriendsSection(
+                store = friendsStore
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Statistics Section
+        // Statistics Section - show for all users
         StatisticsSection(
             store = statisticsStore,
-            onNavigateToStatistics = onNavigateToStatistics
+            onNavigateToStatistics = onNavigateToStatistics,
+            isGuest = user.isGuest
         )
-
         Spacer(modifier = Modifier.height(24.dp))
 
-        // User Info
-        Text(
-            text = "Account Info",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+        // Settings Section
+        SettingsSection(
+            user = user,
+            isGuest = user.isGuest,
+            onSignOut = onSignOut,
+            onChangeUsername = { newUsername ->
+                store.accept(ProfileStore.Intent.UpdateUsername(newUsername, user.id))
+            },
+            onChangePasskey = { newPasskey ->
+                store.accept(ProfileStore.Intent.UpdatePasskey(newPasskey, user.id))
+            }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        UserInfoRow(label = "Account Type", value = if (user.isGuest) "Guest" else "Registered")
-        user.currentWeight?.let {
-            UserInfoRow(label = "Weight", value = "$it kg")
-        }
-        user.height?.let {
-            UserInfoRow(label = "Height", value = "$it cm")
-        }
-
-        if (user.gdprConsent != null) {
-            UserInfoRow(
-                label = "GDPR Consent",
-                value = if (user.gdprConsent.isAccepted) "Accepted" else "Not Accepted"
-            )
-        }
-
         Spacer(modifier = Modifier.weight(1f))
-
-        Button(
-            onClick = onNavigateToCrashlyticsTest,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Test Crashlytics")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = onSignOut,
-            enabled = !isLoggingOut,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (isLoggingOut) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Sign Out")
-            }
-        }
     }
 }
 

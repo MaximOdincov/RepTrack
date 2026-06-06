@@ -6,6 +6,8 @@ import com.example.reptrack.domain.profile.ProfileRepository
 import com.example.reptrack.domain.profile.usecases.AddUserUseCase
 import com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase
 import com.example.reptrack.domain.profile.usecases.InitializeDatabaseUseCase
+import com.example.reptrack.domain.profile.usecases.UpdateUsernameUseCase
+import com.example.reptrack.domain.profile.usecases.UpdatePasskeyUseCase
 import com.example.reptrack.domain.backup.SyncUseCase
 import com.example.reptrack.presentation.profile.stores.ProfileStore
 import com.example.reptrack.presentation.profile.stores.ProfileStoreFactory
@@ -42,12 +44,27 @@ val profileModule = module {
         )
     }
 
+    factory {
+        UpdateUsernameUseCase(
+            repository = get()
+        )
+    }
+
+    factory {
+        UpdatePasskeyUseCase(
+            repository = get()
+        )
+    }
+
+
     factory<ProfileStoreFactory> {
         ProfileStoreFactory(
             storeFactory = get(),
             getCurrentUserProfileUseCase = get(),
             signOutUseCase = get(),
-            syncUseCase = get()
+            syncUseCase = get(),
+            updateUsernameUseCase = get(),
+            updatePasskeyUseCase = get()
         )
     }
 
@@ -55,6 +72,7 @@ val profileModule = module {
         get<ProfileStoreFactory>().create()
     }
 
+    
     factory<FriendsStoreFactory> {
         FriendsStoreFactory(
             storeFactory = get(),

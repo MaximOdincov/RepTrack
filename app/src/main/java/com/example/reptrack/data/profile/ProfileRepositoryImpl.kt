@@ -38,4 +38,15 @@ class ProfileRepositoryImpl(
         userDao.updateUser(userDb)
         consentDb?.let { userDao.insertConsent(it) }
     }
-}
+
+    override suspend fun updateUsername(username: String, userId: String) {
+        userDao.updateUsername(username, userId)
+        android.util.Log.d("ProfileRepository", "Username updated for user $userId")
+    }
+
+    override suspend fun updatePasskey(passkey: String, userId: String) {
+        userDao.updatePasskey(passkey, userId)
+        android.util.Log.d("ProfileRepository", "Passkey updated for user $userId")
+    }
+
+    }

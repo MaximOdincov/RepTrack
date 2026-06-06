@@ -7,6 +7,8 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.example.reptrack.domain.auth.usecases.SignOutUseCase
 import com.example.reptrack.domain.profile.User
 import com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase
+import com.example.reptrack.domain.profile.usecases.UpdateUsernameUseCase
+import com.example.reptrack.domain.profile.usecases.UpdatePasskeyUseCase
 import com.example.reptrack.domain.backup.SyncUseCase
 import com.example.reptrack.presentation.profile.stores.ProfileStore.Intent
 import com.example.reptrack.presentation.profile.stores.ProfileStore.Label
@@ -22,7 +24,9 @@ interface ProfileStore : Store<Intent, State, Label> {
         object Retry: Intent
         object SyncData: Intent
         data class SyncUser(val userId: String): Intent
-    }
+        data class UpdateUsername(val username: String, val userId: String): Intent
+        data class UpdatePasskey(val passkey: String, val userId: String): Intent
+            }
 
     data class State(
         val user: User? = null,
@@ -46,7 +50,9 @@ internal class ProfileStoreFactory(
     private val storeFactory: StoreFactory,
     private val getCurrentUserProfileUseCase: GetCurrentUserProfileUseCase,
     private val signOutUseCase: SignOutUseCase,
-    private val syncUseCase: SyncUseCase
+    private val syncUseCase: SyncUseCase,
+    private val updateUsernameUseCase: UpdateUsernameUseCase,
+    private val updatePasskeyUseCase: UpdatePasskeyUseCase
 ) {
 
     fun create(): ProfileStore =
@@ -67,10 +73,13 @@ internal class ProfileStoreFactory(
         object Syncing: Msg
         object SyncCompleted: Msg
         data class SyncError(val error: String): Msg
-    }
+        data class UsernameUpdated(val username: String): Msg
+        data class PasskeyUpdated(val passkey: String): Msg
+            }
 
 
     private inner class ExecutorImpl : CoroutineExecutor<Intent, Nothing, State, Msg, Label>() {
+
         override fun executeIntent(intent: Intent, getState: () -> State) {
             when (intent) {
                 Intent.LoadProfile -> loadProfile()
@@ -78,6 +87,8 @@ internal class ProfileStoreFactory(
                 Intent.Retry -> loadProfile()
                 Intent.SyncData -> syncData(getState().user?.id)
                 is Intent.SyncUser -> syncData(intent.userId)
+                is Intent.UpdateUsername -> updateUsername(intent.username, intent.userId, getState)
+                is Intent.UpdatePasskey -> updatePasskey(intent.passkey, intent.userId, getState)
             }
         }
 
@@ -108,6 +119,39 @@ internal class ProfileStoreFactory(
             } catch (e: Exception) {
                 dispatch(Msg.Error(e.message ?: "Failed to sign out"))
                 publish(Label.Error(e.message ?: "Failed to sign out"))
+            }
+        }
+
+        
+        private fun updatePasskey(passkey: String, userId: String, getState: () -> State) = scope.launch {
+            android.util.Log.d("ProfileStore", "Updating passkey for user: $userId")
+            try {
+                updatePasskeyUseCase(passkey, userId)
+                // Update the current user's passkey in the state
+                getState().user?.let { currentUser ->
+                    val updatedUser = currentUser.copy(passkey = passkey)
+                    dispatch(Msg.UserLoaded(updatedUser))
+                    android.util.Log.d("ProfileStore", "Passkey updated successfully: $passkey")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ProfileStore", "Failed to update passkey", e)
+                dispatch(Msg.Error(e.message ?: "Failed to update passkey"))
+            }
+        }
+
+        private fun updateUsername(username: String, userId: String, getState: () -> State) = scope.launch {
+            android.util.Log.d("ProfileStore", "Updating username to: $username for user: $userId")
+            try {
+                updateUsernameUseCase(username, userId)
+                // Update the current user's username in the state
+                getState().user?.let { currentUser ->
+                    val updatedUser = currentUser.copy(username = username)
+                    dispatch(Msg.UserLoaded(updatedUser))
+                    android.util.Log.d("ProfileStore", "Username updated successfully: $username")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ProfileStore", "Failed to update username", e)
+                dispatch(Msg.Error(e.message ?: "Failed to update username"))
             }
         }
 
@@ -178,6 +222,14 @@ internal class ProfileStoreFactory(
                     isSyncing = false,
                     syncError = null,
                     lastSyncTime = System.currentTimeMillis()
+                )
+                is Msg.UsernameUpdated -> copy(
+                    user = user?.copy(username = msg.username),
+                    error = null
+                )
+                is Msg.PasskeyUpdated -> copy(
+                    user = user?.copy(passkey = msg.passkey),
+                    error = null
                 )
             }
     }

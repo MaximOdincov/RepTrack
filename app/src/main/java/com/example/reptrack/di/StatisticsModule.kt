@@ -10,6 +10,7 @@ import com.example.reptrack.domain.statistics.usecases.GetExerciseChartDataUseCa
 import com.example.reptrack.domain.statistics.usecases.GetFriendExerciseChartDataUseCase
 import com.example.reptrack.domain.statistics.usecases.GetFriendExerciseDataFromFirebaseUseCase
 import com.example.reptrack.domain.statistics.usecases.GetFriendMuscleGroupChartDataUseCase
+import com.example.reptrack.domain.statistics.usecases.GetFriendMuscleGroupDataFromFirebaseUseCase
 import com.example.reptrack.domain.statistics.usecases.GetFriendWeightChartDataUseCase
 import com.example.reptrack.domain.statistics.usecases.GetMuscleGroupChartDataUseCase
 import com.example.reptrack.domain.statistics.usecases.GetWeightChartDataUseCase
@@ -72,6 +73,12 @@ val statisticsModule = module {
         )
     }
 
+    factory {
+        GetFriendMuscleGroupDataFromFirebaseUseCase(
+            firebaseDataSource = get()
+        )
+    }
+
     // Store Factory
     factory<StatisticsStoreFactory> {
         StatisticsStoreFactory(
@@ -83,6 +90,7 @@ val statisticsModule = module {
             getFriendExerciseDataFromFirebaseUseCase = get(),
             getMuscleGroupChartDataUseCase = get(),
             getFriendMuscleGroupChartDataUseCase = get(),
+            getFriendMuscleGroupDataFromFirebaseUseCase = get(),
             getFriendsUseCase = get(),
             getCurrentUserProfileUseCase = get(),
             savedFriendsManager = get()

@@ -235,7 +235,6 @@ interface WorkoutDao {
         FROM workout_exercises we
         INNER JOIN workout_sessions s ON we.workoutSessionId = s.id
         WHERE s.userId = :userId
-        AND s.status = 'COMPLETED'
         AND s.date BETWEEN :fromDate AND :toDate
         GROUP BY we.muscleGroup
     """)

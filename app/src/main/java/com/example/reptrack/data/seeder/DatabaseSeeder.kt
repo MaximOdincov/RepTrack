@@ -61,8 +61,8 @@ class DatabaseSeeder(
      */
     private suspend fun seedExercises() {
         val exercises = DefaultExercises.getAllExercises().map { exercise ->
-            val iconResourceName = ExerciseIconMapper.getIconForExercise(exercise.id)
-            val iconResId = ExerciseIconMapper.getDrawableResourceId(context, iconResourceName)
+            val iconResourceName = exercise.iconRes!!
+            val iconResId = iconResourceName
 
             ExerciseDb(
                 id = exercise.id,

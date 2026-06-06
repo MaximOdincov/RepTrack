@@ -5,241 +5,239 @@ import com.example.reptrack.domain.workout.entities.WorkoutTemplate
 import com.example.reptrack.domain.workout.entities.TemplateSchedule
 
 /**
- * Comprehensive workout templates with pre-configured exercises and schedules
- * All templates use existing drawable resources from the project
+ * Realistic workout templates for different training styles
  */
 object DefaultTemplates {
 
+    // Цвета для шаблонов (синхронизированы с упражнениями)
+    private const val COLOR_PUSH = "#FF6B6B"      // ярко-коралловый (грудь)
+    private const val COLOR_PULL = "#4ECDC4"       // яркий бирюзовый (спина)
+    private const val COLOR_LEGS = "#45B7D1"       // ярко-голубой (ноги)
+    private const val COLOR_FULL = "#9B59B6"       // яркий фиолетовый
+    private const val COLOR_UPPER = "#9B59B6"      // яркий фиолетовый (руки)
+    private const val COLOR_CARDIO = "#2ECC71"     // ярко-зеленый (кардио)
+
     val templates = listOf(
-        // ==================== PUSH / PULL / LEGS SPLIT ====================
+
+        // ==================== PUSH / PULL / LEGS (КЛАССИЧЕСКИЙ СПЛИТ) ====================
         WorkoutTemplate(
             id = "push_day",
-            name = "Push Day",
-            description = "Chest, shoulders and triceps training",
+            name = "Жимовый день",
+            description = "Грудь, плечи, трицепс",
             iconId = "push_day",
             exerciseIds = listOf(
                 "chest_bench_press",
                 "chest_incline_dumbbell_press",
-                "chest_cable_flyes",
-                "shoulders_dumbbell_overhead_press",
-                "shoulders_lateral_raise",
-                "shoulders_front_raise",
+                "chest_dumbbell_flyes",
+                "shoulders_dumbbell_lateral_raise",
+                "shoulders_arnold_press",
                 "arms_tricep_pushdown",
-                "arms_skull_crushers"
+                "arms_overhead_dumbbell_extension"
             ),
             iconRes = null,
-            iconColor = "#FF6B6B",
+            iconColor = COLOR_PUSH,
             muscleGroups = listOf(MuscleGroup.CHEST, MuscleGroup.ARMS),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(0), // Monday
-                week2Days = setOf(3, 6) // Thursday, Sunday
+                week1Days = setOf(0, 3),      // ПН, ЧТ
+                week2Days = setOf(0, 3)
             )
         ),
 
         WorkoutTemplate(
             id = "pull_day",
-            name = "Pull Day",
-            description = "Back and biceps training",
+            name = "Тяговый день",
+            description = "Спина, бицепс, задняя дельта",
             iconId = "pull_day",
             exerciseIds = listOf(
-                "back_deadlift",
+                "back_pull_ups",
                 "back_barbell_row",
                 "back_lat_pulldown",
                 "back_dumbbell_row",
-                "back_seated_cable_row",
                 "back_face_pulls",
                 "arms_barbell_curl",
-                "arms_hammer_curl",
-                "arms_dumbbell_curl"
+                "arms_hammer_curl"
             ),
             iconRes = null,
-            iconColor = "#4ECDC4",
+            iconColor = COLOR_PULL,
             muscleGroups = listOf(MuscleGroup.BACK, MuscleGroup.ARMS),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(1), // Tuesday
-                week2Days = setOf(4) // Friday
+                week1Days = setOf(1, 4),      // ВТ, ПТ
+                week2Days = setOf(1, 4)
             )
         ),
 
         WorkoutTemplate(
             id = "legs_day",
-            name = "Legs Day",
-            description = "Complete lower body training",
+            name = "Ножный день",
+            description = "Ноги + пресс",
             iconId = "legs_day",
             exerciseIds = listOf(
                 "legs_barbell_squat",
                 "legs_leg_press",
-                "legs_romanian_deadlift",
-                "legs_lunges",
+                "back_romanian_deadlift",
                 "legs_leg_extension",
-                "legs_leg_curl",
-                "legs_calf_raises",
-                "abs_crunches",
-                "abs_plank"
+                "legs_lying_leg_curl",
+                "legs_standing_calf_raises",
+                "abs_plank",
+                "abs_leg_raises"
             ),
             iconRes = null,
-            iconColor = "#95E1D3",
+            iconColor = COLOR_LEGS,
             muscleGroups = listOf(MuscleGroup.LEGS, MuscleGroup.ABS),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(2), // Wednesday
-                week2Days = setOf(5) // Saturday
+                week1Days = setOf(2, 5),      // СР, СБ
+                week2Days = setOf(2, 5)
             )
         ),
 
-        // ==================== 3-DAY FULL BODY ====================
+        // ==================== FULL BODY (ДЛЯ НОВИЧКОВ) ====================
         WorkoutTemplate(
-            id = "full_body_3x",
-            name = "Full Body 3x Week",
-            description = "Full body workout 3 times per week",
+            id = "full_body_beginner",
+            name = "Фуллбоди",
+            description = "3 раза в неделю, базовые движения",
             iconId = "full_body",
             exerciseIds = listOf(
                 "legs_barbell_squat",
                 "chest_bench_press",
                 "back_barbell_row",
-                "shoulders_dumbbell_overhead_press",
+                "shoulders_dumbbell_lateral_raise",
                 "arms_dumbbell_curl",
                 "arms_tricep_pushdown",
-                "legs_lunges",
-                "abs_crunches",
-                "abs_plank"
+                "abs_crunches"
             ),
             iconRes = null,
-            iconColor = "#FFE66D",
+            iconColor = COLOR_FULL,
             muscleGroups = listOf(
                 MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS,
                 MuscleGroup.ARMS, MuscleGroup.ABS
             ),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(0, 2, 4), // Mon, Wed, Fri
+                week1Days = setOf(0, 2, 4),   // ПН, СР, ПТ
                 week2Days = setOf(0, 2, 4)
             )
         ),
 
-        // ==================== UPPER / LOWER SPLIT ====================
+        // ==================== UPPER / LOWER (ПРОДВИНУТЫЙ) ====================
         WorkoutTemplate(
             id = "upper_body",
-            name = "Upper Body",
-            description = "Complete upper body training",
+            name = "Верх тела",
+            description = "Грудь, спина, плечи, руки",
             iconId = "upper_body",
             exerciseIds = listOf(
                 "chest_bench_press",
                 "chest_incline_dumbbell_press",
+                "back_pull_ups",
                 "back_barbell_row",
-                "back_lat_pulldown",
-                "shoulders_dumbbell_overhead_press",
-                "shoulders_lateral_raise",
+                "shoulders_barbell_overhead_press",
+                "shoulders_dumbbell_lateral_raise",
                 "arms_barbell_curl",
-                "arms_tricep_pushdown",
-                "abs_crunches"
+                "arms_tricep_pushdown"
             ),
             iconRes = null,
-            iconColor = "#A29BFE",
-            muscleGroups = listOf(MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.ARMS, MuscleGroup.ABS),
+            iconColor = COLOR_UPPER,
+            muscleGroups = listOf(MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.ARMS),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(0, 3), // Mon, Thu
-                week2Days = setOf(1, 4) // Tue, Fri
+                week1Days = setOf(0, 3),      // ПН, ЧТ
+                week2Days = setOf(0, 3)
             )
         ),
 
         WorkoutTemplate(
             id = "lower_body",
-            name = "Lower Body",
-            description = "Complete lower body training",
+            name = "Низ тела",
+            description = "Квадрицепсы, бицепс бедра, ягодицы, икры",
             iconId = "lower_body",
             exerciseIds = listOf(
                 "legs_barbell_squat",
                 "legs_leg_press",
-                "legs_romanian_deadlift",
+                "back_romanian_deadlift",
                 "legs_lunges",
                 "legs_leg_extension",
-                "legs_leg_curl",
+                "legs_lying_leg_curl",
                 "legs_calf_raises",
-                "abs_plank",
-                "abs_leg_raises"
+                "abs_hanging_leg_raises"
             ),
             iconRes = null,
-            iconColor = "#95E1D3",
+            iconColor = COLOR_LEGS,
             muscleGroups = listOf(MuscleGroup.LEGS, MuscleGroup.ABS),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(1, 4), // Tue, Fri
-                week2Days = setOf(2, 5) // Wed, Sat
+                week1Days = setOf(1, 4),      // ВТ, ПТ
+                week2Days = setOf(1, 4)
             )
         ),
 
-        // ==================== FOCUS TEMPLATES ====================
+        // ==================== СПЕЦИАЛИЗИРОВАННЫЕ ТРЕНИРОВКИ ====================
         WorkoutTemplate(
-            id = "chest_focus",
-            name = "Chest Focus",
-            description = "Intensive chest training",
+            id = "chest_triceps",
+            name = "Грудь + Трицепс",
+            description = "Фокус на грудные и трицепс",
             iconId = "chest_focus",
             exerciseIds = listOf(
                 "chest_bench_press",
-                "chest_incline_bench_press",
-                "chest_decline_bench_press",
-                "chest_dumbbell_bench_press",
+                "chest_incline_dumbbell_press",
+                "chest_dips",
                 "chest_cable_flyes",
                 "chest_push_ups",
-                "chest_dips",
-                "chest_cable_crossover"
+                "arms_tricep_pushdown",
+                "arms_skull_crushers"
             ),
             iconRes = null,
-            iconColor = "#FF6B6B",
-            muscleGroups = listOf(MuscleGroup.CHEST),
+            iconColor = COLOR_PUSH,
+            muscleGroups = listOf(MuscleGroup.CHEST, MuscleGroup.ARMS),
             isCustom = false,
             schedule = TemplateSchedule(
                 week1Days = setOf(0),
-                week2Days = emptySet()
+                week2Days = setOf(3)
             )
         ),
 
         WorkoutTemplate(
-            id = "back_focus",
-            name = "Back Focus",
-            description = "Intensive back training",
+            id = "back_biceps",
+            name = "Спина + Бицепс",
+            description = "Фокус на широчайшие и бицепс",
             iconId = "back_focus",
             exerciseIds = listOf(
-                "back_deadlift",
+                "back_pull_ups",
                 "back_barbell_row",
                 "back_lat_pulldown",
                 "back_dumbbell_row",
-                "back_t_bar_row",
                 "back_seated_cable_row",
-                "back_pull_ups",
-                "back_face_pulls"
+                "arms_barbell_curl",
+                "arms_hammer_curl",
+                "arms_preacher_curl"
             ),
             iconRes = null,
-            iconColor = "#4ECDC4",
-            muscleGroups = listOf(MuscleGroup.BACK),
+            iconColor = COLOR_PULL,
+            muscleGroups = listOf(MuscleGroup.BACK, MuscleGroup.ARMS),
             isCustom = false,
             schedule = TemplateSchedule(
                 week1Days = setOf(1),
-                week2Days = emptySet()
+                week2Days = setOf(4)
             )
         ),
 
         WorkoutTemplate(
-            id = "arm_focus",
-            name = "Arm Focus",
-            description = "Intensive arm training (biceps & triceps)",
-            iconId = "arm_focus",
+            id = "shoulders_arms",
+            name = "Плечи + Руки",
+            description = "Дельты, бицепс, трицепс",
+            iconId = "shoulders_focus",
             exerciseIds = listOf(
-                "arms_barbell_curl",
+                "shoulders_barbell_overhead_press",
+                "shoulders_dumbbell_lateral_raise",
+                "shoulders_dumbbell_front_raise",
+                "shoulders_rear_delt_fly",
+                "shoulders_upright_row",
                 "arms_dumbbell_curl",
-                "arms_hammer_curl",
-                "arms_preacher_curl",
-                "arms_tricep_pushdown",
-                "arms_skull_crushers",
-                "arms_overhead_extension",
-                "arms_rope_pushdown"
+                "arms_tricep_pushdown"
             ),
             iconRes = null,
-            iconColor = "#FF9F43",
+            iconColor = COLOR_UPPER,
             muscleGroups = listOf(MuscleGroup.ARMS),
             isCustom = false,
             schedule = TemplateSchedule(
@@ -249,356 +247,138 @@ object DefaultTemplates {
         ),
 
         WorkoutTemplate(
-            id = "leg_focus",
-            name = "Leg Focus",
-            description = "Intensive leg training",
+            id = "legs_glutes",
+            name = "Ноги + Ягодицы",
+            description = "Фокус на нижнюю часть тела",
             iconId = "leg_focus",
             exerciseIds = listOf(
                 "legs_barbell_squat",
                 "legs_leg_press",
-                "legs_hack_squat",
-                "legs_romanian_deadlift",
+                "back_romanian_deadlift",
+                "legs_hip_thrust",
+                "legs_glute_bridge",
                 "legs_lunges",
-                "legs_leg_extension",
-                "legs_leg_curl",
-                "legs_calf_raises",
-                "abs_plank"
+                "legs_bulgarian_split_squat",
+                "legs_calf_raises"
             ),
             iconRes = null,
-            iconColor = "#95E1D3",
-            muscleGroups = listOf(MuscleGroup.LEGS, MuscleGroup.ABS),
+            iconColor = COLOR_LEGS,
+            muscleGroups = listOf(MuscleGroup.LEGS),
             isCustom = false,
             schedule = TemplateSchedule(
                 week1Days = setOf(2),
-                week2Days = emptySet()
+                week2Days = setOf(5)
             )
         ),
 
         WorkoutTemplate(
-            id = "shoulders_focus",
-            name = "Shoulders Focus",
-            description = "Intensive shoulder training",
-            iconId = "shoulders_focus",
-            exerciseIds = listOf(
-                "shoulders_dumbbell_overhead_press",
-                "shoulders_barbell_overhead_press",
-                "shoulders_lateral_raise",
-                "shoulders_front_raise",
-                "shoulders_reverse_flyes",
-                "shoulders_rear_delt_fly",
-                "shoulders_arnold_press",
-                "shoulders_upright_row"
-            ),
-            iconRes = null,
-            iconColor = "#FD79A8",
-            muscleGroups = listOf(MuscleGroup.ARMS),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(4),
-                week2Days = emptySet()
-            )
-        ),
-
-        WorkoutTemplate(
-            id = "abs_focus",
-            name = "Abs Focus",
-            description = "Intensive core training",
+            id = "core_strength",
+            name = "Кор и пресс",
+            description = "Укрепление кора и пресса",
             iconId = "abs_focus",
             exerciseIds = listOf(
-                "abs_crunches",
                 "abs_plank",
+                "abs_side_plank",
                 "abs_leg_raises",
                 "abs_hanging_leg_raises",
                 "abs_russian_twist",
-                "abs_bicycle_crunches",
-                "abs_mountain_climbers",
-                "abs_cable_crunch",
-                "abs_ab_wheel"
+                "abs_crunches",
+                "abs_dead_bug",
+                "abs_toe_touches"
             ),
             iconRes = null,
-            iconColor = "#FFEAA7",
+            iconColor = COLOR_CARDIO,
             muscleGroups = listOf(MuscleGroup.ABS),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(5),
+                week1Days = setOf(6),      // ВС
                 week2Days = emptySet()
             )
         ),
 
-        // ==================== GOAL-BASED TEMPLATES ====================
+        // ==================== КАРДИО ====================
         WorkoutTemplate(
-            id = "strength",
-            name = "Strength Training",
-            description = "Focus on heavy compounds - 5x5 rep range",
-            iconId = "strength",
-            exerciseIds = listOf(
-                "legs_barbell_squat",
-                "chest_bench_press",
-                "back_deadlift",
-                "back_barbell_row",
-                "shoulders_barbell_overhead_press"
-            ),
-            iconRes = null,
-            iconColor = "#636E72",
-            muscleGroups = listOf(
-                MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS, MuscleGroup.ARMS
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(0, 2, 4),
-                week2Days = setOf(0, 2, 4)
-            )
-        ),
-
-        WorkoutTemplate(
-            id = "hypertrophy",
-            name = "Hypertrophy",
-            description = "Focus on muscle growth - 8-12 rep range",
-            iconId = "hypertrophy",
-            exerciseIds = listOf(
-                "chest_bench_press",
-                "chest_incline_dumbbell_press",
-                "chest_cable_flyes",
-                "back_barbell_row",
-                "back_lat_pulldown",
-                "legs_barbell_squat",
-                "legs_leg_press",
-                "shoulders_dumbbell_overhead_press",
-                "shoulders_lateral_raise",
-                "arms_barbell_curl",
-                "arms_tricep_pushdown"
-            ),
-            iconRes = null,
-            iconColor = "#FF6B6B",
-            muscleGroups = listOf(
-                MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS,
-                MuscleGroup.ARMS
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(0, 1, 2, 3, 4),
-                week2Days = setOf(0, 1, 2, 3, 4)
-            )
-        ),
-
-        WorkoutTemplate(
-            id = "endurance",
-            name = "Endurance",
-            description = "High rep range for muscular endurance",
-            iconId = "endurance",
-            exerciseIds = listOf(
-                "legs_barbell_squat",
-                "chest_bench_press",
-                "back_barbell_row",
-                "shoulders_dumbbell_overhead_press",
-                "legs_lunges",
-                "chest_push_ups",
-                "back_pull_ups",
-                "abs_plank",
-                "cardio_treadmill"
-            ),
-            iconRes = null,
-            iconColor = "#74B9FF",
-            muscleGroups = listOf(
-                MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS,
-                MuscleGroup.ARMS, MuscleGroup.ABS, MuscleGroup.CARDIO
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(1, 3, 5),
-                week2Days = setOf(1, 3, 5)
-            )
-        ),
-
-        // ==================== EQUIPMENT-SPECIFIC TEMPLATES ====================
-        WorkoutTemplate(
-            id = "bodyweight",
-            name = "Bodyweight Only",
-            description = "No equipment needed - perfect for home workouts",
-            iconId = "bodyweight",
-            exerciseIds = listOf(
-                "chest_push_ups",
-                "chest_diamond_push_ups",
-                "back_pull_ups",
-                "back_assisted_pull_up",
-                "legs_lunges",
-                "legs_bulgarian_split_squat",
-                "legs_step_ups",
-                "abs_crunches",
-                "abs_plank",
-                "abs_leg_raises",
-                "abs_russian_twist",
-                "cardio_jump_rope",
-                "cardio_burpees"
-            ),
-            iconRes = null,
-            iconColor = "#55E6C1",
-            muscleGroups = listOf(
-                MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS,
-                MuscleGroup.ABS, MuscleGroup.CARDIO
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(0, 2, 4, 6),
-                week2Days = setOf(1, 3, 5)
-            )
-        ),
-
-        WorkoutTemplate(
-            id = "dumbbell_only",
-            name = "Dumbbell Only",
-            description = "Complete workout with dumbbells only",
-            iconId = "dumbbell_only",
-            exerciseIds = listOf(
-                "chest_dumbbell_bench_press",
-                "chest_incline_dumbbell_press",
-                "back_dumbbell_row",
-                "shoulders_dumbbell_overhead_press",
-                "shoulders_lateral_raise",
-                "shoulders_front_raise",
-                "legs_dumbbell_squat",
-                "legs_lunges",
-                "legs_romanian_deadlift",
-                "arms_dumbbell_curl",
-                "arms_hammer_curl",
-                "arms_overhead_dumbbell_extension",
-                "arms_kickbacks",
-                "abs_crunches",
-                "abs_plank"
-            ),
-            iconRes = null,
-            iconColor = "#FF9F43",
-            muscleGroups = listOf(
-                MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS,
-                MuscleGroup.ARMS, MuscleGroup.ABS
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(0, 2, 4),
-                week2Days = setOf(1, 3, 5)
-            )
-        ),
-
-        // ==================== CARDIO TEMPLATES ====================
-        WorkoutTemplate(
-            id = "cardio_mix",
-            name = "Cardio Mix",
-            description = "Variety of cardio exercises",
+            id = "cardio_conditioning",
+            name = "Кардио",
+            description = "Развитие выносливости",
             iconId = "cardio_mix",
             exerciseIds = listOf(
-                "cardio_treadmill",
                 "cardio_running",
                 "cardio_cycling",
                 "cardio_rowing_machine",
                 "cardio_jump_rope"
             ),
             iconRes = null,
-            iconColor = "#74B9FF",
+            iconColor = COLOR_CARDIO,
             muscleGroups = listOf(MuscleGroup.CARDIO),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(6), // Sunday
-                week2Days = setOf(5) // Saturday
+                week1Days = setOf(6),      // ВС
+                week2Days = setOf(6)
             )
         ),
 
         WorkoutTemplate(
             id = "hiit_workout",
-            name = "HIIT Workout",
-            description = "High intensity interval training",
+            name = "ВИИТ тренировка",
+            description = "Высокоинтенсивный интервальный тренинг",
             iconId = "hiit",
             exerciseIds = listOf(
                 "cardio_burpees",
                 "cardio_box_jumps",
-                "cardio_kettlebell_swings",
                 "cardio_battle_ropes",
                 "cardio_sprinting",
                 "cardio_jump_rope",
-                "abs_mountain_climbers",
-                "abs_plank_jacks",
+                "abs_mountain_climbers"
+            ),
+            iconRes = null,
+            iconColor = COLOR_CARDIO,
+            muscleGroups = listOf(MuscleGroup.CARDIO, MuscleGroup.ABS, MuscleGroup.LEGS),
+            isCustom = false,
+            schedule = TemplateSchedule(
+                week1Days = setOf(5),      // СБ
+                week2Days = setOf(5)
+            )
+        ),
+
+        // ==================== ДОМАШНИЕ ТРЕНИРОВКИ ====================
+        WorkoutTemplate(
+            id = "home_bodyweight",
+            name = "Домашняя тренировка",
+            description = "Без оборудования, для дома",
+            iconId = "bodyweight",
+            exerciseIds = listOf(
                 "chest_push_ups",
-                "legs_lunges"
-            ),
-            iconRes = null,
-            iconColor = "#FF6B6B",
-            muscleGroups = listOf(
-                MuscleGroup.CHEST, MuscleGroup.LEGS, MuscleGroup.ABS, MuscleGroup.CARDIO
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(5),
-                week2Days = setOf(6)
-            )
-        ),
-
-        // ==================== WARM UP / COOL DOWN ====================
-        WorkoutTemplate(
-            id = "warm_up",
-            name = "Warm Up",
-            description = "Dynamic stretching and activation",
-            iconId = "warm_up",
-            exerciseIds = listOf(
-                "cardio_treadmill",
-                "cardio_cycling",
+                "back_pull_ups",
                 "legs_lunges",
+                "legs_bulgarian_split_squat",
                 "legs_step_ups",
-                "shoulders_arm_circles",
-                "shoulders_band_pull_apart",
-                "abs_bird_dog",
-                "abs_dead_bug"
-            ),
-            iconRes = null,
-            iconColor = "#FFEAA7",
-            muscleGroups = listOf(
-                MuscleGroup.LEGS, MuscleGroup.ARMS, MuscleGroup.ABS, MuscleGroup.CARDIO
-            ),
-            isCustom = false,
-            schedule = TemplateSchedule(
-                week1Days = setOf(0, 1, 2, 3, 4, 5, 6),
-                week2Days = setOf(0, 1, 2, 3, 4, 5, 6)
-            )
-        ),
-
-        WorkoutTemplate(
-            id = "cool_down",
-            name = "Cool Down",
-            description = "Static stretching and recovery",
-            iconId = "cool_down",
-            exerciseIds = listOf(
-                "legs_leg_stretch",
-                "chest_chest_stretch",
-                "back_back_stretch",
-                "shoulders_shoulder_stretch",
+                "abs_crunches",
                 "abs_plank",
-                "abs_side_plank",
-                "abs_v_sit"
+                "abs_leg_raises",
+                "cardio_burpees",
+                "cardio_jump_rope"
             ),
             iconRes = null,
-            iconColor = "#95E1D3",
+            iconColor = COLOR_FULL,
             muscleGroups = listOf(
-                MuscleGroup.LEGS, MuscleGroup.CHEST, MuscleGroup.BACK,
-                MuscleGroup.ARMS, MuscleGroup.ABS
+                MuscleGroup.CHEST, MuscleGroup.BACK, MuscleGroup.LEGS,
+                MuscleGroup.ABS, MuscleGroup.CARDIO
             ),
             isCustom = false,
             schedule = TemplateSchedule(
-                week1Days = setOf(0, 1, 2, 3, 4, 5, 6),
-                week2Days = setOf(0, 1, 2, 3, 4, 5, 6)
+                week1Days = setOf(0, 2, 4),
+                week2Days = setOf(1, 3, 5)
             )
         )
     )
 
     fun getAllTemplates(): List<WorkoutTemplate> = templates.toList()
 
-    /**
-     * Get template by ID
-     */
     fun getTemplateById(id: String): WorkoutTemplate? {
         return templates.find { it.id == id }
     }
 
-    /**
-     * Get templates by muscle group
-     */
     fun getTemplatesByMuscleGroup(muscleGroup: MuscleGroup): List<WorkoutTemplate> {
         return templates.filter { muscleGroup in it.muscleGroups }
     }

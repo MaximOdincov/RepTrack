@@ -75,6 +75,14 @@ private fun CompactNumberInput(
 ) {
     var displayValue by remember { mutableFloatStateOf(value ?: 70f) }
 
+    // Use the initial value when first loaded
+    val initialValue = remember(value) { value ?: 70f }
+    LaunchedEffect(initialValue) {
+        if (initialValue != displayValue) {
+            displayValue = initialValue
+        }
+    }
+
     LaunchedEffect(displayValue) {
         delay(500)
         if (displayValue != (value ?: 0f)) {

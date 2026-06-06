@@ -7,4 +7,6 @@ interface ProfileRepository {
     suspend fun deleteUser(userId: String)
     fun observeUser(userId: String): Flow<User?>
     suspend fun updateUser(user: User)
-}
+    suspend fun updateUsername(username: String, userId: String)
+    suspend fun updatePasskey(passkey: String, userId: String)
+    }

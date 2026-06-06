@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.reptrack.presentation.theme.LightAccentOrange
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @Composable
@@ -298,38 +300,42 @@ fun ModernTimeWheel(
     val coroutineScope = rememberCoroutineScope()
     var isUserScrolling by remember { mutableStateOf(false) }
 
-    // Автоматическая прокрутка к выбранному значению при изменении (только если не из самого пикера)
-    LaunchedEffect(selectedValue) {
-        if (!isUserScrolling) {
-            val centerRepeat = (totalRepeats / 2)
-            val newIndex = centerRepeat * rangeSize + selectedValue
-            coroutineScope.launch {
-                listState.scrollToItem(newIndex)
-            }
-        }
-    }
-
-    // Обработка изменения выбранного значения при завершении прокрутки
-    LaunchedEffect(listState.isScrollInProgress) {
-        if (!listState.isScrollInProgress && isUserScrolling) {
-            val visibleItems = listState.layoutInfo.visibleItemsInfo
-            if (visibleItems.isNotEmpty()) {
-                // Найти элемент, который находится ближе всего к центру
-                val centerViewportY = listState.layoutInfo.viewportSize.height / 2
-                val centerItem = visibleItems.minByOrNull {
-                    Math.abs((it.offset + it.size / 2) - centerViewportY)
-                }
-                centerItem?.let {
-                    val realValue = infiniteItems[it.index]
-                    if (realValue != selectedValue) {
-                        onValueChange(realValue)
+    // Используем snapshotFlow с distinctUntilChanged для отслеживания КОНЦА скролла
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { isScrolling ->
+                if (!isScrolling && isUserScrolling) {
+                    val visibleItems = listState.layoutInfo.visibleItemsInfo
+                    if (visibleItems.isNotEmpty()) {
+                        val centerLine = listState.layoutInfo.viewportSize.height / 2f + 22f
+                        
+                        // Находим элемент ближайший к centerLine
+                        val closestItem = visibleItems.minByOrNull { item ->
+                            Math.abs((item.offset + item.size / 2f) - centerLine)
+                        }
+                        
+                        closestItem?.let { item ->
+                            val distanceFromCenter = Math.abs((item.offset + item.size / 2f) - centerLine)
+                            
+                            // Snap'им, только если элемент далеко от centerLine
+                            if (distanceFromCenter > 5f) {
+                                listState.animateScrollToItem(item.index)
+                            }
+                            
+                            // Используем уже найденный closestItem для определения значения
+                            // Не пересчитываем после snap'а - это вызывает смещение на одно число
+                            val realValue = infiniteItems[item.index]
+                            if (realValue != selectedValue) {
+                                onValueChange(realValue)
+                            }
+                        }
                     }
+                    isUserScrolling = false
+                } else if (isScrolling) {
+                    isUserScrolling = true
                 }
             }
-            isUserScrolling = false
-        } else if (listState.isScrollInProgress) {
-            isUserScrolling = true
-        }
     }
 
     Column(
@@ -376,7 +382,7 @@ fun ModernTimeWheel(
                             .clickable {
                                 isUserScrolling = false
                                 coroutineScope.launch {
-                                    listState.animateScrollToItem(index)
+                                    listState.scrollToItem(index)
                                     onValueChange(value)
                                 }
                             },

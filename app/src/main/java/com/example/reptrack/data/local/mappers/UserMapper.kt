@@ -15,7 +15,8 @@ fun User.toDb(): UserDb =
         avatarUrl = avatarUrl,
         currentWeight = currentWeight,
         height = height,
-        passkey = passkey
+        passkey = passkey,
+        isDarkTheme = isDarkTheme
     )
 
 fun User.toGdprDb(): GdprConsentDb? =
@@ -37,6 +38,7 @@ fun UserWithConsent.toDomain(): User =
         currentWeight = user.currentWeight,
         height = user.height,
         passkey = user.passkey,
+        isDarkTheme = user.isDarkTheme,
         gdprConsent = gdprConsent?.let {
             GdprConsent(
                 isAccepted = it.isAccepted,

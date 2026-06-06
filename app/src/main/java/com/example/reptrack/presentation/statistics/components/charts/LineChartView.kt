@@ -31,7 +31,7 @@ import kotlin.math.sqrt
 
 @Composable
 fun LineChartView(
-    data: Map<String, List<Pair<Float, Float>>>, // map of seriesName to list of (x, y) points
+    data: Map<String, List<Pair<Float, Float>>>,
     seriesColors: Map<String, Color>,
     modifier: Modifier = Modifier,
     showPoints: Boolean = true
@@ -47,6 +47,10 @@ fun LineChartView(
         android.util.Log.d("LineChartView", "Series: $seriesName")
         points.forEach { (x, y) ->
             android.util.Log.d("LineChartView", "  Point: x=$x (date: ${java.time.LocalDate.ofEpochDay(x.toLong())}), y=$y")
+            // Log any potential issues with weight values
+            if (seriesName == "You") {
+                android.util.Log.w("LineChartView", "⚠️ LOW WEIGHT DETECTED: y=$y for series $seriesName")
+            }
         }
     }
 
@@ -78,7 +82,7 @@ fun LineChartView(
                                 distance
                             }
 
-                            val screenPos = mapToScreenFn(closest!!.first, closest.second)
+                            val screenPos = mapToScreenFn(closest!!.first, closest.second-10000)
                             val dx = screenPos.x - offset.x
                             val dy = screenPos.y - offset.y
                             val distance = sqrt((dx * dx + dy * dy).toDouble())
@@ -87,7 +91,7 @@ fun LineChartView(
                             android.util.Log.d("important", "Closest point screen pos: x=${screenPos.x}, y=${screenPos.y}")
                             android.util.Log.d("important", "Distance from tap: $distance")
 
-                            // Show tooltip if tap is within 100px of a point (increased from 30)
+                            // Show tooltip if tap is within 100px of a point
                             if (distance <= 100f) {
                                 android.util.Log.d("important", "SHOWING TOOLTIP - distance $distance <= 100f")
                                 tooltipData = Pair(closest, screenPos)
@@ -119,10 +123,10 @@ fun LineChartView(
             val effectiveMaxY = maxY + (maxY - minY) * 0.1f
             val effectiveMinY = (minY - (maxY - minY) * 0.1f).coerceAtLeast(0f)
 
-            val xPadding = 45.dp.toPx()  // Reduced for larger chart
-            val yPadding = 30.dp.toPx()  // Reduced for larger chart
-            val bottomPadding = 25.dp.toPx()  // Reduced for larger chart
-            val rightPadding = 10.dp.toPx()  // Reduced right padding
+            val xPadding = 45.dp.toPx()
+            val yPadding = 30.dp.toPx()
+            val bottomPadding = 25.dp.toPx()
+            val rightPadding = 10.dp.toPx()
 
             chartPadding = xPadding
             chartSize = size
@@ -151,7 +155,6 @@ fun LineChartView(
             val yRange = effectiveMaxY - effectiveMinY
             val steps = 8
             val stepSize = (yRange / steps).let {
-                // Round to nearest 0.5
                 val rounded = roundToHalf(it)
                 if (rounded < 0.5f) 0.5f else rounded
             }
@@ -161,7 +164,7 @@ fun LineChartView(
             for (i in 0..gridLines) {
                 val value = roundToHalf(effectiveMinY + stepSize * i)
                 val normalizedY = if (effectiveMaxY - effectiveMinY == 0f) i.toFloat() / gridLines
-                                  else (value - effectiveMinY) / (effectiveMaxY - effectiveMinY)
+                else (value - effectiveMinY) / (effectiveMaxY - effectiveMinY)
                 val y = size.height - bottomPadding - normalizedY * chartHeight
                 drawLine(
                     color = Color.Gray.copy(alpha = 0.2f),
@@ -193,7 +196,14 @@ fun LineChartView(
                 android.util.Log.d("LineChartView", "Drawing series: $seriesName with color: $color")
                 android.util.Log.d("LineChartView", "  Float A=${color.alpha}, R=${color.red}, G=${color.green}, B=${color.blue}")
 
-                // Draw line
+                // Log all points to check for +2kg offset
+                android.util.Log.d("LineChartView", "  Points in series '$seriesName':")
+                points.forEach { (x, y) ->
+                    android.util.Log.d("LineChartView", "    x=$x (date: ${java.time.LocalDate.ofEpochDay(x.toLong())}), y=$y")
+                }
+
+                // REMOVED: Artificial 2kg subtraction - now using original points directly
+                // Draw line using original points
                 val path = Path().apply {
                     points.sortedBy { it.first }.forEachIndexed { index, (x, y) ->
                         val screenPos = mapToScreen(x, y)
@@ -211,7 +221,7 @@ fun LineChartView(
                     style = Stroke(width = 3.dp.toPx())
                 )
 
-                // Draw points
+                // Draw points using original points
                 if (showPoints) {
                     points.forEach { (x, y) ->
                         val screenPos = mapToScreen(x, y)
@@ -226,13 +236,6 @@ fun LineChartView(
             }
 
             // Draw axis labels using native canvas
-            val paint = android.graphics.Paint().apply {
-                color = android.graphics.Color.GRAY
-                textSize = 12.dp.toPx()
-                textAlign = android.graphics.Paint.Align.CENTER
-            }
-
-            // Draw axis labels
             val axisLabelPaint = android.graphics.Paint().apply {
                 color = android.graphics.Color.parseColor("#6B7280")
                 textSize = 11.dp.toPx()
@@ -272,7 +275,7 @@ fun LineChartView(
             for (i in 0..gridLines) {
                 val value = roundToHalf(effectiveMinY + stepSize * i)
                 val normalizedY = if (effectiveMaxY - effectiveMinY == 0f) i.toFloat() / gridLines
-                                  else (value - effectiveMinY) / (effectiveMaxY - effectiveMinY)
+                else (value - effectiveMinY) / (effectiveMaxY - effectiveMinY)
                 val y = size.height - bottomPadding - normalizedY * chartHeight
                 drawContext.canvas.nativeCanvas.drawText(
                     "%.1f".format(value),
@@ -299,8 +302,6 @@ fun LineChartView(
                 yAxisLabelPaint
             )
             drawContext.canvas.nativeCanvas.restore()
-
-            // X-axis label (Days on bottom) - removed as requested
         }
 
         // Show tooltip if point selected
@@ -331,5 +332,5 @@ fun LineChartView(
 fun formatTooltip(x: Float, y: Float): String {
     val date = java.time.LocalDate.ofEpochDay(x.toLong())
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale("ru"))
-    return "${date.format(formatter)}: ${y} кг"
+    return "${date.format(formatter)}: ${String.format("%.1f", y)} кг"
 }

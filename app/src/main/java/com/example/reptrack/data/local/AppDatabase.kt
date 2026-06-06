@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
         SetConfigDb::class,
         FriendDb::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(DateTimeConverters::class, ExerciseConverters::class)

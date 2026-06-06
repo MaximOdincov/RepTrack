@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.toColorLong
 import androidx.compose.ui.unit.dp
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
+import com.example.reptrack.presentation.statistics.utils.colorToArgb
 import com.example.reptrack.domain.friends.Friend
 import com.example.reptrack.domain.friends.usecases.GetFriendsUseCase
 import com.example.reptrack.domain.statistics.entities.DateRange
@@ -41,7 +42,7 @@ import com.example.reptrack.presentation.statistics.components.ExerciseChartSect
 import com.example.reptrack.presentation.statistics.components.ExerciseInfo
 import com.example.reptrack.presentation.statistics.components.MuscleGroupChartSection
 import com.example.reptrack.presentation.statistics.components.WeightChartSection
-import com.example.reptrack.presentation.statistics.components.dialogs.AddFriendDialog
+import com.example.reptrack.presentation.statistics.components.dialogs.AddFriendDialog as FriendPickerDialog
 import com.example.reptrack.presentation.statistics.components.dialogs.FriendExerciseErrorDialog
 import com.example.reptrack.presentation.statistics.stores.StatisticsStore
 import kotlinx.coroutines.flow.catch
@@ -56,6 +57,7 @@ fun StatisticsScreen(
     getFriendsUseCase: GetFriendsUseCase,
     exercises: List<Exercise>,
     friends: List<Friend>,
+    isGuest: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val state: StatisticsStore.State = store.states.collectAsState(StatisticsStore.State()).value
@@ -115,13 +117,7 @@ fun StatisticsScreen(
         }
     }
 
-    // Load data on first composition
-    LaunchedEffect(Unit) {
-        android.util.Log.d("StatisticsScreen", "=== LaunchedEffect for LoadData triggered ===")
-        store.accept(StatisticsStore.Intent.LoadData)
-        android.util.Log.d("StatisticsScreen", "LoadData intent sent")
-    }
-
+    
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -150,16 +146,16 @@ fun StatisticsScreen(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> WeightTab(store, state, availableFriends)
-                    1 -> ExerciseTab(store, state, exercises, availableFriends)
-                    2 -> MuscleTab(store, state, availableFriends, getFriendsUseCase)
+                    0 -> WeightTab(store, state, availableFriends, isGuest)
+                    1 -> ExerciseTab(store, state, exercises, availableFriends, isGuest)
+                    2 -> MuscleTab(store, state, availableFriends, getFriendsUseCase, isGuest)
                 }
             }
         }
     }
 
-    // Friend exercise error dialog
-    if (showFriendExerciseError) {
+    // Friend exercise error dialog - показываем только на exercise экране
+    if (showFriendExerciseError && pagerState.currentPage == 1) { // 1 = Exercise tab
         FriendExerciseErrorDialog(
             message = friendErrorText,
             onDismiss = { showFriendExerciseError = false }
@@ -171,12 +167,18 @@ fun StatisticsScreen(
 private fun WeightTab(
     store: StatisticsStore,
     state: StatisticsStore.State,
-    friends: List<Friend>
+    friends: List<Friend>,
+    isGuest: Boolean
 ) {
     var showAddFriendDialog by remember { mutableStateOf(false) }
     var showDateRangeDialog by remember { mutableStateOf(false) }
     var selectedDateRange by remember { mutableStateOf(state.dateRange) }
     var dateRangeText by remember { mutableStateOf(getDateRangeText(selectedDateRange)) }
+
+    // Initialize data loading when the tab is first shown
+    LaunchedEffect(Unit) {
+        store.accept(StatisticsStore.Intent.LoadData)
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -188,8 +190,20 @@ private fun WeightTab(
             // Debug logging for weight data
             android.util.Log.d("StatisticsScreen", "=== Weight Data ===")
             android.util.Log.d("StatisticsScreen", "currentWeight: ${state.currentWeight}")
+            android.util.Log.d("StatisticsScreen", "weightData size: ${state.weightData.size}")
             state.weightData.forEach { dataPoint ->
                 android.util.Log.d("StatisticsScreen", "Local weight: date=${dataPoint.date}, value=${dataPoint.value}")
+            }
+
+            // Log weight data for debugging
+            if (state.weightData.isNotEmpty()) {
+                val latestWeight = state.weightData.last()
+                android.util.Log.d("StatisticsScreen", "Latest weight from DB: date=${latestWeight.date}, value=${latestWeight.value}")
+                // Compare with currentWeight
+                android.util.Log.d("StatisticsScreen", "Current weight from state: ${state.currentWeight}")
+                android.util.Log.d("StatisticsScreen", "Difference: ${state.currentWeight?.minus(latestWeight.value)}")
+            } else {
+                android.util.Log.d("StatisticsScreen", "WARNING: No weight data found!")
             }
 
             state.friendWeightData.forEach { (friendId, dataPoints) ->
@@ -226,17 +240,23 @@ private fun WeightTab(
                     android.util.Log.d("StatisticsScreen", "Saving weight: $weight")
                     store.accept(StatisticsStore.Intent.UpdateWeight(weight))
                 },
-                onAddFriend = { showAddFriendDialog = true },
+                onAddFriend = { if (!isGuest) showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->
                     store.accept(StatisticsStore.Intent.RemoveFriend(friendId))
                 },
-                onChangeDateRange = { showDateRangeDialog = true }
+                onFriendColorChange = { friendId, newColor ->
+                    // Convert Color to ARGB Long format using utility function
+                    val argb = colorToArgb(newColor)
+                    store.accept(StatisticsStore.Intent.ChangeFriendColor(friendId, argb))
+                },
+                onChangeDateRange = { showDateRangeDialog = true },
+                isGuest = isGuest
             )
         }
     }
 
     if (showAddFriendDialog) {
-        AddFriendDialog(
+        FriendPickerDialog(
             availableFriends = friends,
             addedFriends = state.friends.map { it.friendId },
             onDismiss = { showAddFriendDialog = false },
@@ -264,12 +284,18 @@ private fun ExerciseTab(
     store: StatisticsStore,
     state: StatisticsStore.State,
     exercises: List<Exercise>,
-    friends: List<Friend>
+    friends: List<Friend>,
+    isGuest: Boolean
 ) {
     var showAddFriendDialog by remember { mutableStateOf(false) }
     var showDateRangeDialog by remember { mutableStateOf(false) }
     var selectedDateRange by remember { mutableStateOf(state.dateRange) }
     var dateRangeText by remember { mutableStateOf(getDateRangeText(selectedDateRange)) }
+
+    // Initialize data loading when the tab is first shown
+    LaunchedEffect(Unit) {
+        store.accept(StatisticsStore.Intent.LoadData)
+    }
 
     val exerciseInfoList = exercises
         .sortedBy { it.name }
@@ -331,22 +357,16 @@ private fun ExerciseTab(
                     store.accept(StatisticsStore.Intent.ToggleSetVisibility(setIndex))
                 },
                 onSetColorChange = { setIndex, color ->
-                    // Convert Color to Long by packing ARGB components
-                    // Compose Color uses Float (0.0-1.0), need to multiply by 255 for Int (0-255)
-                    val argb = ((color.alpha * 255).toInt().toLong() shl 24) or
-                               ((color.red * 255).toInt().toLong() shl 16) or
-                               ((color.green * 255).toInt().toLong() shl 8) or
-                               (color.blue * 255).toInt().toLong()
+                    // Convert Color to Long using utility function
+                    val argb = colorToArgb(color)
                     android.util.Log.d("StatisticsScreen", "=== onSetColorChange called ===")
                     android.util.Log.d("StatisticsScreen", "Set index: $setIndex")
                     android.util.Log.d("StatisticsScreen", "Input Color: $color")
-                    android.util.Log.d("StatisticsScreen", "  A=${color.alpha}, R=${color.red}, G=${color.green}, B=${color.blue}")
-                    android.util.Log.d("StatisticsScreen", "  After *255: A=${(color.alpha * 255).toInt()}, R=${(color.red * 255).toInt()}, G=${(color.green * 255).toInt()}, B=${(color.blue * 255).toInt()}")
                     android.util.Log.d("StatisticsScreen", "Packed ARGB Long: 0x${argb.toString(16)}")
                     android.util.Log.d("StatisticsScreen", "  Current setColors: ${state.setColors}")
                     store.accept(StatisticsStore.Intent.ChangeSetLineColor(setIndex, argb))
                 },
-                onAddFriend = { showAddFriendDialog = true },
+                onAddFriend = { if (!isGuest) showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->
                     store.accept(StatisticsStore.Intent.RemoveFriend(friendId))
                 },
@@ -362,13 +382,14 @@ private fun ExerciseTab(
                     android.util.Log.d("StatisticsScreen", "Packed ARGB Long: 0x${argb.toString(16)}")
                     store.accept(StatisticsStore.Intent.ChangeFriendColor(friendId, argb))
                 },
-                onChangeDateRange = { showDateRangeDialog = true }
+                onChangeDateRange = { showDateRangeDialog = true },
+                isGuest = isGuest
             )
         }
     }
 
     if (showAddFriendDialog) {
-        AddFriendDialog(
+        FriendPickerDialog(
             availableFriends = friends,
             addedFriends = state.friends.map { it.friendId },
             onDismiss = { showAddFriendDialog = false },
@@ -396,12 +417,35 @@ private fun MuscleTab(
     store: StatisticsStore,
     state: StatisticsStore.State,
     friends: List<Friend>,
-    getFriendsUseCase: GetFriendsUseCase
+    getFriendsUseCase: GetFriendsUseCase,
+    isGuest: Boolean
 ) {
     var showAddFriendDialog by remember { mutableStateOf(false) }
     var showDateRangeDialog by remember { mutableStateOf(false) }
     var selectedDateRange by remember { mutableStateOf(state.dateRange) }
     var dateRangeText by remember { mutableStateOf(getDateRangeText(selectedDateRange)) }
+
+    // Initialize data loading when the tab is first shown
+    LaunchedEffect(Unit) {
+        store.accept(StatisticsStore.Intent.LoadData)
+    }
+
+    // Добавляем логирование для диагностики muscle данных
+    LaunchedEffect(state.muscleGroupData, state.friendMuscleGroupData) {
+        android.util.Log.d("MuscleTab", "=== Muscle Data Updated ===")
+        android.util.Log.d("MuscleTab", "User muscle data size: ${state.muscleGroupData.size}")
+        state.muscleGroupData.forEach { data ->
+            android.util.Log.d("MuscleTab", "  ${data.muscleGroup}: ${data.frequency}")
+        }
+
+        android.util.Log.d("MuscleTab", "Friend muscle data size: ${state.friendMuscleGroupData.size}")
+        state.friendMuscleGroupData.forEach { (friendId, data) ->
+            android.util.Log.d("MuscleTab", "  Friend $friendId: ${data.size} items")
+            data.forEach { muscleData ->
+                android.util.Log.d("MuscleTab", "    ${muscleData.muscleGroup}: ${muscleData.frequency}")
+            }
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -415,17 +459,30 @@ private fun MuscleTab(
                 friends = state.friends,
                 friendMuscleData = state.friendMuscleGroupData,
                 dateRange = dateRangeText,
-                onAddFriend = { showAddFriendDialog = true },
+                userColor = state.userColor,
+                isLoading = state.isLoading,
+                onAddFriend = { if (!isGuest) showAddFriendDialog = true },
                 onRemoveFriend = { friendId ->
                     store.accept(StatisticsStore.Intent.RemoveFriend(friendId))
                 },
-                onChangeDateRange = { showDateRangeDialog = true }
+                onFriendColorChange = { friendId, newColor ->
+                    // Convert Color to ARGB Long format using utility function
+                    val argb = colorToArgb(newColor)
+                    store.accept(StatisticsStore.Intent.ChangeFriendColor(friendId, argb))
+                },
+                onUserColorChange = { newColor ->
+                    // Convert Color to ARGB Long format using utility function
+                    val argb = colorToArgb(newColor)
+                    store.accept(StatisticsStore.Intent.ChangeUserColor(argb))
+                },
+                onChangeDateRange = { showDateRangeDialog = true },
+                isGuest = isGuest
             )
         }
     }
 
     if (showAddFriendDialog) {
-        AddFriendDialog(
+        FriendPickerDialog(
             availableFriends = friends,
             addedFriends = state.friends.map { it.friendId },
             onDismiss = { showAddFriendDialog = false },

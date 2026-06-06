@@ -45,13 +45,13 @@ fun TimerControls(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Кнопка сброса (теперь НЕ красная)
+        // Кнопка сброса
         ControlButton(
             icon = Icons.Default.Refresh,
             onClick = onReset,
             enabled = isRunning || isPaused,
             size = 56.dp,
-            containerColor = Color(0xFF3A3A3C),
+            containerColor = LightAccentOrange,
             contentColor = Color.White
         )
 
@@ -99,7 +99,7 @@ fun TimerControls(
             onClick = onOpenTimePicker,
             enabled = !isRunning && !isPaused,
             size = 56.dp,
-            containerColor = Color(0xFF3A3A3C),
+            containerColor = LightAccentOrange,
             contentColor = Color.White
         )
     }
@@ -119,7 +119,7 @@ fun ControlButton(
             .size(size)
             .clip(CircleShape)
             .background(
-                if (enabled) containerColor else containerColor.copy(alpha = 0.3f),
+                if (enabled) containerColor else containerColor.copy(alpha = 0.6f),
                 CircleShape
             )
             .clickable(enabled = enabled, onClick = onClick),
@@ -128,7 +128,7 @@ fun ControlButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (enabled) contentColor else contentColor.copy(alpha = 0.3f),
+            tint = if (enabled) contentColor else contentColor.copy(alpha = 0.6f),
             modifier = Modifier.size(size * 0.5f)
         )
     }
@@ -148,7 +148,7 @@ fun ControlButton(
             .size(size)
             .clip(CircleShape)
             .background(
-                if (enabled) containerColor else containerColor.copy(alpha = 0.3f),
+                if (enabled) containerColor else containerColor.copy(alpha = 0.6f),
                 CircleShape
             )
             .clickable(enabled = enabled, onClick = onClick),
@@ -157,7 +157,7 @@ fun ControlButton(
         Icon(
             painter = icon,
             contentDescription = null,
-            tint = if (enabled) contentColor else contentColor.copy(alpha = 0.3f),
+            tint = if (enabled) contentColor else contentColor.copy(alpha = 0.6f),
             modifier = Modifier.size(size * 0.5f)
         )
     }

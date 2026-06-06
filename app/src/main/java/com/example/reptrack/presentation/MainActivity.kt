@@ -13,6 +13,7 @@ import com.example.reptrack.navigation.AppNavGraph
 import com.example.reptrack.presentation.theme.RepTrackTheme
 
 class MainActivity : ComponentActivity() {
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

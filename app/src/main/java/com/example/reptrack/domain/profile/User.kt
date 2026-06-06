@@ -9,5 +9,6 @@ data class User(
     val currentWeight: Float? = null,
     val height: Float? = null,
     val passkey: String? = null,
+    val isDarkTheme: Boolean? = null,
     val gdprConsent: GdprConsent? = null
 )

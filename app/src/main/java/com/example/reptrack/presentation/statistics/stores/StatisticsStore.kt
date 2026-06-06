@@ -26,12 +26,13 @@ interface StatisticsStore : Store<StatisticsStore.Intent, StatisticsStore.State,
         data class AddFriend(val friendId: String, val friendName: String) : Intent()
         data class RemoveFriend(val friendId: String) : Intent()
         data class ChangeFriendColor(val friendId: String, val color: Long) : Intent()
-    }
+        data class ChangeUserColor(val color: Long) : Intent()
+            }
 
     data class State(
         val isLoading: Boolean = false,
         val error: String? = null,
-        val dateRange: DateRange = DateRange.last30Days(),
+        val dateRange: DateRange = DateRange.allTime(),
         // Common friends list for all charts
         val friends: List<FriendConfig> = emptyList(),
         // Weight
@@ -50,7 +51,8 @@ interface StatisticsStore : Store<StatisticsStore.Intent, StatisticsStore.State,
         val friendMuscleGroupData: Map<String, List<MuscleGroupDataPoint>> = emptyMap(),
         // User info
         val userId: String? = null,
-        val userName: String? = null
+        val userName: String? = null,
+        val userColor: Long = 0xFF6366F1L // Default color (Indigo)
     )
 
     sealed class Label {
@@ -67,6 +69,7 @@ internal class StatisticsStoreFactory(
     private val getFriendExerciseDataFromFirebaseUseCase: GetFriendExerciseDataFromFirebaseUseCase,
     private val getMuscleGroupChartDataUseCase: GetMuscleGroupChartDataUseCase,
     private val getFriendMuscleGroupChartDataUseCase: GetFriendMuscleGroupChartDataUseCase,
+    private val getFriendMuscleGroupDataFromFirebaseUseCase: GetFriendMuscleGroupDataFromFirebaseUseCase,
     private val getFriendsUseCase: GetFriendsUseCase,
     private val getCurrentUserProfileUseCase: GetCurrentUserProfileUseCase,
     private val savedFriendsManager: com.example.reptrack.data.preferences.SavedFriendsManager
@@ -89,6 +92,7 @@ internal class StatisticsStoreFactory(
                     getFriendExerciseDataFromFirebaseUseCase,
                     getMuscleGroupChartDataUseCase,
                     getFriendMuscleGroupChartDataUseCase,
+                    getFriendMuscleGroupDataFromFirebaseUseCase,
                     getFriendsUseCase,
                     getCurrentUserProfileUseCase
                 )
@@ -115,6 +119,7 @@ internal class StatisticsStoreFactory(
         data class FriendExerciseDataLoaded(val friendId: String, val data: List<ExerciseDataPoint>) : Msg
         data class MuscleGroupDataLoaded(val data: List<MuscleGroupDataPoint>) : Msg
         data class FriendMuscleGroupDataLoaded(val friendId: String, val data: List<MuscleGroupDataPoint>) : Msg
+        data class UserColorChanged(val color: Long) : Msg
     }
 
     private class ExecutorImpl(
@@ -127,9 +132,11 @@ internal class StatisticsStoreFactory(
         private val getFriendExerciseDataFromFirebaseUseCase: GetFriendExerciseDataFromFirebaseUseCase,
         private val getMuscleGroupChartDataUseCase: GetMuscleGroupChartDataUseCase,
         private val getFriendMuscleGroupChartDataUseCase: GetFriendMuscleGroupChartDataUseCase,
+        private val getFriendMuscleGroupDataFromFirebaseUseCase: GetFriendMuscleGroupDataFromFirebaseUseCase,
         private val getFriendsUseCase: GetFriendsUseCase,
         private val getCurrentUserProfileUseCase: GetCurrentUserProfileUseCase
     ) : CoroutineExecutor<StatisticsStore.Intent, Nothing, StatisticsStore.State, Msg, StatisticsStore.Label>() {
+        private val repository = getWeightChartDataUseCase.repository
         override fun executeIntent(intent: StatisticsStore.Intent, getState: () -> StatisticsStore.State) {
             android.util.Log.d("StatisticsStore", "=== executeIntent called ===")
             android.util.Log.d("StatisticsStore", "Intent: $intent")
@@ -147,6 +154,10 @@ internal class StatisticsStoreFactory(
                     savedFriendsManager.updateFriendColor(intent.friendId, intent.color)
                     dispatch(Msg.FriendColorChanged(intent.friendId, intent.color))
                 }
+                is StatisticsStore.Intent.ChangeUserColor -> {
+                    // Save user color to persistent storage if needed
+                    dispatch(Msg.UserColorChanged(intent.color))
+                }
             }
         }
 
@@ -160,13 +171,14 @@ internal class StatisticsStoreFactory(
             android.util.Log.d("important", "friends in state: ${state.friends}")
 
             scope.launch {
+                // Always show loading state first
+                dispatch(Msg.Loading)
+
                 if (state.userId == null) {
                     try {
                         getCurrentUserProfileUseCase().collect { user ->
                             if (user != null) {
                                 dispatch(Msg.UserLoaded(user.id, user.username ?: "You"))
-                                // After loading user, load the data
-                                dispatch(Msg.Loading)
 
                                 getWeightChartDataUseCase(user.id, state.dateRange.from, state.dateRange.to)
                                     .catch { e -> dispatch(Msg.Error(e.message ?: "Failed to load weight data")) }
@@ -189,8 +201,6 @@ internal class StatisticsStoreFactory(
                     }
                 }
 
-                dispatch(Msg.Loading)
-
                 val userId = state.userId ?: return@launch
                 android.util.Log.d("important", "=== Starting data loading ===")
                 android.util.Log.d("important", "User ID: $userId")
@@ -212,16 +222,42 @@ internal class StatisticsStoreFactory(
                     }
                 }
 
+                // Load current weight
+                android.util.Log.d("important", "🎯 Launching current weight loading...")
+                scope.launch {
+                    try {
+                        val currentWeight = getWeightChartDataUseCase.repository.getCurrentWeight(userId)
+                        android.util.Log.d("important", "✅ Current weight loaded: $currentWeight")
+                        dispatch(Msg.CurrentWeightLoaded(currentWeight ?: 0f))
+                    } catch (e: Exception) {
+                        android.util.Log.e("important", "❌ EXCEPTION in current weight: ${e.message}")
+                    }
+                }
+
+                // Load friend weight data for all existing friends
+                android.util.Log.d("important", "=== Loading friend weight data ===")
+                state.friends.forEach { friend ->
+                    android.util.Log.d("important", "Loading friend ${friend.friendId} (${friend.friendName}) weight data")
+                    loadFriendWeightData(friend.friendId, friend.friendName, state.copy(userId = userId))
+                }
+
                 // Load muscle group data in separate coroutine
                 android.util.Log.d("important", "💪 Launching muscle group data collection...")
                 scope.launch {
                     try {
+                        android.util.Log.d("important", "Calling getMuscleGroupChartDataUseCase for user: $userId")
                         getMuscleGroupChartDataUseCase(userId, state.dateRange.from, state.dateRange.to)
                             .catch { e ->
                                 android.util.Log.e("important", "❌ ERROR loading muscle group data: ${e.message}")
                                 dispatch(Msg.Error(e.message ?: "Failed to load muscle group data"))
                             }
-                            .collect { data -> dispatch(Msg.MuscleGroupDataLoaded(data)) }
+                            .collect { data ->
+                                android.util.Log.d("important", "✅ Muscle group data collected: ${data.size} items")
+                                data.forEach { muscleData ->
+                                    android.util.Log.d("important", "  ${muscleData.muscleGroup}: ${muscleData.frequency}")
+                                }
+                                dispatch(Msg.MuscleGroupDataLoaded(data))
+                            }
                     } catch (e: Exception) {
                         android.util.Log.e("important", "❌ EXCEPTION in muscle group data: ${e.message}")
                     }
@@ -234,7 +270,21 @@ internal class StatisticsStoreFactory(
                     android.util.Log.d("important", "✓ Found selectedExerciseId: $exerciseId")
                     android.util.Log.d("important", "Calling loadExerciseData...")
                     loadExerciseData(exerciseId, state, userId, state.userName ?: "You")
+
+                    // Load friend exercise data for selected exercise
+                    android.util.Log.d("important", "=== Loading friend exercise data ===")
+                    state.friends.forEach { friend ->
+                        android.util.Log.d("important", "Loading friend ${friend.friendId} (${friend.friendName}) exercise data")
+                        loadFriendExerciseData(friend.friendId, friend.friendName, exerciseId, state.copy(userId = userId))
+                    }
                 } ?: android.util.Log.d("important", "✗ No selected exercise, skipping")
+
+                // Load friend muscle data for all existing friends
+                android.util.Log.d("important", "=== Loading friend muscle data ===")
+                state.friends.forEach { friend ->
+                    android.util.Log.d("important", "Loading friend ${friend.friendId} (${friend.friendName}) muscle data")
+                    loadFriendMuscleGroupData(friend.friendId, state.copy(userId = userId))
+                }
             }
         }
 
@@ -260,15 +310,35 @@ internal class StatisticsStoreFactory(
             } else {
                 android.util.Log.d("important", "No selected exercise, skipping friend data reload")
             }
+
+            // Reload friend muscle data with new date range
+            android.util.Log.d("important", "Reloading friend muscle data with new date range")
+            state.friends.forEach { friend ->
+                android.util.Log.d("important", "Loading friend ${friend.friendId} (${friend.friendName}) muscle data")
+                android.util.Log.d("important", "Friend has ${state.friendMuscleGroupData[friend.friendId]?.size ?: 0} existing records")
+                loadFriendMuscleGroupData(friend.friendId, newState)
+            }
         }
 
         private fun updateWeight(value: Float, state: StatisticsStore.State) {
             val userId = state.userId ?: return
+            val dateRange = state.dateRange
+
             scope.launch {
                 try {
                     updateWeightUseCase(userId, LocalDateTime.now(), value)
+                    // Update current weight immediately
                     dispatch(Msg.CurrentWeightUpdated(value))
+                    // Reload weight data to ensure consistency
+                    android.util.Log.d("StatisticsStore", "Reloading weight data after update...")
+                    getWeightChartDataUseCase(userId, dateRange.from, dateRange.to)
+                        .catch { e -> dispatch(Msg.Error(e.message ?: "Failed to reload weight data")) }
+                        .collect { data ->
+                            android.util.Log.d("StatisticsStore", "Weight data reloaded with ${data.size} records")
+                            dispatch(Msg.WeightDataLoaded(data))
+                        }
                 } catch (e: Exception) {
+                    android.util.Log.e("StatisticsStore", "Error updating weight: ${e.message}")
                     dispatch(Msg.Error(e.message ?: "Failed to update weight"))
                 }
             }
@@ -437,9 +507,34 @@ internal class StatisticsStoreFactory(
 
         private fun loadFriendMuscleGroupData(friendId: String, state: StatisticsStore.State) {
             scope.launch {
-                getFriendMuscleGroupChartDataUseCase(friendId, state.dateRange.from, state.dateRange.to)
-                    .catch { e -> dispatch(Msg.Error(e.message ?: "Failed to load friend muscle group data")) }
-                    .collect { data -> dispatch(Msg.MuscleGroupDataLoaded(data)) }
+                android.util.Log.d("friends", "=== 💪 Loading friend muscle group data ===")
+                android.util.Log.d("friends", "FriendId: $friendId")
+                android.util.Log.d("friends", "Date range: ${state.dateRange.from} to ${state.dateRange.to}")
+
+                try {
+                    getFriendMuscleGroupDataFromFirebaseUseCase(friendId, state.dateRange.from, state.dateRange.to)
+                        .catch { e ->
+                            android.util.Log.e("friends", "❌ ERROR loading friend muscle data from Firebase: ${e.message}")
+                            // Try fallback to local database
+                            getFriendMuscleGroupChartDataUseCase(friendId, state.dateRange.from, state.dateRange.to)
+                                .catch { localError ->
+                                    android.util.Log.e("friends", "❌ ERROR fallback to local database: ${localError.message}")
+                                    dispatch(Msg.Error(localError.message ?: "Failed to load friend muscle group data"))
+                                }
+                                .collect { localData ->
+                                    android.util.Log.d("friends", "✅ Fallback local muscle data loaded: ${localData.size} items")
+                                    dispatch(Msg.FriendMuscleGroupDataLoaded(friendId, localData))
+                                }
+                        }
+                        .collect { data ->
+                            android.util.Log.d("friends", "✅ Friend muscle data loaded from Firebase: ${data.size} items")
+                            android.util.Log.d("friends", "Data: $data")
+                            dispatch(Msg.FriendMuscleGroupDataLoaded(friendId, data))
+                        }
+                } catch (e: Exception) {
+                    android.util.Log.e("friends", "❌ EXCEPTION in loadFriendMuscleGroupData: ${e.message}")
+                    dispatch(Msg.Error(e.message ?: "Failed to load friend muscle group data"))
+                }
             }
         }
     }
@@ -506,6 +601,10 @@ internal class StatisticsStoreFactory(
                     currentWeight = msg.weight
                 )
 
+                is Msg.CurrentWeightLoaded -> copy(
+                    currentWeight = msg.weight
+                )
+
                 is Msg.FriendAdded -> copy(
                     friends = friends + msg.friendConfig
                 ).also {
@@ -527,6 +626,12 @@ internal class StatisticsStoreFactory(
                     }
                 ).also {
                     Log.d("friends", "🎨 Friend color changed: ${msg.friendId} -> 0x${msg.color.toString(16)}")
+                }
+
+                is Msg.UserColorChanged -> copy(
+                    userColor = msg.color
+                ).also {
+                    Log.d("user", "🎨 User color changed: 0x${msg.color.toString(16)}")
                 }
 
                 is Msg.ExerciseSelected -> {

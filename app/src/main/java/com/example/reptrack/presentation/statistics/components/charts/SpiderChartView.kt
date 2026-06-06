@@ -2,8 +2,12 @@ package com.example.reptrack.presentation.statistics.components.charts
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -24,6 +28,21 @@ fun SpiderChartView(
     labels: List<String> = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Abs"),
     maxValue: Float = 100f
 ) {
+    // Показываем placeholder, если данных нет
+    if (data.isEmpty()) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No data available",
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        return
+    }
+
     val density = LocalDensity.current
     val labelStyle = TextStyle(fontSize = 12.sp, color = Color.Gray)
     val labelWidth = with(density) { labelStyle.fontSize.toPx() * 3 }
@@ -84,7 +103,7 @@ fun SpiderChartView(
             drawContext.canvas.nativeCanvas.drawText(labels[i], x, y, paint)
         }
 
-        // Draw data series
+        // Draw data series with filled areas
         data.forEach { series ->
             val path = Path().apply {
                 for (i in 0 until numSides) {
@@ -97,6 +116,15 @@ fun SpiderChartView(
                 }
                 close()
             }
+
+            // Draw filled area with transparency
+            drawPath(
+                path = path,
+                color = series.color.copy(alpha = 0.3f), // Semi-transparent fill
+                style = androidx.compose.ui.graphics.drawscope.Fill
+            )
+
+            // Draw outline
             drawPath(
                 path = path,
                 color = series.color,

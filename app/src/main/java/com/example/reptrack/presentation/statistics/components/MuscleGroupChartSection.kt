@@ -19,9 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +39,9 @@ import com.example.reptrack.domain.workout.entities.MuscleGroup
 import com.example.reptrack.presentation.statistics.components.charts.SpiderChartView
 import com.example.reptrack.presentation.statistics.components.charts.SpiderChartData
 import com.example.reptrack.presentation.statistics.components.common.FriendChip
+import com.example.reptrack.presentation.statistics.utils.colorFromArgb
+import com.example.reptrack.presentation.statistics.utils.colorToArgb
+
 
 @Composable
 fun MuscleGroupChartSection(
@@ -41,9 +49,14 @@ fun MuscleGroupChartSection(
     friends: List<FriendConfig>,
     friendMuscleData: Map<String, List<MuscleGroupDataPoint>>,
     dateRange: String,
+    userColor: Long,
+    isLoading: Boolean,
     onAddFriend: () -> Unit,
     onRemoveFriend: (String) -> Unit,
+    onFriendColorChange: (String, Color) -> Unit,
+    onUserColorChange: (Color) -> Unit,
     onChangeDateRange: () -> Unit,
+    isGuest: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -59,17 +72,185 @@ fun MuscleGroupChartSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Muscle Group Focus",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                OutlinedButton(onClick = onChangeDateRange) {
-                    Text(dateRange)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Muscle Group Focus",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = onChangeDateRange) {
+                            Text(dateRange)
+                        }
+                        // Color selector for user's chart
+                        var showColorPicker by remember { mutableStateOf(false) }
+                        val availableColors = remember {
+                            listOf(
+                                com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors.getPrimaryColor(
+                                    MuscleGroup.CHEST
+                                ),
+                                com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors.getPrimaryColor(
+                                    MuscleGroup.BACK
+                                ),
+                                com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors.getPrimaryColor(
+                                    MuscleGroup.LEGS
+                                ),
+                                com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors.getPrimaryColor(
+                                    MuscleGroup.ARMS
+                                ),
+                                com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors.getPrimaryColor(
+                                    MuscleGroup.ABS
+                                ),
+                                com.example.reptrack.presentation.exercise.list.utils.MuscleGroupColors.getPrimaryColor(
+                                    MuscleGroup.CARDIO
+                                ),
+                                Color(0xFF6366F1), // Indigo - fallback
+                                Color(0xFFEC4899)  // Pink - fallback
+                            )
+                        }
+
+                        // Convert available colors to ARGB Long for comparison
+                        val availableColorsArgb = remember {
+                            availableColors.map { colorToArgb(it) }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = colorFromArgb(userColor),
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    shape = CircleShape
+                                )
+                                .clickable { showColorPicker = true }
+                        )
+
+                        if (showColorPicker) {
+                            androidx.compose.ui.window.Dialog(onDismissRequest = {
+                                showColorPicker = false
+                            }) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            MaterialTheme.colorScheme.surface,
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .padding(16.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "Select Your Color",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            modifier = Modifier.padding(bottom = 12.dp)
+                                        )
+                                        availableColors.chunked(4).forEach { row ->
+                                            Row(
+                                                modifier = Modifier.padding(vertical = 4.dp),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                row.forEach { color ->
+                                                    val isSelected = colorToArgb(color) == userColor
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(40.dp)
+                                                            .background(
+                                                                color = color,
+                                                                shape = RoundedCornerShape(8.dp)
+                                                            )
+                                                            .border(
+                                                                width = 2.dp,
+                                                                color = if (isSelected)
+                                                                    MaterialTheme.colorScheme.primary
+                                                                else
+                                                                    Color.Transparent,
+                                                                shape = RoundedCornerShape(8.dp)
+                                                            )
+                                                            .clickable {
+                                                                android.util.Log.d(
+                                                                    "MuscleChart",
+                                                                    "User selected color: $color"
+                                                                )
+                                                                val argb = colorToArgb(color)
+                                                                android.util.Log.d(
+                                                                    "MuscleChart",
+                                                                    "User selected ARGB: 0x${
+                                                                        argb.toString(16)
+                                                                    }"
+                                                                )
+                                                                onUserColorChange(color)
+                                                                showColorPicker = false
+                                                            }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Calculate chart data (needed for both chart and legend)
+            val labels = getMuscleGroupLabels()
+            val maxValue = calculateMaxValue(muscleGroupData, friendMuscleData)
+
+            val chartData = mutableListOf<SpiderChartData>()
+
+            // User data
+            if (muscleGroupData.isNotEmpty()) {
+                val userValues = labels.map { label ->
+                    val groupName = getMuscleGroupFromLabel(label)
+                    muscleGroupData.find { it.muscleGroup == groupName }?.frequency?.toFloat() ?: 0f
+                }
+                val userColorActual = colorFromArgb(userColor)
+                android.util.Log.d(
+                    "MuscleChart",
+                    "User color: ARGB=0x${userColor.toString(16)}, Converted=$userColorActual"
+                )
+                chartData.add(
+                    SpiderChartData(
+                        values = userValues,
+                        color = userColorActual,
+                        label = "You"
+                    )
+                )
+            }
+
+            // Friends data
+            friends.forEach { friend ->
+                val friendData = friendMuscleData[friend.friendId]
+                if (friendData != null && friendData.isNotEmpty()) {
+                    val friendValues = labels.map { label ->
+                        val groupName = getMuscleGroupFromLabel(label)
+                        friendData.find { it.muscleGroup == groupName }?.frequency?.toFloat() ?: 0f
+                    }
+                    val friendColorActual = colorFromArgb(friend.color)
+                    android.util.Log.d(
+                        "MuscleChart",
+                        "Friend ${friend.friendName} color: ARGB=0x${friend.color.toString(16)}, Converted=$friendColorActual"
+                    )
+                    chartData.add(
+                        SpiderChartData(
+                            values = friendValues,
+                            color = friendColorActual,
+                            label = friend.friendName
+                        )
+                    )
+                }
+            }
 
             // Spider Chart
             Box(
@@ -77,121 +258,72 @@ fun MuscleGroupChartSection(
                     .fillMaxWidth()
                     .height(300.dp)
             ) {
-                val labels = getMuscleGroupLabels()
-                val maxValue = calculateMaxValue(muscleGroupData, friendMuscleData)
-
-                val chartData = mutableListOf<SpiderChartData>()
-
-                // User data
-                if (muscleGroupData.isNotEmpty()) {
-                    val userValues = labels.map { label ->
-                        val groupName = getMuscleGroupFromLabel(label)
-                        muscleGroupData.find { it.muscleGroup == groupName }?.frequency?.toFloat() ?: 0f
+                if (isLoading) {
+                    // Show loading state
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                    chartData.add(
-                        SpiderChartData(
-                            values = userValues,
-                            color = MaterialTheme.colorScheme.primary,
-                            label = "You"
-                        )
+                } else {
+                    SpiderChartView(
+                        data = chartData,
+                        labels = labels,
+                        maxValue = maxValue,
+                        modifier = Modifier.fillMaxSize()
                     )
-                }
-
-                // Friends data
-                friends.forEach { friend ->
-                    val friendData = friendMuscleData[friend.friendId]
-                    if (friendData != null && friendData.isNotEmpty()) {
-                        val friendValues = labels.map { label ->
-                            val groupName = getMuscleGroupFromLabel(label)
-                            friendData.find { it.muscleGroup == groupName }?.frequency?.toFloat() ?: 0f
-                        }
-                        chartData.add(
-                            SpiderChartData(
-                                values = friendValues,
-                                color = Color(friend.color),
-                                label = friend.friendName
-                            )
-                        )
-                    }
-                }
-
-                SpiderChartView(
-                    data = chartData,
-                    labels = labels,
-                    maxValue = maxValue,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Legend
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(8.dp)
-                ) {
-                    chartData.forEach { series ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .background(series.color, CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = series.label,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
                 }
             }
 
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Friends section
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Friends",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    if (friends.size < 3) {
-                        Button(onClick = onAddFriend) {
-                            Text("Add Friend")
-                        }
-                    }
-                }
-
-                if (friends.isEmpty()) {
-                    Text(
-                        text = "No friends added yet",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                } else {
+            // Friends section - only show if not guest
+            if (!isGuest) {
+                Column {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        friends.forEach { friend ->
-                            FriendChip(
-                                name = friend.friendName,
-                                color = Color(friend.color),
-                                onRemove = { onRemoveFriend(friend.friendId) }
-                            )
+                        Text(
+                            text = "Friends",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (friends.size < 3) {
+                            Button(onClick = onAddFriend) {
+                                Text("Add Friend")
+                            }
+                        }
+                    }
+
+                    if (friends.isEmpty()) {
+                        Text(
+                            text = "No friends added yet",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            friends.forEach { friend ->
+                                FriendChip(
+                                    name = friend.friendName,
+                                    color = colorFromArgb(friend.color),
+                                    onRemove = { onRemoveFriend(friend.friendId) },
+                                    onChangeColor = { newColor ->
+                                        onFriendColorChange(
+                                            friend.friendId,
+                                            newColor
+                                        )
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -200,39 +332,39 @@ fun MuscleGroupChartSection(
     }
 }
 
-private fun getMuscleGroupLabels(): List<String> {
-    return listOf(
-        "Chest",
-        "Back",
-        "Legs",
-        "Cardio",
-        "Arms",
-        "Abs"
-    )
-}
-
-private fun getMuscleGroupFromLabel(label: String): MuscleGroup {
-    return when (label) {
-        "Chest" -> MuscleGroup.CHEST
-        "Back" -> MuscleGroup.BACK
-        "Legs" -> MuscleGroup.LEGS
-        "Cardio" -> MuscleGroup.CARDIO
-        "Arms" -> MuscleGroup.ARMS
-        "Abs" -> MuscleGroup.ABS
-        else -> MuscleGroup.CHEST
-    }
-}
-
-private fun calculateMaxValue(
-    userData: List<MuscleGroupDataPoint>,
-    friendData: Map<String, List<MuscleGroupDataPoint>>
-): Float {
-    var maxValue = 0f
-
-    userData.forEach { maxValue = maxOf(maxValue, it.frequency.toFloat()) }
-    friendData.values.forEach { data ->
-        data.forEach { maxValue = maxOf(maxValue, it.frequency.toFloat()) }
+    private fun getMuscleGroupLabels(): List<String> {
+        return listOf(
+            "Chest",
+            "Back",
+            "Legs",
+            "Cardio",
+            "Arms",
+            "Abs"
+        )
     }
 
-    return maxOf(maxValue, 10f) // Minimum scale of 10
-}
+    private fun getMuscleGroupFromLabel(label: String): MuscleGroup {
+        return when (label) {
+            "Chest" -> MuscleGroup.CHEST
+            "Back" -> MuscleGroup.BACK
+            "Legs" -> MuscleGroup.LEGS
+            "Cardio" -> MuscleGroup.CARDIO
+            "Arms" -> MuscleGroup.ARMS
+            "Abs" -> MuscleGroup.ABS
+            else -> MuscleGroup.CHEST
+        }
+    }
+
+    private fun calculateMaxValue(
+        userData: List<MuscleGroupDataPoint>,
+        friendData: Map<String, List<MuscleGroupDataPoint>>
+    ): Float {
+        var maxValue = 0f
+
+        userData.forEach { maxValue = maxOf(maxValue, it.frequency.toFloat()) }
+        friendData.values.forEach { data ->
+            data.forEach { maxValue = maxOf(maxValue, it.frequency.toFloat()) }
+        }
+
+        return maxOf(maxValue, 10f) // Minimum scale of 10
+    }

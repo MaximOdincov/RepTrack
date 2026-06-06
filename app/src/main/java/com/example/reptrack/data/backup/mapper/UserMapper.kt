@@ -19,6 +19,7 @@ object UserMapper {
                 currentWeight = doc.getDouble("currentWeight")?.toFloat(),
                 height = doc.getDouble("height")?.toFloat(),
                 passkey = doc.getString("passkey"),
+                isDarkTheme = doc.getBoolean("isDarkTheme"),
                 updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
                 deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) }
             )
@@ -37,6 +38,7 @@ object UserMapper {
             "currentWeight" to user.currentWeight?.toDouble(),
             "height" to user.height?.toDouble(),
             "passkey" to user.passkey,
+            "isDarkTheme" to user.isDarkTheme,
             "updatedAt" to TimestampMapper.toTimestamp(user.updatedAt),
             "deletedAt" to user.deletedAt?.let { TimestampMapper.toTimestamp(it) }
         )

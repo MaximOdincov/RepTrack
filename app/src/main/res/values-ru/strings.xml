@@ -257,4 +257,89 @@
     <string name="icon_upper_body">upper_body_icon</string>
     <string name="icon_lower_body">lower_body_icon</string>
 
+    <!-- ==================== AUTHENTICATION ==================== -->
+
+    <!-- Screen Titles -->
+    <string name="auth_sign_in">Вход</string>
+    <string name="auth_sign_up">Регистрация</string>
+    <string name="auth_welcome_back">Добро пожаловать!</string>
+    <string name="auth_create_account">Создать аккаунт</string>
+    <string name="auth_guest_mode">Продолжить как гость</string>
+
+    <!-- Form Fields -->
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_username">Имя пользователя</string>
+    <string name="auth_confirm_password">Подтвердите пароль</string>
+    <string name="auth_email_placeholder">Введите ваш email</string>
+    <string name="auth_password_placeholder">Введите ваш пароль</string>
+    <string name="auth_username_placeholder">Выберите имя пользователя</string>
+    <string name="auth_confirm_password_placeholder">Подтвердите ваш пароль</string>
+
+    <!-- Buttons -->
+    <string name="auth_sign_in_button">Войти</string>
+    <string name="auth_sign_up_button">Зарегистрироваться</string>
+    <string name="auth_forgot_password">Забыли пароль?</string>
+    <string name="auth_dont_have_account">Нет аккаунта?</string>
+    <string name="auth_already_have_account">Уже есть аккаунт?</string>
+    <string name="auth_continue_with_google">Продолжить с Google</string>
+    <string name="auth_or_continue_with">или продолжить с</string>
+
+    <!-- Validation Messages -->
+    <string name="auth_error_email_required">Email обязателен</string>
+    <string name="auth_error_email_invalid">Пожалуйста, введите корректный email</string>
+    <string name="auth_error_email_invalid_chars">Email содержит недопустимые символы</string>
+    <string name="auth_error_email_too_long">Слишком длинный email</string>
+
+    <string name="auth_error_password_required">Пароль обязателен</string>
+    <string name="auth_error_password_too_short">Пароль должен содержать минимум 8 символов</string>
+    <string name="auth_error_password_no_uppercase">Пароль должен содержать хотя бы одну заглавную букву</string>
+    <string name="auth_error_password_no_lowercase">Пароль должен содержать хотя бы одну строчную букву</string>
+    <string name="auth_error_password_no_digit">Пароль должен содержать хотя бы одну цифру</string>
+    <string name="auth_error_password_invalid_chars">Пароль содержит недопустимые символы</string>
+    <string name="auth_error_password_weak">Это слишком простой пароль</string>
+
+    <string name="auth_error_username_required">Имя пользователя обязательно</string>
+    <string name="auth_error_username_too_short">Имя пользователя должно содержать минимум 3 символа</string>
+    <string name="auth_error_username_too_long">Имя пользователя должно содержать меньше 20 символов</string>
+    <string name="auth_error_username_invalid_chars">Имя пользователя может содержать только буквы, цифры и подчеркивания</string>
+    <string name="auth_error_username_starts_with_number">Имя пользователя не может начинаться с цифры</string>
+    <string name="auth_error_username_invalid">Это имя пользователя недоступно</string>
+
+    <string name="auth_error_password_mismatch">Пароли не совпадают</string>
+    <string name="auth_error_field_required">Это поле обязательно для заполнения</string>
+
+    <!-- Privacy Policy -->
+    <string name="auth_privacy_policy_title">Политика конфиденциальности</string>
+    <string name="auth_privacy_policy_checkbox">Я принимаю Политику конфиденциальности</string>
+    <string name="auth_privacy_policy_checkbox_text">Политика конфиденциальности</string>
+    <string name="auth_error_privacy_required">Пожалуйста, примите политику конфиденциальности для продолжения</string>
+    <string name="auth_data_processing">Я согласен на обработку данных</string>
+
+    <!-- Error Messages -->
+    <string name="auth_error_sign_in_failed">Войдите не удалось. Пожалуйста, проверьте ваши данные и попробуйте снова.</string>
+    <string name="auth_error_sign_up_failed">Регистрация не удалась. Пожалуйста, попробуйте снова.</string>
+    <string name="auth_error_network">Ошибка сети. Пожалуйста, проверьте ваше подключение.</string>
+    <string name="auth_error_unknown">Произошла ошибка. Пожалуйста, попробуйте позже.</string>
+    <string name="auth_error_loading">Загрузка...</string>
+
+    <!-- Success Messages -->
+    <string name="auth_success_password_reset">Email для сброса пароля отправлен</string>
+    <string name="auth_success_signed_in">Успешный вход</string>
+    <string name="auth_success_signed_up">Аккаунт успешно создан</string>
+
+    <!-- Password Strength -->
+    <string name="auth_password_strength_very_weak">Очень слабый</string>
+    <string name="auth_password_strength_weak">Слабый</string>
+    <string name="auth_password_strength_medium">Средний</string>
+    <string name="auth_password_strength_strong">Сильный</string>
+    <string name="auth_password_strength_very_strong">Очень сильный</string>
+    <string name="auth_password_strength_requirements">Требования:</string>
+
+    <!-- Loading States -->
+    <string name="auth_loading_signing_in">Входим...</string>
+    <string name="auth_loading_signing_up">Создаем аккаунт...</string>
+    <string name="auth_loading_resetting_password">Отправляем email...</string>
+    <string name="auth_loading_signing_in_with_google">Входим через Google...</string>
+
 </resources>

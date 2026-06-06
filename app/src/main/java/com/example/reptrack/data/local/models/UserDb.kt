@@ -14,6 +14,7 @@ data class UserDb(
     val currentWeight: Float?,
     val height: Float?,
     val passkey: String?,
+    val isDarkTheme: Boolean?,
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val deletedAt: LocalDateTime? = null
 )
