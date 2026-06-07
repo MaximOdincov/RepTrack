@@ -17,9 +17,9 @@ import com.example.reptrack.domain.workout.usecases.workout_exercises.ObserveWor
 import com.example.reptrack.domain.workout.usecases.sessions.CompleteWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -43,7 +43,9 @@ internal interface MainScreenStore : Store<MainScreenStore.Intent, MainScreenSto
         val exerciseData: Map<String, ExerciseData> = emptyMap(),
         val applicableTemplates: List<com.example.reptrack.domain.workout.entities.WorkoutTemplate> = emptyList(),
         val templateExerciseData: Map<String, com.example.reptrack.domain.workout.entities.Exercise> = emptyMap()
-    )
+    ) {
+        fun isDefaultDate() = currentDate == java.time.LocalDate.now()
+    }
 
     data class ExerciseData(
         val exercise: com.example.reptrack.domain.workout.entities.Exercise,
@@ -68,6 +70,7 @@ internal class MainScreenStoreFactory(
     private val deleteWorkoutExerciseUseCase: DeleteWorkoutExerciseUseCase,
     private val completeWorkoutSessionUseCase: CompleteWorkoutSessionUseCase,
     private val unlinkSessionFromTemplateUseCase: com.example.reptrack.domain.workout.usecases.sessions.UnlinkSessionFromTemplateUseCase,
+    private val updateWorkoutSessionUseCase: com.example.reptrack.domain.workout.usecases.sessions.UpdateWorkoutSessionUseCase,
     private val authRepository: com.example.reptrack.domain.auth.AuthRepository
 ) {
 
@@ -87,14 +90,12 @@ internal class MainScreenStoreFactory(
         data class TemplatesLoaded(val templates: List<WorkoutTemplate>) : Msg
         data class InitializingChanged(val isInitializing: Boolean) : Msg
         data class TemplateExerciseDataLoaded(val exerciseId: String, val exercise: Exercise) : Msg
-        data class ExerciseDeleted(val workoutExerciseId: String) : Msg
         data object ExerciseDataCleared : Msg
         data object TemplateExerciseDataCleared : Msg
         data class WorkoutCompleted(val session: WorkoutSession?) : Msg
     }
 
     private inner class ExecutorImpl : CoroutineExecutor<MainScreenStore.Intent, Nothing, MainScreenStore.State, Msg, MainScreenStore.Label>() {
-        // Track active loading jobs to cancel them when date changes
         private var currentLoadJob: Job? = null
         private val activeExerciseDataJobs = mutableMapOf<String, Job>()
 
@@ -113,8 +114,6 @@ internal class MainScreenStoreFactory(
                     // Only update date if it changed
                     if (currentState.currentDate != intent.date) {
                         dispatch(Msg.DateChanged(intent.date))
-                        dispatch(Msg.ExerciseDataCleared)
-                        dispatch(Msg.TemplateExerciseDataCleared)
                     }
                     
                     loadWorkoutSession(intent.date)
@@ -125,9 +124,9 @@ internal class MainScreenStoreFactory(
                 is MainScreenStore.Intent.TemplateExerciseClicked -> {
                     publish(MainScreenStore.Label.NavigateToTemplateExercise(intent.exerciseId, intent.templateId))
                 }
-                is MainScreenStore.Intent.DeleteExercise -> {
-                    deleteExercise(intent.workoutExerciseId)
-                }
+                 is MainScreenStore.Intent.DeleteExercise -> {
+                     deleteExercise(intent.workoutExerciseId, getState)
+                 }
                 is MainScreenStore.Intent.CompleteWorkout -> {
                     completeWorkout(getState)
                 }
@@ -136,7 +135,7 @@ internal class MainScreenStoreFactory(
 
         private fun loadWorkoutSession(date: LocalDate) {
             dispatch(Msg.LoadingChanged(true))
-                android.util.Log.d("MainScreenStore", "loadWorkoutSession: date=$date")
+            currentLoadJob?.cancel()
             currentLoadJob = scope.launch {
                 try {
                     val weekCalendar = calendarUseCase.observeWeekCalendar(date)
@@ -180,7 +179,6 @@ internal class MainScreenStoreFactory(
                             loadExerciseData(workoutExercise)
                         }
 
-                        // If no session but have templates, load template exercises
                         if (session == null && templates.isNotEmpty()) {
                             templates.forEach { template ->
                                 template.exerciseIds.forEach { exerciseId ->
@@ -240,20 +238,23 @@ internal class MainScreenStoreFactory(
             }
         }
 
-        private fun deleteExercise(workoutExerciseId: String) {
+        private fun deleteExercise(workoutExerciseId: String, getState: () -> MainScreenStore.State) {
             scope.launch {
-                // Get sessionId from workoutExercise
+                val currentState = getState()
+                val date = currentState.currentDate
+                
                 val workoutExercise = observeWorkoutExerciseByIdUseCase(workoutExerciseId).firstOrNull()
                 val sessionId = workoutExercise?.workoutSessionId
 
                 val result = deleteWorkoutExerciseUseCase(workoutExerciseId)
                 if (result.isSuccess) {
-                    // Unlink from template since we deleted an exercise
                     if (sessionId != null) {
                         unlinkSessionFromTemplateUseCase(sessionId)
                     }
-
-                    dispatch(Msg.ExerciseDeleted(workoutExerciseId))
+                    
+                    dispatch(Msg.ExerciseDataCleared)
+                    
+                    loadWorkoutSession(date)
                 }
             }
         }
@@ -274,8 +275,8 @@ internal class MainScreenStoreFactory(
     }
 
     private object ReducerImpl : Reducer<MainScreenStore.State, Msg> {
-        override fun MainScreenStore.State.reduce(message: Msg): MainScreenStore.State =
-            when (message) {
+        override fun MainScreenStore.State.reduce(message: Msg): MainScreenStore.State {
+            val newState = when (message) {
                 is Msg.DateChanged -> copy(currentDate = message.newDate)
                 is Msg.WorkoutSessionLoaded -> copy(workoutSession = message.session)
                 is Msg.ExerciseDataLoaded -> copy(
@@ -284,34 +285,14 @@ internal class MainScreenStoreFactory(
                 is Msg.LoadingChanged -> copy(isLoading = message.isLoading)
                 is Msg.InitializingChanged -> copy(isInitializing = message.isInitializing)
                 is Msg.TemplatesLoaded -> copy(applicableTemplates = message.templates)
-                is Msg.TemplateExerciseDataLoaded -> copy(
-                    templateExerciseData = templateExerciseData + (message.exerciseId to message.exercise)
-                )
-                is Msg.ExerciseDeleted -> {
-                    // Remove exercise from workout session
-                    val updatedSession = workoutSession?.let { session ->
-                        val updatedExercises = session.exercises.filterNot { it.id == message.workoutExerciseId }
-                        session.copy(exercises = updatedExercises)
-                    }
-
-                    // Remove exercise data
-                    val exerciseIdToRemove = exerciseData.entries
-                        .firstOrNull { it.value.workoutExercise.id == message.workoutExerciseId }?.key
-
-                    val updatedExerciseData = if (exerciseIdToRemove != null) {
-                        exerciseData - exerciseIdToRemove
-                    } else {
-                        exerciseData
-                    }
-
-                    copy(
-                        workoutSession = updatedSession,
-                        exerciseData = updatedExerciseData
-                    )
-                }
-                is Msg.WorkoutCompleted -> copy(workoutSession = message.session)
-                is Msg.ExerciseDataCleared -> copy(exerciseData = emptyMap())
-                is Msg.TemplateExerciseDataCleared -> copy(templateExerciseData = emptyMap())
-            }
+                  is Msg.TemplateExerciseDataLoaded -> copy(
+                      templateExerciseData = templateExerciseData + (message.exerciseId to message.exercise)
+                  )
+                  is Msg.WorkoutCompleted -> copy(workoutSession = message.session)
+                  is Msg.ExerciseDataCleared -> copy(exerciseData = emptyMap(), templateExerciseData = emptyMap())
+                  is Msg.TemplateExerciseDataCleared -> copy(templateExerciseData = emptyMap())
+              }
+              return newState
+        }
     }
 }

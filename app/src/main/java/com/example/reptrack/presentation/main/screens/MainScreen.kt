@@ -39,16 +39,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -88,12 +81,14 @@ internal fun MainScreen(
     onNavigateToLibrary: () -> Unit = {}
 ) {
     val state by store.states.collectAsState(MainScreenStore.State())
+    android.util.Log.d("SessionDB", "MainScreen render: state.workoutSession=${state.workoutSession?.id}, exercises=${state.workoutSession?.exercises?.size}, exerciseDataSize=${state.exerciseData.size}")
 
-    // Initialize data load on first entry to Main screen
-    LaunchedEffect(Unit) {
-        if (state.workoutSession == null) {
-            store.accept(MainScreenStore.Intent.SelectDate(state.currentDate))
-        }
+    // Сохраняем выбранную дату между навигациями
+    val selectedDate by rememberSaveable(state.currentDate) { mutableStateOf(state.currentDate) }
+
+    // Инициализация при входе на экран
+    LaunchedEffect(selectedDate) {
+        store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
     }
 
 
@@ -112,9 +107,6 @@ internal fun MainScreen(
             }
         }
     }
-
-    // Use store's currentDate directly - with single store, state is preserved across navigation
-    val selectedDate = state.currentDate
 
     Scaffold(
         floatingActionButton = {
@@ -375,7 +367,9 @@ private fun WorkoutDetails(
             }
 
             // Combined White Card with Exercises
+            android.util.Log.d("SessionDB", "WorkoutDetails: workout.exercises.size=${workout.exercises.size}, exerciseData.size=${exerciseData.size}")
             if (workout.exercises.isNotEmpty()) {
+                android.util.Log.d("SessionDB", "WorkoutDetails: rendering exercises")
                 item {
                     Box(
                         modifier = Modifier
@@ -502,42 +496,10 @@ private fun SwipeableExerciseCard(
     var offsetX by remember { mutableFloatStateOf(0f) }
     val deleteThreshold = -600f
 
-    val swipeProgress = (kotlin.math.abs(offsetX) / kotlin.math.abs(deleteThreshold)).coerceIn(0f, 1f)
-    val iconScale by animateFloatAsState(
-        targetValue = if (swipeProgress > 0.01f) 0.3f + (swipeProgress * 0.7f) else 0f,
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-        label = "icon_scale"
-    )
-    val iconAlpha by animateFloatAsState(
-        targetValue = swipeProgress,
-        animationSpec = tween(durationMillis = 100),
-        label = "icon_alpha"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        // Delete background
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alpha(iconAlpha)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEF5350)),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(end = 24.dp)
-                    .size(32.dp)
-                    .scale(iconScale)
-            )
-        }
-
         // Exercise card
         Box(
             modifier = Modifier
@@ -566,6 +528,7 @@ private fun SwipeableExerciseCard(
         ) {
             Box(
                 modifier = Modifier
+                    .padding(bottom = 12.dp)
                     .clickable { if (offsetX == 0f) onClick() }
             ) {
                 WorkoutExerciseCard(
@@ -790,3 +753,4 @@ private fun formatExerciseCount(count: Int): String {
 
     return "$count $suffix"
 }
+    

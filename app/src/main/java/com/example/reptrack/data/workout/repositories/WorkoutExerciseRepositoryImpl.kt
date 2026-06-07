@@ -123,12 +123,13 @@ class WorkoutExerciseRepositoryImpl(
     }
 
     override suspend fun delete(exerciseId: String): Result<Unit> = try {
-        android.util.Log.d("SessionDB", "WorkoutExerciseRepository.delete: exerciseId=$exerciseId")
+        android.util.Log.d("SessionDB", "WorkoutExerciseRepository.delete: START - exerciseId=$exerciseId")
         // CASCADE автоматически удалит все сеты этого упражнения
         workoutDao.deleteExerciseById(exerciseId)
-        android.util.Log.d("SessionDB", "WorkoutExerciseRepository.delete: SUCCESS")
+        android.util.Log.d("SessionDB", "WorkoutExerciseRepository.delete: SUCCESS - exerciseId=$exerciseId")
         Result.success(Unit)
     } catch (e: Exception) {
+        android.util.Log.e("SessionDB", "WorkoutExerciseRepository.delete: FAILED - exerciseId=$exerciseId, error=${e.message}", e)
         val appException = when (e) {
             is SQLException -> DataException.DatabaseError(
                 operation = "deleteExercise",

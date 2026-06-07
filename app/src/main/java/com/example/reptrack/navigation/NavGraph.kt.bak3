@@ -245,7 +245,8 @@ fun AppNavGraph(
                             type = NavType.StringType
                             defaultValue = ExerciseListMode.VIEW_MODE.value
                         }
-                    )
+                    ),
+                    launchSingleTop = true
                 ) { backStackEntry ->
                     val modeValue = backStackEntry.arguments?.getString(Screen.ExerciseList.MODE_ARG)
                     val mode = ExerciseListMode.fromValue(modeValue ?: ExerciseListMode.VIEW_MODE.value)
@@ -342,7 +343,7 @@ fun AppNavGraph(
                             }
                         },
                         onInitialize = {
-                            store.accept(ExerciseListStore.Intent.Initialize(mode))
+                            store.accept(ExerciseListStore(Intent.Initialize(mode))
                         }
                     )
                 }
@@ -357,7 +358,8 @@ fun AppNavGraph(
                             type = NavType.StringType
                             defaultValue = ExerciseDetailMode.DESIGN_MODE.value
                         }
-                    )
+                    ),
+                    launchSingleTop = true
                 ) { backStackEntry ->
                     val exerciseId = backStackEntry.arguments?.getString(Screen.ExerciseDetail.EXERCISE_ID_ARG) ?: ""
                     val modeValue = backStackEntry.arguments?.getString(Screen.ExerciseDetail.MODE_ARG)
@@ -389,7 +391,8 @@ fun AppNavGraph(
                         navArgument(Screen.WorkoutExerciseDetail.WORKOUT_EXERCISE_ID_ARG) {
                             type = NavType.StringType
                         }
-                    )
+                    ),
+                    launchSingleTop = true
                 ) { backStackEntry ->
                     val workoutExerciseId = backStackEntry.arguments?.getString(Screen.WorkoutExerciseDetail.WORKOUT_EXERCISE_ID_ARG) ?: ""
 
@@ -416,7 +419,8 @@ fun AppNavGraph(
                             type = NavType.StringType
                             defaultValue = TemplateListMode.VIEW_MODE.value
                         }
-                    )
+                    ),
+                    launchSingleTop = true
                 ) { backStackEntry ->
                     val modeValue = backStackEntry.arguments?.getString(Screen.TemplateList.MODE_ARG)
                     val mode = when (modeValue) {
@@ -435,9 +439,7 @@ fun AppNavGraph(
                     TemplateListScreen(
                         store = store,
                         onNavigateToDetail = { templateId ->
-                            navController.navigate(Screen.TemplateDetail.createRoute(templateId, TemplateDetailMode.EDIT_MODE)) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.TemplateDetail.createRoute(templateId, TemplateDetailMode.EDIT_MODE))
                         },
                         onSelectTemplateAndBack = { template ->
                             navController.popBackStack()
@@ -458,9 +460,7 @@ fun AppNavGraph(
                                 )
                                 val result = createTemplateUseCase(emptyTemplate)
                                 if (result.isSuccess) {
-                                    navController.navigate(Screen.TemplateDetail.createRoute(emptyTemplate.id, TemplateDetailMode.EDIT_MODE)) {
-                                        launchSingleTop = true
-                                    }
+                                    navController.navigate(Screen.TemplateDetail.createRoute(emptyTemplate.id, TemplateDetailMode.EDIT_MODE))
                                 } else {
                                     io.github.aakira.napier.Napier.e(
                                         "Failed to create empty template: ${result.exceptionOrNull()?.message}",
@@ -485,7 +485,8 @@ fun AppNavGraph(
                             type = NavType.StringType
                             defaultValue = TemplateDetailMode.VIEW_MODE.value
                         }
-                    )
+                    ),
+                    launchSingleTop = true
                 ) { backStackEntry ->
                     val templateIdArg = backStackEntry.arguments?.getString(Screen.TemplateDetail.TEMPLATE_ID_ARG)
                     val templateId = if (templateIdArg == "new") null else templateIdArg
@@ -537,9 +538,7 @@ fun AppNavGraph(
                                 navController.popBackStack()
                             },
                             onNavigateToExerciseSelection = {
-                                navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.SELECT_MODE)) {
-                                    launchSingleTop = true
-                                }
+                                navController.navigate(Screen.ExerciseList.createRoute(ExerciseListMode.SELECT_MODE))
                             }
                         )
                     }
@@ -597,7 +596,6 @@ fun AppNavGraph(
                             // 2. Navigate to Sign In screen
                             navController.navigate(Screen.SignIn.route) {
                                 popUpTo(Screen.Main.route) { inclusive = true }
-                                launchSingleTop = true
                             }
 
                             // 3. Unload modules after navigation has started
@@ -608,9 +606,7 @@ fun AppNavGraph(
                             }
                         },
                         onNavigateToStatistics = {
-                            navController.navigate(Screen.Statistics.route) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.Statistics.route)
                         }
                     )
                 }
@@ -689,19 +685,13 @@ fun AppNavGraph(
                         templateStore = templateStore,
                         mode = com.example.reptrack.presentation.library.screens.LibraryMode.VIEW,
                         onNavigateToExerciseDetail = { exerciseId ->
-                            navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId, ExerciseDetailMode.DESIGN_MODE)) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId, ExerciseDetailMode.DESIGN_MODE))
                         },
                         onNavigateToTemplateDetail = { templateId ->
-                            navController.navigate(Screen.TemplateDetail.createRoute(templateId, TemplateDetailMode.EDIT_MODE)) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.TemplateDetail.createRoute(templateId, TemplateDetailMode.EDIT_MODE))
                         },
                         onNavigateToAddExercise = {
-                            navController.navigate(Screen.ExerciseDetail.createRoute("new", ExerciseDetailMode.DESIGN_MODE)) {
-                                launchSingleTop = true
-                            }
+                            navController.navigate(Screen.ExerciseDetail.createRoute("new", ExerciseDetailMode.DESIGN_MODE))
                         },
                         onNavigateToAddTemplate = {
                             // Create empty template immediately, then navigate to edit it
@@ -719,9 +709,7 @@ fun AppNavGraph(
                                 )
                                 val result = createTemplateUseCase(emptyTemplate)
                                 if (result.isSuccess) {
-                                    navController.navigate(Screen.TemplateDetail.createRoute(emptyTemplate.id, TemplateDetailMode.EDIT_MODE)) {
-                                        launchSingleTop = true
-                                    }
+                                    navController.navigate(Screen.TemplateDetail.createRoute(emptyTemplate.id, TemplateDetailMode.EDIT_MODE))
                                 } else {
                                     io.github.aakira.napier.Napier.e(
                                         "Failed to create empty template: ${result.exceptionOrNull()?.message}",
@@ -742,7 +730,8 @@ fun AppNavGraph(
                             type = NavType.StringType
                             nullable = false
                         }
-                    )
+                    ),
+                    launchSingleTop = true
                 ) {
                     val dateArg = it.arguments?.getString(Screen.LibraryAddToWorkout.DATE_ARG)
                     val selectedDate = java.time.LocalDate.parse(dateArg)

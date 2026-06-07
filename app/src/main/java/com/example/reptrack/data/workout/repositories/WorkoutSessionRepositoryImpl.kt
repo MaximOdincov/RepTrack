@@ -25,7 +25,9 @@ class WorkoutSessionRepositoryImpl(
 
     override fun observeSessionById(sessionId: String): Flow<WorkoutSession?> {
         return workoutDao.observeSessionById(sessionId)
-            .map { it?.toDomain() }
+            .map { it?.toDomain()?.copy(
+                exercises = it.exercises.filter { it.exercise.deletedAt == null }.map { it.toDomain() }
+            ) }
             .catch { e -> throw e }
     }
 
@@ -49,7 +51,9 @@ class WorkoutSessionRepositoryImpl(
         val endOfDay = date.atTime(LocalTime.MAX)
 
         return workoutDao.observeSessionByDate(userId, startOfDay, endOfDay)
-            .map { it?.toDomain() }
+            .map { it?.toDomain()?.copy(
+                exercises = it.exercises.filter { it.exercise.deletedAt == null }.map { it.toDomain() }
+            ) }
             .catchAndHandle(
                 errorHandler = errorHandler,
                 context = ErrorContext(
@@ -80,6 +84,9 @@ class WorkoutSessionRepositoryImpl(
 
         if (session != null) {
             android.util.Log.d("SessionDB", "getSessionByDate FOUND: id=${session.session.id}, deletedAt=${session.session.deletedAt}, exercisesCount=${session.exercises.size}")
+            // Filter out deleted exercises
+            val validExercises = session.exercises.filter { it.exercise.deletedAt == null }
+            android.util.Log.d("SessionDB", "getSessionByDate: filtered exercises from ${session.exercises.size} to ${validExercises.size}")
         } else {
             android.util.Log.e("SessionDB", "!!! SESSION NOT FOUND for date=$date !!!")
 
@@ -91,7 +98,9 @@ class WorkoutSessionRepositoryImpl(
             }
         }
 
-        return session?.toDomain()
+        return session?.toDomain()?.copy(
+            exercises = session.exercises.filter { it.exercise.deletedAt == null }.map { it.toDomain() }
+        )
     }
 
     override suspend fun createSession(session: WorkoutSession): Result<Unit> {
@@ -126,6 +135,7 @@ class WorkoutSessionRepositoryImpl(
 
     override suspend fun updateSession(session: WorkoutSession): Result<Unit> {
         return try {
+            android.util.Log.d("SessionDB", "updateSession START: id=${session.id}, exercises=${session.exercises.size}")
             val sessionDb = session.toDb()
             val exercisesDb = session.exercises.map { exercise ->
                 exercise.toDb(session.id)
@@ -136,13 +146,17 @@ class WorkoutSessionRepositoryImpl(
                 }
             }
 
+            android.util.Log.d("SessionDB", "updateSession: inserting ${exercisesDb.size} exercises")
+
             workoutDao.insertFullWorkout(
                 session = sessionDb,
                 exercises = exercisesDb,
                 sets = setsDb
             )
+            android.util.Log.d("SessionDB", "updateSession SUCCESS: id=${session.id}")
             Result.success(Unit)
         } catch (e: Exception) {
+            android.util.Log.e("SessionDB", "updateSession FAILED: id=${session.id}, error=${e.message}", e)
             Result.failure(e)
         }
     }
@@ -163,9 +177,7 @@ class WorkoutSessionRepositoryImpl(
     override suspend fun updateSessionTimestamp(
         sessionId: String,
         updatedAt: LocalDateTime
-    ): Result<Unit> {
-        TODO("Not yet implemented")
-    }
+    ): Result<Unit> = Result.success(Unit)
 
     override suspend fun deleteSession(sessionId: String): Result<Unit> {
         android.util.Log.d("SessionDB", "deleteSession: sessionId=$sessionId")

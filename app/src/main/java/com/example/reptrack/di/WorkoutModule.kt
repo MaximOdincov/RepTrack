@@ -79,9 +79,9 @@ val workoutModule = module {
     factory { DeleteExerciseUseCase(get(), get()) }
 
     factory { ObserveWorkoutExerciseByIdUseCase(get(), get()) }
-    factory { CreateWorkoutExerciseUseCase(get(), get()) }
-    factory { UpdateWorkoutExerciseUseCase(get(), get()) }
-    factory { DeleteWorkoutExerciseUseCase(get(), get()) }
+     factory { CreateWorkoutExerciseUseCase(get(), get()) }
+     factory { UpdateWorkoutExerciseUseCase(get(), get()) }
+     factory { DeleteWorkoutExerciseUseCase(get(), get()) }
 
     factory { ObserveWorkoutExercisesBySessionUseCase(get(), get()) }
     factory { ObserveBestSetFromLastWorkoutUseCase(get(), get()) }
@@ -91,7 +91,7 @@ val workoutModule = module {
 
     // Session use cases
     factory { CreateWorkoutSessionUseCase(get()) }
-    factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get()) }
+    factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get(), get()) }
     factory { UpdateWorkoutSessionUseCase(get()) }
     factory { CompleteWorkoutSessionUseCase(get()) }
     factory { UnlinkSessionFromTemplateUseCase(get()) }
@@ -119,6 +119,7 @@ val workoutModule = module {
             deleteWorkoutExerciseUseCase = get(),
             completeWorkoutSessionUseCase = get(),
             unlinkSessionFromTemplateUseCase = get(),
+            updateWorkoutSessionUseCase = get(),
             authRepository = get()
         ).create()
     }
@@ -134,10 +135,11 @@ val workoutModule = module {
             shouldUpdateSessionFromTemplateUseCase = get(),
             deleteWorkoutExerciseUseCase = get(),
             completeWorkoutSessionUseCase = get(),
-            unlinkSessionFromTemplateUseCase = get(),
-            authRepository = get()
-        )
-    }
+             unlinkSessionFromTemplateUseCase = get(),
+             updateWorkoutSessionUseCase = get(),
+             authRepository = get()
+         )
+     }
 
     factory {
         WorkoutExerciseDetailStoreFactory(
