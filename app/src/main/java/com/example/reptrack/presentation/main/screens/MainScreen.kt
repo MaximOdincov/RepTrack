@@ -148,7 +148,7 @@ internal fun MainScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             when {
-                state.isLoading -> {
+                state.isLoading || state.isInitializing -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
