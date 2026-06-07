@@ -96,14 +96,29 @@ class FriendRepositoryImpl(
 
     override suspend fun deleteFriend(userId: String, friendId: String): Result<Unit> {
         return try {
+            android.util.Log.d("FriendRepositoryImpl", "deleteFriend called: userId=$userId, friendId=$friendId")
+            
             // Find the friend record
             val friends = friendDao.observeFriends(userId).first()
+            android.util.Log.d("FriendRepositoryImpl", "Friends count: ${friends.size}")
+            friends.forEach { friend ->
+                android.util.Log.d("FriendRepositoryImpl", "  Friend: id=${friend.id}, friendUserId=${friend.friendUserId}, username=${friend.username}")
+            }
             val friendDb = friends.firstOrNull { it.friendUserId == friendId }
 
             if (friendDb == null) {
+                android.util.Log.w("FriendRepositoryImpl", "Friend not found for deletion: $friendId")
                 return Result.failure(Exception("Friend not found"))
             }
 
+            android.util.Log.d("FriendRepositoryImpl", "Deleting friend from Firebase...")
+            firebaseFriendsDataSource.deleteFriend(userId, friendId)
+                .getOrElse { error ->
+                    android.util.Log.e("FriendRepositoryImpl", "Failed to delete friend from Firebase: ${error.message}", error)
+                    // Don't fail if Firebase deletion fails, still delete locally
+                }
+
+            android.util.Log.d("FriendRepositoryImpl", "Deleting friend from local database...")
             friendDao.deleteFriend(friendDb.id)
             Result.success(Unit)
         } catch (e: Exception) {

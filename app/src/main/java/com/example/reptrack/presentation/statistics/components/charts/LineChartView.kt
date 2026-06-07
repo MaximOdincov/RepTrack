@@ -114,16 +114,29 @@ fun LineChartView(
 
             val minX = allXValues.minOrNull() ?: 0f
             val maxX = allXValues.maxOrNull() ?: 1f
-            val minY = allYValues.minOrNull() ?: 15f
-            val maxY = allYValues.maxOrNull() ?: 30f
+            val minY = allYValues.minOrNull() ?: 50f
+            val maxY = allYValues.maxOrNull() ?: 50f
 
             // Ensure at least 1 day range for X axis to avoid flat charts
             val effectiveMaxX = if (maxX - minX < 1f) minX + 1f else maxX
-            // Add small padding to Y axis, but ensure minimum range of 15kg
+            
+            // Add small padding to Y axis
             val initialYRange = maxY - minY
             val effectiveYRange = if (initialYRange < 15f) 15f else initialYRange
-            val effectiveMaxY = maxY + effectiveYRange * 0.05f
-            val effectiveMinY = (minY - effectiveYRange * 0.05f).coerceAtLeast(10f)
+            
+            // For very low weights (< 30kg), ensure Y starts from 10kg and has at least 20kg range
+            val isLowWeight = maxY < 30f
+            val effectiveMaxY = if (isLowWeight) {
+                (maxY + 10f).coerceAtMost(50f)
+            } else {
+                maxY + effectiveYRange * 0.05f
+            }
+            
+            val effectiveMinY = if (isLowWeight) {
+                10f.coerceAtMost(minY)
+            } else {
+                (minY - effectiveYRange * 0.05f).coerceAtLeast(10f)
+            }
 
             val xPadding = 45.dp.toPx()
             val yPadding = 30.dp.toPx()

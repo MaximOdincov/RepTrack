@@ -218,10 +218,10 @@ private fun WeightTab(
                 weightData = state.weightData.map {
                     Pair(
                         it.date.toEpochDay().toFloat(),
-                        it.value - 2f
+                        it.value
                     )
                 }.also { mappedData ->
-                    android.util.Log.d("StatisticsScreen", "Mapped weight data (after -2kg):")
+                    android.util.Log.d("StatisticsScreen", "Mapped weight data:")
                     mappedData.forEach { (x, y) ->
                         android.util.Log.d("StatisticsScreen", "  x=$x (epoch day), y=$y")
                     }
@@ -230,7 +230,7 @@ private fun WeightTab(
                     entry.value.map { data ->
                         Pair(
                             data.date.toEpochDay().toFloat(),
-                            data.value - 2f
+                            data.value
                         )
                     }
                 },

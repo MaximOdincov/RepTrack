@@ -197,13 +197,14 @@ fun ExerciseChartSection(
                     }
                 }
 
+                Spacer(modifier = Modifier.width(16.dp))
+
                 OutlinedButton(
                     onClick = onChangeDateRange,
                     modifier = Modifier.wrapContentWidth().wrapContentHeight()
                 ) {
                     Text(dateRange)
                 }
-                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))

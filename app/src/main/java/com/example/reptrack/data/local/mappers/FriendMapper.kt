@@ -6,7 +6,7 @@ import com.example.reptrack.domain.friends.FriendStatus
 
 fun FriendDb.toDomain(): Friend =
     Friend(
-        id = id.toString(),
+        id = friendUserId,
         userId = userId,
         friendUserId = friendUserId,
         username = username,

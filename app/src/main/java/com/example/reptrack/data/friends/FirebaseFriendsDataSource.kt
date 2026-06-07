@@ -127,4 +127,25 @@ class FirebaseFriendsDataSource(
             Result.failure(e)
         }
     }
+
+    suspend fun deleteFriend(userId: String, friendId: String): Result<Unit> {
+        android.util.Log.d("FirebaseFriendsDataSource", "deleteFriend called: userId=$userId, friendId=$friendId")
+        return try {
+            android.util.Log.d("FirebaseFriendsDataSource", "Deleting friend relationship from Firestore...")
+            firestore
+                .collection("users")
+                .document(userId)
+                .collection("friends")
+                .document(friendId)
+                .delete()
+                .await()
+
+            android.util.Log.d("FirebaseFriendsDataSource", "Friend relationship deleted successfully")
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseFriendsDataSource", "Error deleting friend: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
 }

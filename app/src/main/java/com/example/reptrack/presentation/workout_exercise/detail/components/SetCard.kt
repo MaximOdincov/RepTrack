@@ -240,7 +240,12 @@ private fun CompactNumberInput(
     LaunchedEffect(displayValue) {
         delay(500)
         if (displayValue != (value ?: 0f)) {
-            onValueChanged(displayValue)
+            val finalValue = if (isWeight) {
+                displayValue.coerceAtMost(1000f)
+            } else {
+                displayValue
+            }
+            onValueChanged(finalValue)
         }
     }
 
@@ -328,10 +333,11 @@ private fun IncrementButton(
                 is PressInteraction.Release -> {
                     val pressDuration = System.currentTimeMillis() - pressStartTime
                     if (!isLongPressing && pressDuration < 300) {
+                        val step = if (isWeight) 0.5f else 1f
                         val newValue = if (isIncrement) {
-                            currentValue + singleStep
+                            (currentValue + step).coerceAtMost(if (isWeight) 1000f else Int.MAX_VALUE.toFloat())
                         } else {
-                            maxOf(0f, currentValue - singleStep)
+                            maxOf(0f, currentValue - step)
                         }
                         onValueChange(newValue)
                     }
@@ -364,7 +370,9 @@ private fun IncrementButton(
                     }
 
                     val newValue = if (isIncrement) {
-                        currentValue + step
+                        val step = if (isWeight) 2.5f else 2f
+                        val rawValue = currentValue + step
+                        if (isWeight) rawValue.coerceAtMost(1000f) else rawValue
                     } else {
                         maxOf(0f, currentValue - step)
                     }
