@@ -67,6 +67,11 @@ class FakeWorkoutSessionRepository(
         return Result.success(Unit)
     }
 
+    override suspend fun updateSessionTimestamp(sessionId: String, updatedAt: java.time.LocalDateTime): Result<Unit> {
+        // For mock, just return success
+        return Result.success(Unit)
+    }
+
     override suspend fun deleteSession(sessionId: String): Result<Unit> {
         // For mock, just return success
         return Result.success(Unit)

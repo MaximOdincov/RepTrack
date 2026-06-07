@@ -58,7 +58,9 @@ class CalendarUseCase(
             sessionRepository.observeSessionByDate(date),
             templateRepository.observeTemplatesByDayOfWeek(dayOfWeekValue, isSecondWeek)
         ) { session, templates ->
-            createCalendarDay(date, session, templates)
+            val calendarDay = createCalendarDay(date, session, templates)
+            android.util.Log.d("CalendarUseCase", "createCalendarDay: date=$date, session=${session != null}, templates=${templates.size}, hasWorkout=${calendarDay.hasWorkout}, status=${calendarDay.status}")
+            calendarDay
         }
     }
 

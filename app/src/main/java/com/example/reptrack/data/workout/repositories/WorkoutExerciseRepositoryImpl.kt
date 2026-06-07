@@ -54,6 +54,10 @@ class WorkoutExerciseRepositoryImpl(
     override suspend fun create(exercise: WorkoutExercise, sessionId: String): Result<Unit> = try {
         workoutDao.insertExercises(listOf(exercise.toDb(sessionId)))
         workoutDao.insertSets(exercise.sets.map { it.toDb(exercise.id) })
+        
+        // Обновляем сессию, чтобы вызвать пересборку Flow
+        workoutDao.updateSessionTimestamp(sessionId)
+        
         Result.success(Unit)
     } catch (e: Exception) {
         val appException = when (e) {

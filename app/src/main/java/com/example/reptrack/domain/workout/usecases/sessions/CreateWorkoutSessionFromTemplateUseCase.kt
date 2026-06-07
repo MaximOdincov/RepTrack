@@ -27,6 +27,9 @@ class CreateWorkoutSessionFromTemplateUseCase(
         unlinkFromTemplate: Boolean = false
     ): Result<WorkoutSession> {
         return try {
+            android.util.Log.d("SessionDB", "CreateWorkoutSessionFromTemplateUseCase: templateId=$templateId, date=$date, userId=$userId")
+            android.util.Log.d("SessionDB", "CreateWorkoutSessionFromTemplateUseCase: START: templateId=$templateId, date=$date, userId=$userId")
+
             // Check if session already exists for this date (synchronous check to avoid Flow caching issues)
             val existingSession = sessionRepository.getSessionByDate(date)
 
@@ -35,7 +38,7 @@ class CreateWorkoutSessionFromTemplateUseCase(
                 return Result.success(existingSession)
             }
 
-            android.util.Log.w("SessionDB", "Session NOT FOUND for date=$date, creating new session")
+            android.util.Log.w("SessionDB", "Session NOT FOUND for date=$date, creating new session from template=$templateId")
 
             val template = templateRepository.observeTemplateById(templateId).firstOrNull()
                 ?: return Result.failure(NoSuchElementException("Template not found: $templateId"))

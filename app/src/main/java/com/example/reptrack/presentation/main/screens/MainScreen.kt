@@ -89,6 +89,15 @@ internal fun MainScreen(
 ) {
     val state by store.states.collectAsState(MainScreenStore.State())
 
+    // Initialize data load on first entry to Main screen
+    LaunchedEffect(Unit) {
+        if (state.workoutSession == null) {
+            store.accept(MainScreenStore.Intent.SelectDate(state.currentDate))
+        }
+    }
+
+
+
     // Handle navigation labels
     LaunchedEffect(store) {
         store.labels.collect { label ->

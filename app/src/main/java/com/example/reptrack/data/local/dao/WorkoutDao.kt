@@ -83,6 +83,9 @@ interface WorkoutDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: WorkoutSessionDb)
 
+    @Query("UPDATE workout_sessions SET updatedAt = :updatedAt WHERE id = :sessionId")
+    suspend fun updateSessionTimestamp(sessionId: String, updatedAt: java.time.LocalDateTime = java.time.LocalDateTime.now())
+
     @Query("UPDATE workout_sessions SET status = :status, updatedAt = :updatedAt WHERE id = :sessionId")
     suspend fun updateSessionStatus(sessionId: String, status: String, updatedAt: java.time.LocalDateTime)
 
@@ -114,6 +117,7 @@ interface WorkoutDao {
         insertSession(session)
         insertExercises(exercises)
         insertSets(sets)
+        updateSessionTimestamp(session.id)
         android.util.Log.d("SessionDB", "insertFullWorkout DONE: inserted ${exercises.size} exercises, ${sets.size} sets")
     }
 

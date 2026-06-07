@@ -160,6 +160,13 @@ class WorkoutSessionRepositoryImpl(
         }
     }
 
+    override suspend fun updateSessionTimestamp(
+        sessionId: String,
+        updatedAt: LocalDateTime
+    ): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun deleteSession(sessionId: String): Result<Unit> {
         android.util.Log.d("SessionDB", "deleteSession: sessionId=$sessionId")
         return try {

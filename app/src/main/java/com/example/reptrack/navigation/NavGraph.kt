@@ -189,23 +189,17 @@ fun AppNavGraph(
                     val getCurrentUserProfileUseCase: com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase = getKoin().get()
                     val firebaseUserDataSource: com.example.reptrack.data.auth.FirebaseUserDataSource = getKoin().get()
 
+                    val state by store.states.collectAsState(com.example.reptrack.presentation.main.stores.MainScreenStore.State())
+
                     // Add user to database on first entry to Main screen
                     LaunchedEffect(Unit) {
                         val authUser = getCurrentUserUseCase()
                         authUser?.let { auth ->
-                            // Add user to local database
                             addUserUseCase(auth.toDomain())
-
-                            // Initialize database with default exercises and templates
                             initializeDatabaseUseCase()
-
-                            // Wait a bit for database to be ready
                             kotlinx.coroutines.delay(100)
-
-                            // Get the user from database to get username, avatarUrl, and passkey
                             getCurrentUserProfileUseCase().collect { user ->
                                 user?.let {
-                                    // Also save user to Firebase with passkey
                                     firebaseUserDataSource.saveUser(
                                         userId = it.id,
                                         username = it.username,
@@ -213,14 +207,11 @@ fun AppNavGraph(
                                         avatarUrl = it.avatarUrl,
                                         passkey = it.passkey
                                     )
-                                    // Only need to save once
                                     return@collect
                                 }
                             }
                         }
                     }
-
-                    val state by store.states.collectAsState(com.example.reptrack.presentation.main.stores.MainScreenStore.State())
 
                     MainScreen(
                         store = store,
@@ -233,7 +224,6 @@ fun AppNavGraph(
                         }
                     )
                 }
-
                 composable(
                     route = Screen.ExerciseList.route,
                     arguments = listOf(

@@ -38,6 +38,7 @@ internal interface MainScreenStore : Store<MainScreenStore.Intent, MainScreenSto
     data class State constructor(
         val currentDate: java.time.LocalDate = java.time.LocalDate.now(),
         val isLoading: Boolean = false,
+        val isInitializing: Boolean = true,
         val workoutSession: com.example.reptrack.domain.workout.entities.WorkoutSession? = null,
         val exerciseData: Map<String, ExerciseData> = emptyMap(),
         val applicableTemplates: List<com.example.reptrack.domain.workout.entities.WorkoutTemplate> = emptyList(),
@@ -84,6 +85,7 @@ internal class MainScreenStoreFactory(
         data class ExerciseDataLoaded(val exerciseId: String, val data: MainScreenStore.ExerciseData) : Msg
         data class LoadingChanged(val isLoading: Boolean) : Msg
         data class TemplatesLoaded(val templates: List<WorkoutTemplate>) : Msg
+        data class InitializingChanged(val isInitializing: Boolean) : Msg
         data class TemplateExerciseDataLoaded(val exerciseId: String, val exercise: Exercise) : Msg
         data class ExerciseDeleted(val workoutExerciseId: String) : Msg
         data object ExerciseDataCleared : Msg
@@ -97,23 +99,24 @@ internal class MainScreenStoreFactory(
         private val activeExerciseDataJobs = mutableMapOf<String, Job>()
 
         override fun executeIntent(intent: MainScreenStore.Intent, getState: () -> MainScreenStore.State) {
+            android.util.Log.d("MainScreenStore", "executeIntent: $intent")
             when (intent) {
                 is MainScreenStore.Intent.SelectDate -> {
-                    // Only reload if date actually changed
+                    android.util.Log.d("MainScreenStore", "SelectDate: intent=${intent.date}, current=${getState().currentDate}")
                     val currentState = getState()
-                    if (currentState.currentDate == intent.date) {
-                        // Date hasn't changed, no need to reload
-                        return
-                    }
-
-                    // Cancel previous loading operations
+                    
+                    // Always cancel previous loading operations and reload
                     currentLoadJob?.cancel()
                     activeExerciseDataJobs.values.forEach { it.cancel() }
                     activeExerciseDataJobs.clear()
-
-                    dispatch(Msg.DateChanged(intent.date))
-                    dispatch(Msg.ExerciseDataCleared)
-                    dispatch(Msg.TemplateExerciseDataCleared)
+                    
+                    // Only update date if it changed
+                    if (currentState.currentDate != intent.date) {
+                        dispatch(Msg.DateChanged(intent.date))
+                        dispatch(Msg.ExerciseDataCleared)
+                        dispatch(Msg.TemplateExerciseDataCleared)
+                    }
+                    
                     loadWorkoutSession(intent.date)
                 }
                 is MainScreenStore.Intent.ExerciseClicked -> {
@@ -133,58 +136,60 @@ internal class MainScreenStoreFactory(
 
         private fun loadWorkoutSession(date: LocalDate) {
             dispatch(Msg.LoadingChanged(true))
+                android.util.Log.d("MainScreenStore", "loadWorkoutSession: date=$date")
             currentLoadJob = scope.launch {
                 try {
-                    // Use collect instead of firstOrNull for continuous updates
-                    calendarUseCase.observeWeekCalendar(date)
+                    val weekCalendar = calendarUseCase.observeWeekCalendar(date)
                         .flowOn(Dispatchers.IO)
-                        .collect { weekCalendar ->
-                            val calendarDay = weekCalendar?.days?.find { it.date == date }
-                            val templates = calendarDay?.applicableTemplates ?: emptyList()
+                        .firstOrNull()
+                    
+                    if (weekCalendar != null) {
+                        val calendarDay = weekCalendar.days.find { it.date == date }
+                        val templates = calendarDay?.applicableTemplates ?: emptyList()
 
-                            var session: WorkoutSession? = null
+                        var session: WorkoutSession? = null
 
-                            // If we have templates, always call UseCase - it will check if session exists
-                            if (templates.isNotEmpty()) {
-                                val template = templates.first()
-                                val userId = authRepository.getCurrentUser()?.id
+                        // If we have templates, always call UseCase - it will check if session exists
+                        if (templates.isNotEmpty()) {
+                            val template = templates.first()
+                            val userId = authRepository.getCurrentUser()?.id
 
-                                if (userId != null) {
-                                    val result = createSessionFromTemplateUseCase(
-                                        templateId = template.id,
-                                        userId = userId,
-                                        date = date
-                                    )
+                            if (userId != null) {
+                                val result = createSessionFromTemplateUseCase(
+                                    templateId = template.id,
+                                    userId = userId,
+                                    date = date
+                                )
 
-                                    if (result.isSuccess) {
-                                        session = result.getOrNull()
-                                    } else {
-                                        android.util.Log.e("SessionDB", "Failed to create session: ${result.exceptionOrNull()?.message}")
-                                    }
+                                if (result.isSuccess) {
+                                    session = result.getOrNull()
+                                } else {
+                                    android.util.Log.e("SessionDB", "Failed to create session: ${result.exceptionOrNull()?.message}")
                                 }
-                            } else if (calendarDay?.workoutSession != null) {
-                                // No templates but have existing session (e.g., manually created)
-                                session = calendarDay.workoutSession
                             }
+                        } else if (calendarDay?.workoutSession != null) {
+                            // No templates but have existing session (e.g., manually created)
+                            session = calendarDay.workoutSession
+                        }
 
-                            dispatch(Msg.LoadingChanged(false))
-                            dispatch(Msg.WorkoutSessionLoaded(session))
-                            dispatch(Msg.TemplatesLoaded(templates))
+                        dispatch(Msg.LoadingChanged(false))
+                        dispatch(Msg.WorkoutSessionLoaded(session))
+                        dispatch(Msg.TemplatesLoaded(templates))
 
-                            // Load data for all exercises in the session
-                            session?.exercises?.forEach { workoutExercise ->
-                                loadExerciseData(workoutExercise)
-                            }
+                        // Load data for all exercises in the session
+                        session?.exercises?.forEach { workoutExercise ->
+                            loadExerciseData(workoutExercise)
+                        }
 
-                            // If no session but have templates, load template exercises
-                            if (session == null && templates.isNotEmpty()) {
-                                templates.forEach { template ->
-                                    template.exerciseIds.forEach { exerciseId ->
-                                        loadTemplateExerciseData(exerciseId)
-                                    }
+                        // If no session but have templates, load template exercises
+                        if (session == null && templates.isNotEmpty()) {
+                            templates.forEach { template ->
+                                template.exerciseIds.forEach { exerciseId ->
+                                    loadTemplateExerciseData(exerciseId)
                                 }
                             }
                         }
+                    }
                 } catch (e: Exception) {
                     dispatch(Msg.LoadingChanged(false))
                 }
@@ -278,6 +283,7 @@ internal class MainScreenStoreFactory(
                     exerciseData = exerciseData + (message.exerciseId to message.data)
                 )
                 is Msg.LoadingChanged -> copy(isLoading = message.isLoading)
+                is Msg.InitializingChanged -> copy(isInitializing = message.isInitializing)
                 is Msg.TemplatesLoaded -> copy(applicableTemplates = message.templates)
                 is Msg.TemplateExerciseDataLoaded -> copy(
                     templateExerciseData = templateExerciseData + (message.exerciseId to message.exercise)
