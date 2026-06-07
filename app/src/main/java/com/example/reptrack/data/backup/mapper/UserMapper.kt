@@ -18,7 +18,7 @@ object UserMapper {
                 avatarUrl = doc.getString("avatarUrl"),
                 currentWeight = doc.getDouble("currentWeight")?.toFloat(),
                 height = doc.getDouble("height")?.toFloat(),
-                friendCode = doc.getString("friendCode"),
+                friendCode = doc.getString("passkey"),
                 isDarkTheme = doc.getBoolean("isDarkTheme"),
                 updatedAt = TimestampMapper.fromTimestamp(doc.getLong("updatedAt")),
                 deletedAt = doc.getLong("deletedAt")?.let { TimestampMapper.fromTimestamp(it) }
@@ -37,7 +37,7 @@ object UserMapper {
             "avatarUrl" to user.avatarUrl,
             "currentWeight" to user.currentWeight?.toDouble(),
             "height" to user.height?.toDouble(),
-            "friendCode" to user.friendCode,
+            "passkey" to user.friendCode,
             "isDarkTheme" to user.isDarkTheme,
             "updatedAt" to TimestampMapper.toTimestamp(user.updatedAt),
             "deletedAt" to user.deletedAt?.let { TimestampMapper.toTimestamp(it) }

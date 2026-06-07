@@ -92,7 +92,6 @@
     <string name="exercise_overhead_extension">Overhead Extension</string>
     <string name="exercise_close_grip_bench_press">Close Grip Bench Press</string>
     <string name="exercise_tricep_dips">Tricep Dips</string>
-    <string name="exercise_diamond_push_ups_triceps">Diamond Push Ups</string>
     <string name="exercise_kickbacks">Kickbacks</string>
     <string name="exercise_overhead_dumbbell_extension">Overhead Dumbbell Extension</string>
     <string name="exercise_cable_overhead_extension">Cable Overhead Extension</string>
@@ -118,7 +117,6 @@
     <string name="exercise_front_raise">Front Raise</string>
     <string name="exercise_dumbbell_front_raise">Dumbbell Front Raise</string>
     <string name="exercise_cable_front_raise">Cable Front Raise</string>
-    <string name="exercise_reverse_flyes_shoulders">Reverse Flyes</string>
     <string name="exercise_rear_delt_fly">Rear Delt Fly</string>
     <string name="exercise_shoulder_press_machine">Shoulder Press Machine</string>
     <string name="exercise_arnold_press">Arnold Press</string>

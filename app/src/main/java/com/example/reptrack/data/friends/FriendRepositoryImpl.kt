@@ -28,7 +28,7 @@ class FriendRepositoryImpl(
         friendEmail: String,
         passkey: String
     ): Result<Friend> {
-        android.util.Log.d("FriendRepositoryImpl", "addFriend called: userId=$userId, friendEmail=$friendEmail")
+        android.util.Log.d("FriendRepositoryImpl", "addFriend called: userId=$userId, friendEmail=$friendEmail, passkey=$passkey")
         return try {
             // First, find the user by email in Firebase
             android.util.Log.d("FriendRepositoryImpl", "Finding user by email in Firebase...")
@@ -38,7 +38,7 @@ class FriendRepositoryImpl(
                     return Result.failure(error)
                 }
 
-            android.util.Log.d("FriendRepositoryImpl", "User found: ${friendUser.id}, username=${friendUser.username}")
+            android.util.Log.d("FriendRepositoryImpl", "User found: id=${friendUser.id}, username=${friendUser.username}, email=${friendUser.email}, passkey=${friendUser.passkey}")
 
             // Verify the passkey
             android.util.Log.d("FriendRepositoryImpl", "Verifying passkey...")
@@ -48,10 +48,10 @@ class FriendRepositoryImpl(
                     return Result.failure(error)
                 }
 
-            android.util.Log.d("FriendRepositoryImpl", "Passkey valid: $isPasskeyValid")
+             android.util.Log.d("FriendRepositoryImpl", "Passkey valid: $isPasskeyValid")
 
             if (!isPasskeyValid) {
-                android.util.Log.e("FriendRepositoryImpl", "Invalid passkey")
+                android.util.Log.e("FriendRepositoryImpl", "Invalid passkey. User ID: ${friendUser.id}, Email: ${friendUser.email}, Passkey provided: $passkey")
                 return Result.failure(Exception("Invalid passkey"))
             }
 

@@ -25,22 +25,28 @@ class FirebaseFriendsDataSource(
                 .get()
                 .await()
 
-            android.util.Log.d("FirebaseFriendsDataSource", "Query returned ${querySnapshot.size()} documents")
+             android.util.Log.d("FirebaseFriendsDataSource", "Query returned ${querySnapshot.size()} documents")
 
             if (querySnapshot.isEmpty) {
-                android.util.Log.e("FirebaseFriendsDataSource", "User not found for email: $email")
-                return Result.failure(Exception("User not found"))
+                android.util.Log.e("FirebaseFriendsDataSource", "User not found for email: $email. Available collections: check if 'users' collection exists")
+                return Result.failure(Exception("User not found. Check if the user exists in Firestore"))
             }
 
             val document = querySnapshot.documents[0]
-            android.util.Log.d("FirebaseFriendsDataSource", "Document found: ${document.id}")
+             android.util.Log.d("FirebaseFriendsDataSource", "Document found: ${document.id}")
+             android.util.Log.d("FirebaseFriendsDataSource", "Document data: ${document.data}")
+            if (document.data != null) {
+                document.data?.forEach { (key, value) ->
+                    android.util.Log.d("FirebaseFriendsDataSource", "  Field: $key = $value")
+                }
+            }
 
             val userInfo = FirebaseUserInfo(
                 id = document.id,
                 username = document.getString("username"),
                 email = document.getString("email"),
                 avatarUrl = document.getString("avatarUrl"),
-                 passkey = document.getString("friendCode")
+                 passkey = document.getString("passkey")
              )
 
              android.util.Log.d("FirebaseFriendsDataSource", "User info: username=${userInfo.username}, hasPasskey=${userInfo.passkey != null}")
@@ -66,9 +72,10 @@ class FirebaseFriendsDataSource(
                 return Result.failure(Exception("User not found"))
             }
 
-             val storedPasskey = document.getString("friendCode")
+             val storedPasskey = document.getString("passkey")
              android.util.Log.d("FirebaseFriendsDataSource", "Stored passkey: $storedPasskey, provided: $passkey")
-            val isValid = storedPasskey == passkey
+            val isValid = storedPasskey != null && storedPasskey == passkey
+             android.util.Log.d("FirebaseFriendsDataSource", "Passkey valid: $isValid")
 
             Result.success(isValid)
         } catch (e: Exception) {

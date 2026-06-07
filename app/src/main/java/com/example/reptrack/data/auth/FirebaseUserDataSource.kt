@@ -14,6 +14,7 @@ class FirebaseUserDataSource(
         passkey: String?
     ): Result<Unit> {
         return try {
+            android.util.Log.d("FirebaseUserDataSource", "Saving user: userId=$userId, username=$username, email=$email, hasAvatar=${avatarUrl != null}, hasPasskey=${passkey != null}")
             firestore
                 .collection("users")
                 .document(userId)
@@ -30,6 +31,7 @@ class FirebaseUserDataSource(
                 )
                 .await()
 
+            android.util.Log.d("FirebaseUserDataSource", "User saved successfully")
             Result.success(Unit)
         } catch (e: Exception) {
             android.util.Log.e("FirebaseUserDataSource", "Error saving user: ${e.message}", e)
