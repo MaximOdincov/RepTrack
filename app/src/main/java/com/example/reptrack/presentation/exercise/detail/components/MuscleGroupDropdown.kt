@@ -36,6 +36,17 @@ import androidx.compose.ui.unit.sp
 import com.example.reptrack.R
 import com.example.reptrack.domain.workout.entities.MuscleGroup
 
+private fun getMuscleGroupName(muscleGroup: MuscleGroup): String {
+    return when (muscleGroup) {
+        MuscleGroup.CHEST -> "Грудь"
+        MuscleGroup.BACK -> "Спина"
+        MuscleGroup.LEGS -> "Ноги"
+        MuscleGroup.ARMS -> "Руки"
+        MuscleGroup.ABS -> "Пресс"
+        MuscleGroup.CARDIO -> "Кардио"
+    }
+}
+
 /**
  * Dropdown menu for selecting muscle groups with icons
  *
@@ -83,9 +94,9 @@ fun MuscleGroupDropdown(
                 .fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = selectedGroup.name.lowercase().replaceFirstChar { it.uppercase() },
+                value = getMuscleGroupName(selectedGroup),
                 onValueChange = { },
-                label = { Text("Muscle Group") },
+                label = { Text("Группа мышц") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onGloballyPositioned { coordinates ->
@@ -98,7 +109,7 @@ fun MuscleGroupDropdown(
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Dropdown menu"
+                        contentDescription = "Меню выбора"
                     )
                 },
                 leadingIcon = {
@@ -152,7 +163,7 @@ fun MuscleGroupDropdown(
                             tint = getColorForGroup(group)
                         )
                         Text(
-                            text = group.name.lowercase().replaceFirstChar { it.uppercase() },
+                            text = getMuscleGroupName(group),
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Normal

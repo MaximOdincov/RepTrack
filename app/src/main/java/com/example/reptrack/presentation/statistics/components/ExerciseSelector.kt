@@ -30,7 +30,7 @@ fun ExerciseSelector(
     Card(modifier = modifier) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Select Exercise",
+                text = "Выберите упражнение",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
@@ -40,7 +40,7 @@ fun ExerciseSelector(
             TextField(
                 value = searchText,
                 onValueChange = { searchText = it },
-                label = { Text("Search exercises") },
+                label = { Text("Поиск упражнений") },
                 modifier = Modifier.fillMaxWidth()
             )
 

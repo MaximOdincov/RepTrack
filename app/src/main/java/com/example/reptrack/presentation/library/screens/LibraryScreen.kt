@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -183,12 +184,12 @@ private fun ExerciseTabContent(
                 onClick = {
                     exerciseStore.accept(ExerciseListStore.Intent.AddExerciseClicked)
                 },
-                containerColor = LightAccentOrange
-            ) {
-                Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.Add,
-                    contentDescription = "Add Exercise",
-                    tint = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Default.Add,
+                        contentDescription = "Добавить упражнение",
+                        tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
@@ -313,12 +314,12 @@ private fun TemplateTabContent(
                     onClick = {
                         templateStore.accept(TemplateListStore.Intent.AddTemplateClicked)
                     },
-                    containerColor = LightAccentOrange
+                    containerColor = MaterialTheme.colorScheme.primary
                 ) {
-                   Icon(
+                    Icon(
                         imageVector = androidx.compose.material.icons.Icons.Default.Add,
-                        contentDescription = "Add Template",
-                        tint = Color.White
+                        contentDescription = "Добавить шаблон",
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             },
@@ -349,7 +350,7 @@ private fun TemplateTabContent(
                     leadingIcon = {
                         androidx.compose.material3.Icon(
                             imageVector = androidx.compose.material.icons.Icons.Default.Search,
-                            contentDescription = "Search",
+                            contentDescription = "Поиск",
                             tint = Color.Gray
                         )
                     },
@@ -423,7 +424,7 @@ private fun TemplateTabContent(
                         templateToDelete = null
                     }
                 ) {
-                    Text("Удалить", color = Color(0xFFEF5350))
+                    Text("Удалить", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {

@@ -67,17 +67,19 @@ class TimerNotificationManager(private val context: Context) {
 
         // Build notification
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle(if (isPaused) "⏸ Timer Paused" else "⏰ Timer Running")
-            .setContentText("Time remaining: $timeText")
+            .setContentTitle(if (isPaused) "⏸ Таймер на паузе" else "⏰ Таймер запущен")
+            .setContentText("Осталось: $timeText")
             .setSmallIcon(R.drawable.ic_timer)
             .setContentIntent(pendingIntent)
             .setOngoing(!isPaused)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setSound(null)
+            .setDefaults(0)
 
         // Add action buttons
         val actionIcon = if (isPaused) R.drawable.ic_play else R.drawable.ic_pause
-        val actionText = if (isPaused) "Resume" else "Pause"
+        val actionText = if (isPaused) "Продолжить" else "Пауза"
         val action = if (isPaused) ACTION_RESUME else ACTION_PAUSE
 
         builder.addAction(
@@ -88,7 +90,7 @@ class TimerNotificationManager(private val context: Context) {
 
         builder.addAction(
             R.drawable.ic_stop,
-            "Stop",
+            "Стоп",
             createPendingIntent(ACTION_STOP)
         )
 

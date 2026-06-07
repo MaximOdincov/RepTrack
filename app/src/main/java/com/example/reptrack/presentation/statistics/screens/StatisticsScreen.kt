@@ -127,17 +127,17 @@ fun StatisticsScreen(
                 Tab(
                     selected = pagerState.currentPage == 0,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
-                    text = { Text("Weight") }
+                    text = { Text("Вес") }
                 )
                 Tab(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                    text = { Text("Exercises") }
+                    text = { Text("Упражнения") }
                 )
                 Tab(
                     selected = pagerState.currentPage == 2,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(2) } },
-                    text = { Text("Muscles") }
+                    text = { Text("Мышцы") }
                 )
             }
 
@@ -513,16 +513,16 @@ private fun DateRangeDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Date Range") },
+        title = { Text("Выберите период") },
         text = {
             Column {
                 val ranges = remember {
                     listOf(
-                        DateRange.last7Days() to "Last 7 days",
-                        DateRange.last30Days() to "Last 30 days",
-                        DateRange.last3Months() to "Last 3 months",
-                        DateRange.lastYear() to "Last year",
-                        DateRange.allTime() to "All time"
+                        DateRange.last7Days() to "Последние 7 дней",
+                        DateRange.last30Days() to "Последние 30 дней",
+                        DateRange.last3Months() to "Последние 3 месяца",
+                        DateRange.lastYear() to "Последний год",
+                        DateRange.allTime() to "Все время"
                     )
                 }
 
@@ -543,7 +543,7 @@ private fun DateRangeDialog(
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
         }
     )
@@ -552,11 +552,11 @@ private fun DateRangeDialog(
 private fun getDateRangeText(range: DateRange): String {
     val now = java.time.LocalDateTime.now()
 
-    return when {
-        range.from.isAfter(now.minusDays(8)) -> "Last 7 days"
-        range.from.isAfter(now.minusDays(31)) -> "Last 30 days"
-        range.from.isAfter(now.minusMonths(4)) -> "Last 3 months"
-        range.from.isAfter(now.minusYears(2)) -> "Last year"
-        else -> "All time"
-    }
+        return when {
+            range.from.isAfter(now.minusDays(8)) -> "Последние 7 дней"
+            range.from.isAfter(now.minusDays(31)) -> "Последние 30 дней"
+            range.from.isAfter(now.minusMonths(4)) -> "Последние 3 месяца"
+            range.from.isAfter(now.minusYears(2)) -> "Последний год"
+            else -> "Все время"
+        }
 }

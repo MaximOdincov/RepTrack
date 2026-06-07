@@ -120,11 +120,11 @@ internal fun MainScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToLibrary,
-                containerColor = Color(0xFFFF9800)
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add to Workout",
+                    contentDescription = "Добавить в тренировку",
                     tint = Color.White
                 )
             }
@@ -282,21 +282,9 @@ private fun TemplateStatusCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    "$exerciseCount ${if (exerciseCount == 1) "exercise" else "exercises"}",
+                    formatExerciseCount(exerciseCount),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            // Muscle Groups
-            if (muscleGroups.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    "Muscle Groups",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -334,7 +322,7 @@ private fun NoWorkoutPlaceholder() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            "No workout planned for this day",
+            "Нет тренировки на этот день",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
@@ -343,7 +331,7 @@ private fun NoWorkoutPlaceholder() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            "Add a template or start a new workout",
+            "Добавьте шаблон или начните новую тренировку",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -406,7 +394,7 @@ private fun WorkoutDetails(
                         Column {
                             // Exercises Header
                             Text(
-                                "Exercises",
+                                "Упражнения",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -636,15 +624,15 @@ private fun SessionStatusCard(
     muscleGroups: List<MuscleGroup>
 ) {
     val statusColor = when (status) {
-        WorkoutStatus.PLANNED -> Color(0xFF9E9E9E)
-        WorkoutStatus.IN_PROGRESS -> Color(0xFFFF9800)
-        WorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
+        WorkoutStatus.PLANNED -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        WorkoutStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
+        WorkoutStatus.COMPLETED -> MaterialTheme.colorScheme.tertiary
     }
 
     val statusText = when (status) {
-        WorkoutStatus.PLANNED -> "Planned"
-        WorkoutStatus.IN_PROGRESS -> "In Progress"
-        WorkoutStatus.COMPLETED -> "Completed"
+        WorkoutStatus.PLANNED -> "Запланировано"
+        WorkoutStatus.IN_PROGRESS -> "В процессе"
+        WorkoutStatus.COMPLETED -> "Завершено"
     }
 
     val statusIcon = when (status) {
@@ -694,21 +682,21 @@ private fun SessionStatusCard(
             }
 
             // Exercise Count (without badge, larger font)
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                "$exerciseCount ${if (exerciseCount == 1) "exercise" else "exercises"}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                Text(
+                    formatExerciseCount(exerciseCount),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
             // Muscle Groups
             if (muscleGroups.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    "Muscle Groups",
+                    "Группы мышц",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -734,6 +722,16 @@ private fun MuscleGroupChip(muscleGroup: MuscleGroup) {
     val backgroundColor = MuscleGroupColors.getBackgroundColor(muscleGroup)
     val textColor = MuscleGroupColors.getPrimaryColor(muscleGroup)
 
+    val names = mapOf(
+        MuscleGroup.CHEST to "Грудь",
+        MuscleGroup.BACK to "Спина",
+        MuscleGroup.LEGS to "Ноги",
+        MuscleGroup.ARMS to "Руки",
+        MuscleGroup.ABS to "Пресс",
+        MuscleGroup.CARDIO to "Кардио"
+    )
+    val groupName = names[muscleGroup] ?: muscleGroup.name.lowercase().replace("_", " ")
+
     Box(
         modifier = Modifier
             .background(
@@ -748,7 +746,7 @@ private fun MuscleGroupChip(muscleGroup: MuscleGroup) {
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
-            text = muscleGroup.name.lowercase().replace("_", " "),
+            text = groupName,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
             color = textColor
@@ -768,13 +766,27 @@ private fun CompleteWorkoutButton(
     ) {
         Icon(
             imageVector = androidx.compose.material.icons.Icons.Default.CheckCircle,
-            contentDescription = "Complete Workout",
+            contentDescription = "Завершить тренировку",
             modifier = Modifier.padding(end = 8.dp)
         )
         Text(
-            "Complete Workout",
+            "Завершить тренировку",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Medium
         )
     }
+}
+
+private fun formatExerciseCount(count: Int): String {
+    val lastDigit = count % 10
+    val lastTwoDigits = count % 100
+
+    val suffix = when {
+        lastTwoDigits in 11..14 -> "упражнений"
+        lastDigit == 1 -> "упражнение"
+        lastDigit in 2..4 -> "упражнения"
+        else -> "упражнений"
+    }
+
+    return "$count $suffix"
 }

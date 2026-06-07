@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -228,7 +229,7 @@ fun TimerScreen(store: TimerStore) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Время вышло!",
-                        color = LightAccentOrange,
+                        color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }
@@ -247,7 +248,7 @@ fun TimerScreen(store: TimerStore) {
                         store.accept(TimerStore.Intent.StartTimer)
                         startTimerService(context, state.durationSeconds)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = LightAccentOrange)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text("Запустить снова", color = Color.White)
                 }

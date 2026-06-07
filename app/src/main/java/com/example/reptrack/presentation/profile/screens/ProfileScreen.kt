@@ -86,7 +86,7 @@ fun ProfileScreen(
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Signing out...")
+                    Text("Выход...")
                 }
             }
             false -> {
@@ -98,7 +98,7 @@ fun ProfileScreen(
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Loading profile...")
+                    Text("Загрузка профиля...")
                 }
             }
             null != null -> {
@@ -116,7 +116,7 @@ fun ProfileScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = { store.accept(ProfileStore.Intent.Retry) }) {
-                        Text("Retry")
+                        Text("Повторить")
                     }
                 }
             }
@@ -177,7 +177,7 @@ private fun ProfileContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Sync error: $syncError",
+                        text = "Ошибка синхронизации: $syncError",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )

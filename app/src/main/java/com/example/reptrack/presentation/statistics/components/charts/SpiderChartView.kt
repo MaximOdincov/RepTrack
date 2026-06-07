@@ -25,7 +25,7 @@ import kotlin.math.min
 fun SpiderChartView(
     data: List<SpiderChartData>, // multiple series (user + friends)
     modifier: Modifier = Modifier,
-    labels: List<String> = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Abs"),
+        labels: List<String> = listOf("Грудь", "Спина", "Ноги", "Плечи", "Руки", "Пресс"),
     maxValue: Float = 100f
 ) {
     // Показываем placeholder, если данных нет
@@ -35,7 +35,7 @@ fun SpiderChartView(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No data available",
+                text = "Нет данных",
                 color = Color.Gray,
                 style = MaterialTheme.typography.bodyMedium
             )

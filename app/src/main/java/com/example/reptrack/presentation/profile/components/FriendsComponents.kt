@@ -130,7 +130,7 @@ fun ProfileHeader(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = username ?: "Guest",
+                            text = username ?: "Гость",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -255,7 +255,7 @@ fun FriendsSection(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Friends",
+                        text = "Друзья",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -303,7 +303,7 @@ fun FriendsSection(
                         }
                     } else if (state.friends.isEmpty()) {
                         Text(
-                            text = "No friends yet. Add your first friend!",
+                            text = "Нет друзей. Добавьте первого друга!",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier.fillMaxWidth(),
@@ -349,7 +349,7 @@ fun FriendsSection(
                             contentDescription = "Add Friend"
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Friend")
+                        Text("Добавить друга")
                     }
                 }
             }
@@ -442,14 +442,14 @@ fun FriendItem(
             ) {
                 // Username
                 Text(
-                    text = friend.username ?: "Unknown",
+                    text = friend.username ?: "Неизвестно",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
 
                 // Friend email
                 Text(
-                    text = friend.email ?: "Unknown email",
+                    text = friend.email ?: "Неизвестный email",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -535,7 +535,7 @@ private fun AddFriendDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Add Friend",
+                        text = "Добавить друга",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -554,7 +554,7 @@ private fun AddFriendDialog(
 
                 // Instructions
                 Text(
-                    text = "Enter your friend's email and passkey.",
+                    text = "Введите email и пароль вашего друга.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -591,7 +591,7 @@ private fun AddFriendDialog(
                         passkey = it
                         localError = null
                     },
-                    label = { Text("Passkey") },
+                        label = { Text("Пароль") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Info,
@@ -627,7 +627,7 @@ private fun AddFriendDialog(
                         )
 
                         if (email.isBlank() || passkey.isBlank()) {
-                            localError = "Please fill in all fields"
+                            localError = "Пожалуйста, заполните все поля"
                             Log.d(
                                 "AddFriendDialog",
                                 "Validation failed - empty fields"
@@ -652,7 +652,7 @@ private fun AddFriendDialog(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Add Friend", fontWeight = FontWeight.SemiBold)
+                        Text("Добавить", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

@@ -23,7 +23,7 @@ fun DateRangeSelector(
     Card(modifier = modifier) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Time Period",
+                text = "Период времени",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
@@ -33,19 +33,19 @@ fun DateRangeSelector(
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
             ) {
                 DateRangeChip(
-                    label = "7 Days",
+                    label = "7 дней",
                     isSelected = isRangeEqual(selectedRange, DateRange.last7Days()),
                     onClick = { onRangeSelected(DateRange.last7Days()) }
                 )
 
                 DateRangeChip(
-                    label = "30 Days",
+                    label = "30 дней",
                     isSelected = isRangeEqual(selectedRange, DateRange.last30Days()),
                     onClick = { onRangeSelected(DateRange.last30Days()) }
                 )
 
                 DateRangeChip(
-                    label = "3 Months",
+                    label = "3 месяца",
                     isSelected = isRangeEqual(selectedRange, DateRange.last3Months()),
                     onClick = { onRangeSelected(DateRange.last3Months()) }
                 )
@@ -56,13 +56,13 @@ fun DateRangeSelector(
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
             ) {
                 DateRangeChip(
-                    label = "Year",
+                    label = "Год",
                     isSelected = isRangeEqual(selectedRange, DateRange.lastYear()),
                     onClick = { onRangeSelected(DateRange.lastYear()) }
                 )
 
                 DateRangeChip(
-                    label = "All Time",
+                    label = "Все время",
                     isSelected = isRangeEqual(selectedRange, DateRange.allTime()),
                     onClick = { onRangeSelected(DateRange.allTime()) }
                 )

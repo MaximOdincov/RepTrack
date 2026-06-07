@@ -54,7 +54,7 @@ fun AddFriendDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Friend to Chart") },
+        title = { Text("Добавить друга в график") },
         text = {
             if (isLoading) {
                 Box(
@@ -69,14 +69,14 @@ fun AddFriendDialog(
                 Column {
                     // Friend selection
                     Text(
-                        text = "Select a friend:",
+                            text = "Выберите друга:",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
                     if (availableFriends.isEmpty()) {
                         Text(
-                            text = "No friends available. Add friends in your profile first.",
+                            text = "Нет доступных друзей. Сначала добавьте друзей в вашем профиле.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -84,7 +84,7 @@ fun AddFriendDialog(
                         val selectableFriends = availableFriends.filter { it.friendUserId !in addedFriends }
                         if (selectableFriends.isEmpty()) {
                             Text(
-                                text = "All friends are already added to this chart.",
+                                text = "Все друзья уже добавлены в этот график.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -152,12 +152,12 @@ fun AddFriendDialog(
                 },
                 enabled = selectedFriendId != null
             ) {
-                Text("Add")
+                    Text("Добавить")
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
         }
     )
@@ -171,7 +171,7 @@ fun ColorPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Choose Color") },
+        title = { Text("Выберите цвет") },
         text = {
             Column {
                 val colors = remember {
@@ -233,7 +233,7 @@ fun ColorPickerDialog(
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Done")
+                Text("Готово")
             }
         }
     )
@@ -241,12 +241,12 @@ fun ColorPickerDialog(
 
 @Composable
 fun FriendExerciseErrorDialog(
-    message: String = "Friend doesn't have this exercise. You can only track common exercises.",
+            message: String = "У друга нет этого упражнения. Вы можете отслеживать только общие упражнения.",
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Cannot Add Friend") },
+        title = { Text("Невозможно добавить друга") },
         text = { Text(message) },
         confirmButton = {
             Button(onClick = onDismiss) {

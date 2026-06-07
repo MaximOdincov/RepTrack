@@ -58,6 +58,18 @@ import com.example.reptrack.presentation.workout_exercise.detail.stores.WorkoutE
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
+import com.example.reptrack.domain.workout.entities.MuscleGroup
+
+private fun getMuscleGroupName(muscleGroup: MuscleGroup): String {
+    return when (muscleGroup) {
+        MuscleGroup.CHEST -> "Грудь"
+        MuscleGroup.BACK -> "Спина"
+        MuscleGroup.LEGS -> "Ноги"
+        MuscleGroup.ARMS -> "Руки"
+        MuscleGroup.ABS -> "Пресс"
+        MuscleGroup.CARDIO -> "Кардио"
+    }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +105,7 @@ fun WorkoutExerciseDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = state.exercise?.name ?: "Exercise",
+                        text = state.exercise?.name ?: "Упражнение",
                         fontSize = 20.sp
                     )
                 },
@@ -105,7 +117,7 @@ fun WorkoutExerciseDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Назад"
                         )
                     }
                 },
@@ -123,10 +135,10 @@ fun WorkoutExerciseDetailScreen(
                     store.accept(WorkoutExerciseDetailStore.Intent.AddSet())
                 }
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add set"
-                )
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Добавить подход"
+                        )
             }
         },
         containerColor = Color(0xFFF5F5F5)
@@ -149,7 +161,7 @@ fun WorkoutExerciseDetailScreen(
                         state.exercise?.let { exercise ->
                             ExerciseInfoCard(
                                 exerciseName = exercise.name,
-                                muscleGroup = exercise.muscleGroup.toString(),
+                                muscleGroup = getMuscleGroupName(exercise.muscleGroup),
                                 iconRes = exercise.iconRes ?: R.drawable.exercise_default_icon,
                                 iconColor = try {
                                     exercise.iconColor?.let { Color(it.toColorInt()) } ?: Color.Black
@@ -163,12 +175,12 @@ fun WorkoutExerciseDetailScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        Text(
-                            text = "Sets",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
+                            Text(
+                                text = "Подходы",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
 
                         Spacer(modifier = Modifier.height(12.dp))
                     }
@@ -230,14 +242,14 @@ fun WorkoutExerciseDetailScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = "No sets yet",
+                                        text = "Ещё нет подходов",
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = Color.Gray
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "Tap + to add your first set",
+                                        text = "Нажмите + чтобы добавить первый подход",
                                         fontSize = 14.sp,
                                         color = Color.Gray
                                     )
@@ -249,6 +261,20 @@ fun WorkoutExerciseDetailScreen(
             }
         }
     }
+}
+
+private fun formatSetsCount(count: Int): String {
+    val lastDigit = count % 10
+    val lastTwoDigits = count % 100
+    
+    val suffix = when {
+        lastTwoDigits in 11..14 -> "подходов"
+        lastDigit == 1 -> "подход"
+        lastDigit in 2..4 -> "подхода"
+        else -> "подходов"
+    }
+    
+    return "$count $suffix"
 }
 
 @Composable
@@ -288,9 +314,9 @@ private fun ExerciseInfoCard(
                 ) {
                     // Проверяем что iconRes не равен 0 (0 - не валидный resource ID)
                     if (iconRes != 0) {
-                        Icon(
-                            painter = painterResourceSafe(id = iconRes),
-                            contentDescription = "Exercise icon",
+                                Icon(
+                                    painter = painterResourceSafe(id = iconRes),
+                                    contentDescription = "Иконка упражнения",
                             modifier = Modifier.size(48.dp),
                             tint = iconColor
                         )
@@ -335,8 +361,8 @@ private fun ExerciseInfoCard(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "$setsCount Sets",
+                    Text(
+                                text = formatSetsCount(setsCount),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black

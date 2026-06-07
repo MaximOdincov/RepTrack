@@ -102,7 +102,7 @@ fun ExerciseEditCard(
                     if (iconRes != null && iconRes != 0) {
                         Icon(
                             painter = painterResourceSafe(id = iconRes),
-                            contentDescription = "Exercise icon",
+                            contentDescription = "Иконка упражнения",
                             modifier = Modifier.size(60.dp),
                             tint = ColorUtils.parseColor(iconColor)
                         )
@@ -130,7 +130,7 @@ fun ExerciseEditCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit icon",
+                        contentDescription = "Редактировать иконку",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )
@@ -145,7 +145,7 @@ fun ExerciseEditCard(
             OutlinedTextField(
                 value = name,
                 onValueChange = onNameChanged,
-                label = { Text("Exercise Name") },
+                label = { Text("Название упражнения") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(

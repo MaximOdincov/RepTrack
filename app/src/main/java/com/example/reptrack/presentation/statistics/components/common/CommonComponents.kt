@@ -120,7 +120,7 @@ private fun ColorPickerDialog(
         ) {
             Column {
                 Text(
-                    text = "Select Color",
+                    text = "Выберите цвет",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )

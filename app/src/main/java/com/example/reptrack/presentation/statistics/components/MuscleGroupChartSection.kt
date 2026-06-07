@@ -78,7 +78,7 @@ fun MuscleGroupChartSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Muscle Group Focus",
+                        text = "Группы мышц",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -147,7 +147,7 @@ fun MuscleGroupChartSection(
                                 ) {
                                     Column {
                                         Text(
-                                            text = "Select Your Color",
+                                            text = "Выберите ваш цвет",
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.SemiBold,
                                             modifier = Modifier.padding(bottom = 12.dp)
@@ -288,20 +288,20 @@ fun MuscleGroupChartSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Friends",
+                            text = "Друзья",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         if (friends.size < 3) {
                             Button(onClick = onAddFriend) {
-                                Text("Add Friend")
+                                Text("Добавить друга")
                             }
                         }
                     }
 
                     if (friends.isEmpty()) {
                         Text(
-                            text = "No friends added yet",
+                            text = "Нет добавленных друзей",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             modifier = Modifier.padding(vertical = 8.dp)

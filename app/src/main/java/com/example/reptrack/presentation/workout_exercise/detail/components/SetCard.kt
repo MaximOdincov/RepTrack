@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.reptrack.R
 import com.example.reptrack.domain.workout.entities.WorkoutSet
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -134,7 +135,7 @@ fun SetCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Set ${set.index}",
+                        text = "Подход ${set.index}",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -151,7 +152,7 @@ fun SetCard(
                     )
                 } else {
                     Text(
-                        text = "Empty",
+                        text = "Пусто",
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -174,7 +175,7 @@ fun SetCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Weight",
+                                text = "Вес",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -185,7 +186,7 @@ fun SetCard(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Reps",
+                                text = "Повторения",
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

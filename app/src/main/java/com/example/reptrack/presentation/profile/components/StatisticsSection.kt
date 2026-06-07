@@ -79,12 +79,12 @@ fun StatisticsSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Statistics",
+                    text = "Статистика",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "View Details →",
+                    text = "Подробнее →",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -163,7 +163,7 @@ fun StatisticsSection(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "kg",
+                            text = "кг",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -207,7 +207,7 @@ fun StatisticsSection(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "Save Weight",
+                            text = "Сохранить вес",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )

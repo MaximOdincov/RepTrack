@@ -80,7 +80,7 @@ fun SettingsSection(
         ) {
             // Header
             Text(
-                text = "Settings",
+                        text = "Настройки",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -108,7 +108,7 @@ fun SettingsSection(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Username",
+                                text = "Имя пользователя",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = when {
                                     false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -116,7 +116,7 @@ fun SettingsSection(
                                 }.copy(alpha = 0.7f)
                             )
                             Text(
-                                text = user.username ?: "Not set",
+                                text = user.username ?: "Не указано",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium
                             )
@@ -167,7 +167,7 @@ fun SettingsSection(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Friend Passkey",
+                                text = "Пароль друга",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = when {
                                     false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -175,7 +175,7 @@ fun SettingsSection(
                             }.copy(alpha = 0.7f)
                             )
                             Text(
-                                text = "Tap to view and manage",
+                                text = "Нажмите, чтобыпросмотреть и управлять",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = when {
                                     false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -236,7 +236,7 @@ fun SettingsSection(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Sign Out", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onError)
+                Text("Выйти", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onError)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -269,18 +269,18 @@ fun SettingsSection(
     if (showPasskeyEditDialog) {
         AlertDialog(
             onDismissRequest = { showPasskeyEditDialog = false },
-            title = { Text("Edit Friend Passkey") },
+            title = { Text("Редактировать пароль друга") },
             text = {
                 Column {
                     Text(
-                        text = "Enter your new friend passkey:",
+                        text = "Введите новый пароль друга:",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = newPasskey,
                         onValueChange = { newPasskey = it },
-                        label = { Text("Passkey") },
+                        label = { Text("Пароль") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -296,14 +296,14 @@ fun SettingsSection(
                     },
                     enabled = newPasskey.isNotBlank()
                 ) {
-                    Text("Save")
+                    Text("Сохранить")
                 }
             },
             dismissButton = {
                 OutlinedButton(
                     onClick = { showPasskeyEditDialog = false }
                 ) {
-                    Text("Cancel")
+                    Text("Отмена")
                 }
             }
         )
@@ -334,11 +334,11 @@ private fun PasskeyDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Your Friend Passkey") },
+        title = { Text("Ваш пароль друга") },
         text = {
             Column {
                 Text(
-                    text = "Share this passkey with friends to add them:",
+                    text = "Поделитесь этим паролем с друзьями, чтобы добавить их:",
                     style = MaterialTheme.typography.bodyMedium,
                     color = when {
                                 false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -379,28 +379,28 @@ private fun PasskeyDialog(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
-                    Text("Copy Passkey")
+                    Text("Копировать пароль")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = onEdit,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Edit Passkey")
+                    Text("Изменить пароль")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = onShare,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Share Passkey")
+                    Text("Поделиться паролем")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Cancel")
+                    Text("Отмена")
                 }
             }
         }
@@ -419,7 +419,7 @@ private fun UsernameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Username") },
+                title = { Text("Редактировать имя пользователя") },
         text = {
             Column {
                 OutlinedTextField(
@@ -428,7 +428,7 @@ private fun UsernameDialog(
                         newUsername = it
                         localError = null
                     },
-                    label = { Text("Username") },
+                        label = { Text("Имя пользователя") },
                     singleLine = true,
                     isError = localError != null,
                     modifier = Modifier.fillMaxWidth()
@@ -452,20 +452,20 @@ private fun UsernameDialog(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancel")
+                    Text("Отмена")
                 }
                 Button(
                     onClick = {
                         if (newUsername.isNotBlank()) {
                             onConfirm(newUsername)
                         } else {
-                            localError = "Username cannot be empty"
+                                localError = "Имя пользователя не может быть пустым"
                         }
                     },
                     modifier = Modifier.weight(1f),
                     enabled = newUsername.isNotBlank()
                 ) {
-                    Text("Save")
+                    Text("Сохранить")
                 }
             }
         }

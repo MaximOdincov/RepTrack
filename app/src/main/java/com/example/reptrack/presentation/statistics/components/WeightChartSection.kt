@@ -100,7 +100,7 @@ fun WeightChartSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Weight Progress",
+                    text = "Прогресс веса",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -171,7 +171,7 @@ fun WeightChartSection(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "kg",
+                            text = "кг",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -214,7 +214,7 @@ fun WeightChartSection(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "Save Weight",
+                            text = "Сохранить вес",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -236,7 +236,7 @@ fun WeightChartSection(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No weight data available",
+                            text = "Нет данных о весе",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -282,20 +282,20 @@ fun WeightChartSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Friends",
+                            text = "Друзья",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         if (friends.size < 3) {
                             Button(onClick = onAddFriend) {
-                                Text("Add Friend")
+                                Text("Добавить друга")
                             }
                         }
                     }
 
                     if (friends.isEmpty()) {
                         Text(
-                            text = "No friends added yet",
+                            text = "Нет добавленных друзей",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             modifier = Modifier.padding(vertical = 8.dp)

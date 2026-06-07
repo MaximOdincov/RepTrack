@@ -295,7 +295,7 @@ fun ExerciseChartSection(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Нет данных о упражнении",
+                                text = "Нет данных об упражнении",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

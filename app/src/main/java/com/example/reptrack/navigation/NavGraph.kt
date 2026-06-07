@@ -211,6 +211,8 @@ fun AppNavGraph(
                                 }
                             }
                         }
+                        
+                        // Pre-load workout session data
                     }
 
                     MainScreen(

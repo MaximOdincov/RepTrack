@@ -29,14 +29,14 @@ fun FriendSelector(
     Card(modifier = modifier) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Compare with Friends",
+                text = "Сравнение с друзьями",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             if (selectedFriends.isEmpty()) {
                 Text(
-                    text = "No friends selected",
+                    text = "Нет выбранных друзей",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -55,7 +55,7 @@ fun FriendSelector(
             // For now, just showing available friends below
             if (friends.isNotEmpty()) {
                 Text(
-                    text = "Available friends:",
+                            text = "Доступные друзья:",
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
                 )
@@ -95,7 +95,7 @@ private fun FriendItem(
 
         if (onRemove != null) {
             Text(
-                text = "Remove",
+                    text = "Удалить",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
@@ -114,7 +114,7 @@ fun FriendExerciseErrorDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Cannot Add Friend")
+            Text("Невозможно добавить друга")
         },
         text = {
             Text(message)

@@ -174,10 +174,8 @@ internal class MainScreenStoreFactory(
 
                         dispatch(Msg.LoadingChanged(false))
                         dispatch(Msg.WorkoutSessionLoaded(session))
-                        dispatch(Msg.TemplatesLoaded(templates))
                         dispatch(Msg.InitializingChanged(false))
-
-                        // Load data for all exercises in the session
+                        dispatch(Msg.TemplatesLoaded(templates))
                         session?.exercises?.forEach { workoutExercise ->
                             loadExerciseData(workoutExercise)
                         }
