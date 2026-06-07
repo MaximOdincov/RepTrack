@@ -74,11 +74,11 @@ fun WeightChartSection(
     // Try to get the latest weight from weightData if currentWeight is null
     val latestWeightFromData = weightData.lastOrNull()?.second
 
-    var editingWeight by remember { mutableStateOf(currentWeight ?: latestWeightFromData ?: 0f) }
+    var editingWeight by remember { mutableStateOf((currentWeight ?: latestWeightFromData ?: 50f).coerceAtLeast(10f)) }
 
     // Update editingWeight when data changes
     LaunchedEffect(currentWeight, weightData) {
-        val newWeight = currentWeight ?: weightData.lastOrNull()?.second ?: 0f
+        val newWeight = (currentWeight ?: weightData.lastOrNull()?.second ?: 50f).coerceAtLeast(10f)
         if (editingWeight != newWeight) {
             android.util.Log.d("WeightChartSection", "Updating editingWeight: $editingWeight -> $newWeight")
             editingWeight = newWeight
@@ -131,7 +131,7 @@ fun WeightChartSection(
                                 shape = CircleShape
                             )
                             .clickable {
-                                editingWeight = (editingWeight - 0.5f).coerceAtLeast(0f)
+                                editingWeight = (editingWeight - 0.5f).coerceAtLeast(10f)
                                 showSaveButton = true
                             },
                         contentAlignment = Alignment.Center

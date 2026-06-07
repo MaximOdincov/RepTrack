@@ -55,7 +55,7 @@ fun ForgotPasswordDialog(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Enter your email address and we'll send you a link to reset your password.",
+                    text = "Введите ваш email, и мы вышлем ссылку для сброса пароля.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -74,13 +74,13 @@ fun ForgotPasswordDialog(
                     isError = !isEmailValid && email.isNotEmpty(),
                     error = if (!isEmailValid && email.isNotEmpty()) {
                         if (!email.contains("@")) {
-                            "Email must contain @"
+                            "Email должен содержать @"
                         } else if (email.length < 6) {
-                            "Email is too short"
+                            "Email слишком короткий"
                         } else if (!email.endsWith(".")) {
-                            "Email must have domain extension"
+                            "Email должен иметь доменную часть"
                         } else {
-                            "Invalid email format"
+                            "Неверный формат email"
                         }
                     } else null,
                     enabled = true
@@ -107,7 +107,7 @@ fun ForgotPasswordDialog(
                     .height(48.dp)
             ) {
                 Text(
-                    text = "Reset Password",
+                    text = "Сбросить",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     )
@@ -122,7 +122,7 @@ fun ForgotPasswordDialog(
                 )
             ) {
                 Text(
-                    text = "Cancel",
+                    text = "Отмена",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

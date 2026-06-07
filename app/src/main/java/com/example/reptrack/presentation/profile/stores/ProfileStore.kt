@@ -10,13 +10,13 @@ import com.example.reptrack.domain.profile.usecases.GetCurrentUserProfileUseCase
 import com.example.reptrack.domain.profile.usecases.UpdateUsernameUseCase
 import com.example.reptrack.domain.profile.usecases.UpdatePasskeyUseCase
 import com.example.reptrack.domain.backup.SyncUseCase
-import com.example.reptrack.presentation.profile.stores.ProfileStore.Intent
 import com.example.reptrack.presentation.profile.stores.ProfileStore.Label
 import com.example.reptrack.presentation.profile.stores.ProfileStore.State
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import android.content.Context
 
-interface ProfileStore : Store<Intent, State, Label> {
+interface ProfileStore : Store<com.example.reptrack.presentation.profile.stores.ProfileStore.Intent, State, Label> {
 
     sealed interface Intent {
         object LoadProfile: Intent
@@ -56,7 +56,7 @@ internal class ProfileStoreFactory(
 ) {
 
     fun create(): ProfileStore =
-        object : ProfileStore, Store<Intent, State, Label> by storeFactory.create(
+        object : ProfileStore, Store<ProfileStore.Intent, State, Label> by storeFactory.create(
             name = "ProfileStore",
             initialState = State(lastSyncTime = syncUseCase.getLastSyncTime()),
             executorFactory = ::ExecutorImpl,
@@ -78,17 +78,17 @@ internal class ProfileStoreFactory(
             }
 
 
-    private inner class ExecutorImpl : CoroutineExecutor<Intent, Nothing, State, Msg, Label>() {
+    private inner class ExecutorImpl : CoroutineExecutor<com.example.reptrack.presentation.profile.stores.ProfileStore.Intent, Nothing, State, Msg, Label>() {
 
-        override fun executeIntent(intent: Intent, getState: () -> State) {
+        override fun executeIntent(intent: com.example.reptrack.presentation.profile.stores.ProfileStore.Intent, getState: () -> State) {
             when (intent) {
-                Intent.LoadProfile -> loadProfile()
-                Intent.SignOut -> signOut()
-                Intent.Retry -> loadProfile()
-                Intent.SyncData -> syncData(getState().user?.id)
-                is Intent.SyncUser -> syncData(intent.userId)
-                is Intent.UpdateUsername -> updateUsername(intent.username, intent.userId, getState)
-                is Intent.UpdatePasskey -> updatePasskey(intent.passkey, intent.userId, getState)
+                com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.LoadProfile -> loadProfile()
+                com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.SignOut -> signOut()
+                com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.Retry -> loadProfile()
+                com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.SyncData -> syncData(getState().user?.id)
+                is com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.SyncUser -> syncData(intent.userId)
+                is com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.UpdateUsername -> updateUsername(intent.username, intent.userId, getState)
+                is com.example.reptrack.presentation.profile.stores.ProfileStore.Intent.UpdatePasskey -> updatePasskey(intent.passkey, intent.userId, getState)
             }
         }
 
@@ -123,21 +123,25 @@ internal class ProfileStoreFactory(
         }
 
         
-        private fun updatePasskey(passkey: String, userId: String, getState: () -> State) = scope.launch {
-            android.util.Log.d("ProfileStore", "Updating passkey for user: $userId")
-            try {
-                updatePasskeyUseCase(passkey, userId)
-                // Update the current user's passkey in the state
-                getState().user?.let { currentUser ->
-                    val updatedUser = currentUser.copy(passkey = passkey)
-                    dispatch(Msg.UserLoaded(updatedUser))
-                    android.util.Log.d("ProfileStore", "Passkey updated successfully: $passkey")
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("ProfileStore", "Failed to update passkey", e)
-                dispatch(Msg.Error(e.message ?: "Failed to update passkey"))
-            }
-        }
+         private fun updatePasskey(passkey: String, userId: String, getState: () -> State) = scope.launch {
+              android.util.Log.d("ProfileStore", "Updating passkey to: $passkey for user: $userId")
+             try {
+                  updatePasskeyUseCase(passkey, userId)
+                  updatePasskeyUseCase.updateFirebaseOnly(passkey, userId)
+                   // Sync user data to Firestore
+                   val syncSuccess = syncUseCase.syncUserOnly(userId)
+                   android.util.Log.d("ProfileStore", "User sync result: $syncSuccess")
+                  // Update the current user's friend code in the state
+                 getState().user?.let { currentUser ->
+                     val updatedUser = currentUser.copy(friendCode = passkey)
+                     dispatch(Msg.UserLoaded(updatedUser))
+                     android.util.Log.d("ProfileStore", "Passkey updated successfully: $passkey")
+                 }
+             } catch (e: Exception) {
+                 android.util.Log.e("ProfileStore", "Failed to update passkey", e)
+                 dispatch(Msg.Error(e.message ?: "Failed to update passkey"))
+             }
+         }
 
         private fun updateUsername(username: String, userId: String, getState: () -> State) = scope.launch {
             android.util.Log.d("ProfileStore", "Updating username to: $username for user: $userId")
@@ -164,6 +168,9 @@ internal class ProfileStoreFactory(
             }
 
             android.util.Log.d("ProfileStore", "Starting sync for user: $userId")
+            
+            // Sync will continue in background even after screen destruction
+            // because it runs in the store's scope
             dispatch(Msg.Syncing)
             try {
                 val success = syncUseCase(userId)
@@ -228,7 +235,7 @@ internal class ProfileStoreFactory(
                     error = null
                 )
                 is Msg.PasskeyUpdated -> copy(
-                    user = user?.copy(passkey = msg.passkey),
+                    user = user?.copy(friendCode = msg.passkey),
                     error = null
                 )
             }

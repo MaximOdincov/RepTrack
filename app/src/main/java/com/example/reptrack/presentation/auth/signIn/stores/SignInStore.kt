@@ -162,11 +162,8 @@ internal class SignInStoreFactory(
 
         private fun signIn(state: State) = scope.launch {
 
-            // Временно отключаем валидацию для тестирования
             val email = state.email
             val password = state.password
-
-            android.util.Log.d("SignInStore", "DEBUG: email=$email, password=${"*".repeat(password.length)}")
 
             if (email.isEmpty() || password.isEmpty()) {
                 publish(Label.Error("Пожалуйста, введите email и пароль"))
@@ -175,27 +172,26 @@ internal class SignInStoreFactory(
             }
 
             dispatch(Loading)
-            android.util.Log.d("SignInStore", "DEBUG: Вызываем signInUseCase")
             val result = signInUseCase(state.email, state.password)
-            android.util.Log.d("SignInStore", "DEBUG: Результат = $result")
             if (result.isSuccess){
-                android.util.Log.d("SignInStore", "DEBUG: Успех!")
                 publish(Label.Authorized)
             }
-            else {
-                android.util.Log.d("SignInStore", "DEBUG: Ошибка: ${result.exceptionOrNull()}")
-                publish(Label.Error(result.exceptionOrNull()?.toString() ?: "Ошибка входа"))
-            }
+            else publish(Label.Error(result.exceptionOrNull()?.toString() ?: "Ошибка входа"))
             dispatch(Msg.Idle)
         }
 
         private fun signInWithGoogle(idToken: String) = scope.launch {
+            android.util.Log.d("SignInStore", "[Google] Signing in with token (length: ${idToken.length})")
             dispatch(Loading)
             val result = signInWithGoogleUseCase(idToken)
             if (result.isSuccess){
+                android.util.Log.d("SignInStore", "[Google] SUCCESS")
                 publish(Label.Authorized)
+            } else {
+                val ex = result.exceptionOrNull()
+                android.util.Log.e("SignInStore", "[Google] FAILED: ${ex?.message}", ex)
+                publish(Label.Error("Ошибка входа с Google: ${ex?.message ?: "unknown"}"))
             }
-            else publish(Label.Error("Ошибка входа с Google: ${result.exceptionOrNull()?.toString()}"))
             dispatch(Msg.Idle)
         }
 

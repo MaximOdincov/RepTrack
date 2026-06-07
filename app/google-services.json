@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1039455213076-6v0qglv4ulqrqopkklkke3k1ejm6ntc2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.reptrack",
+            "certificate_hash": "6a88ec5615b8775050e483942b7c777bea877d51"
+          }
+        },
+        {
           "client_id": "1039455213076-8ajd9e4l1o52p61end7mkvrd2n7fdhjr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

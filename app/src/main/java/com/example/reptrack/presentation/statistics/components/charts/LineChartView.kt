@@ -114,14 +114,16 @@ fun LineChartView(
 
             val minX = allXValues.minOrNull() ?: 0f
             val maxX = allXValues.maxOrNull() ?: 1f
-            val minY = allYValues.minOrNull() ?: 0f
-            val maxY = allYValues.maxOrNull() ?: 1f
+            val minY = allYValues.minOrNull() ?: 15f
+            val maxY = allYValues.maxOrNull() ?: 30f
 
             // Ensure at least 1 day range for X axis to avoid flat charts
             val effectiveMaxX = if (maxX - minX < 1f) minX + 1f else maxX
-            // Add small padding to Y axis
-            val effectiveMaxY = maxY + (maxY - minY) * 0.1f
-            val effectiveMinY = (minY - (maxY - minY) * 0.1f).coerceAtLeast(0f)
+            // Add small padding to Y axis, but ensure minimum range of 15kg
+            val initialYRange = maxY - minY
+            val effectiveYRange = if (initialYRange < 15f) 15f else initialYRange
+            val effectiveMaxY = maxY + effectiveYRange * 0.05f
+            val effectiveMinY = (minY - effectiveYRange * 0.05f).coerceAtLeast(10f)
 
             val xPadding = 45.dp.toPx()
             val yPadding = 30.dp.toPx()
@@ -152,9 +154,9 @@ fun LineChartView(
             }
 
             // Calculate Y axis labels with step 0.5
-            val yRange = effectiveMaxY - effectiveMinY
+            val finalYRange = effectiveMaxY - effectiveMinY
             val steps = 8
-            val stepSize = (yRange / steps).let {
+            val stepSize = (finalYRange / steps).let {
                 val rounded = roundToHalf(it)
                 if (rounded < 0.5f) 0.5f else rounded
             }

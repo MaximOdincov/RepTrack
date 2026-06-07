@@ -49,6 +49,18 @@ class BackupRepository(
         }
     }
 
+
+    suspend fun syncUserOnly(userId: String) = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "========== Syncing user only: $userId ==========")
+            syncUsers(userId)
+            syncGdprConsents(userId)
+            Log.d(TAG, "========== User sync completed ==========")
+        } catch (e: Exception) {
+            Log.e(TAG, "========== User sync failed ==========", e)
+            throw SyncException("Failed to sync user data for $userId", e)
+        }
+    }
     private suspend fun syncExercises(userId: String) {
         Log.d(TAG, "[Exercises] Starting sync...")
         val startTime = System.currentTimeMillis()

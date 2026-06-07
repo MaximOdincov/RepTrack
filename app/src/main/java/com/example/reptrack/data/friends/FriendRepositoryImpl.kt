@@ -9,6 +9,7 @@ import com.example.reptrack.domain.friends.FriendRepository
 import com.example.reptrack.domain.friends.FriendStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 class FriendRepositoryImpl(

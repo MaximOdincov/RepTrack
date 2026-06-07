@@ -15,7 +15,7 @@ fun User.toDb(): UserDb =
         avatarUrl = avatarUrl,
         currentWeight = currentWeight,
         height = height,
-        passkey = passkey,
+        friendCode = friendCode,
         isDarkTheme = isDarkTheme
     )
 
@@ -37,7 +37,7 @@ fun UserWithConsent.toDomain(): User =
         avatarUrl = user.avatarUrl,
         currentWeight = user.currentWeight,
         height = user.height,
-        passkey = user.passkey,
+        friendCode = user.friendCode,
         isDarkTheme = user.isDarkTheme,
         gdprConsent = gdprConsent?.let {
             GdprConsent(

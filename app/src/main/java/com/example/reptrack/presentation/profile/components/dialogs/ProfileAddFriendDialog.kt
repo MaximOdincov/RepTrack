@@ -71,25 +71,25 @@ fun ProfileAddFriendDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Add Friend",
-                    fontWeight = FontWeight.Bold
-                )
-                androidx.compose.material3.IconButton(
-                    onClick = { if (!isLoading) onDismiss() },
-                    enabled = !isLoading
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close"
+                        text = "Добавить друга",
+                        fontWeight = FontWeight.Bold
                     )
-                }
+                    androidx.compose.material3.IconButton(
+                        onClick = { if (!isLoading) onDismiss() },
+                        enabled = !isLoading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Закрыть"
+                        )
+                    }
             }
         },
         text = {
             Column {
                 // Instructions
                 Text(
-                    text = "Enter your friend's email and passkey.",
+                        text = "Введите email и код дружбы вашего друга.",
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                     color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -126,13 +126,13 @@ fun ProfileAddFriendDialog(
                         passkey = it
                         localError = null
                     },
-                    label = { Text("Passkey") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Passkey"
-                        )
-                    },
+                            label = { Text("Код дружбы") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Код дружбы"
+                                )
+                            },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -158,7 +158,7 @@ fun ProfileAddFriendDialog(
                 Button(
                     onClick = {
                         if (email.isBlank() || passkey.isBlank()) {
-                            localError = "Please fill in all fields"
+                            localError = "Пожалуйста, заполните все поля"
                             return@Button
                         }
 
@@ -175,7 +175,7 @@ fun ProfileAddFriendDialog(
                             color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Add Friend", fontWeight = FontWeight.SemiBold)
+                                Text("Добавить друга", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -186,7 +186,7 @@ fun ProfileAddFriendDialog(
                 modifier = Modifier.fillMaxWidth(),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
             ) {
-                Text("Cancel")
+                    Text("Отмена")
             }
         }
     )

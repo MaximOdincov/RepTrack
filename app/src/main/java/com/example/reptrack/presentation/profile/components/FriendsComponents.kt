@@ -71,7 +71,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.friends.Friend
 import com.example.reptrack.presentation.profile.stores.FriendsStore
-import com.example.reptrack.presentation.statistics.components.dialogs.AddFriendDialog
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -116,7 +116,7 @@ fun ProfileHeader(
             } else {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = "Profile Avatar",
+                                            contentDescription = "Аватар профиля",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(40.dp)
                 )
@@ -130,10 +130,10 @@ fun ProfileHeader(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                            text = username ?: "Гость",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
+                    text = username ?: "Неизвестно",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
             Text(
                 text = email ?: "",
                 style = MaterialTheme.typography.bodyMedium,
@@ -144,21 +144,28 @@ fun ProfileHeader(
         }
 
         // Sync and Settings Icons
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             // Sync Icon with text - only show if not guest
             if (!isGuest) {
-                if (isSyncing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Box {
-                        IconButton(onClick = onSyncClick) {
+                // Sync button with status indicators inside
+                Box(
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    IconButton(
+                        onClick = onSyncClick,
+                        enabled = !isSyncing
+                    ) {
+                        if (isSyncing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Sync",
+                                contentDescription = "Синхронизация",
                                 tint = if (syncError != null) {
                                     MaterialTheme.colorScheme.error
                                 } else {
@@ -167,44 +174,58 @@ fun ProfileHeader(
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                        // Sync status indicator
-                        if (syncError != null) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = "Sync Error",
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .offset(x = 12.dp, y = (-6).dp)
-                            )
-                        } else if (lastSyncTime > 0) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = "Synced",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .offset(x = 16.dp, y = (-6).dp)
-                            )
-                        }
+                    }
+                    // Sync status indicator
+                    if (syncError != null) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Ошибка синхронизации",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .offset(x = 12.dp, y = (-6).dp)
+                        )
+                    } else if (lastSyncTime > 0) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Синхронизировано",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .offset(x = 16.dp, y = (-6).dp)
+                        )
                     }
                 }
 
-                // Sync text - bigger and centered
+                // Sync text - bigger and centered next to icon
                 Text(
-                    text = "SYNC",
+                    text = if (isSyncing) "Синхронизация..." else "Синхронизация",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = if (syncError != null) {
                         MaterialTheme.colorScheme.error
                     } else {
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
-                    },
-                    modifier = Modifier.padding(start = 8.dp),
-                    textAlign = TextAlign.Center
+                    }
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
+            } else {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Для синхронизации нужна авторизация",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                    Text(
+                        text = "и друзья",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
             }
         }
     }
@@ -250,7 +271,7 @@ fun FriendsSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Friends",
+                        contentDescription = "Друзья",
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -273,11 +294,11 @@ fun FriendsSection(
                     } else {
                         Icons.Default.KeyboardArrowDown
                     },
-                    contentDescription = if (FriendsStore.Section.Friends in state.expandedSections) {
-                        "Collapse"
-                    } else {
-                        "Expand"
-                    },
+                        contentDescription = if (FriendsStore.Section.Friends in state.expandedSections) {
+                            "Свернуть"
+                        } else {
+                            "Развернуть"
+                        },
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
@@ -346,7 +367,7 @@ fun FriendsSection(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add Friend"
+                            contentDescription = "Добавить друга"
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Добавить друга")
@@ -384,8 +405,7 @@ fun FriendsSection(
                 store.accept(FriendsStore.Intent.AddFriend(email, passkey))
             },
             isLoading = state.isAddingFriend,
-            availableFriends = TODO(),
-            addedFriends = TODO()
+            error = state.error
         )
     }
 }
@@ -442,14 +462,14 @@ fun FriendItem(
             ) {
                 // Username
                 Text(
-                    text = friend.username ?: "Неизвестно",
+                    text = friend.username ?: "Unknown",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
 
                 // Friend email
                 Text(
-                    text = friend.email ?: "Неизвестный email",
+                    text = friend.email ?: "Unknown email",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
@@ -545,7 +565,7 @@ private fun AddFriendDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
+                            contentDescription = "Закрыть"
                         )
                     }
                 }
@@ -554,10 +574,10 @@ private fun AddFriendDialog(
 
                 // Instructions
                 Text(
-                    text = "Введите email и пароль вашего друга.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+                        text = "Введите email и код дружбы вашего друга.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -591,13 +611,13 @@ private fun AddFriendDialog(
                         passkey = it
                         localError = null
                     },
-                        label = { Text("Пароль") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Passkey"
-                        )
-                    },
+                            label = { Text("Код дружбы") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Код дружбы"
+                                )
+                            },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -623,11 +643,11 @@ private fun AddFriendDialog(
                         Log.d("AddFriendDialog", "Add Friend button clicked")
                         Log.d(
                             "AddFriendDialog",
-                            "Email: $email, Passkey: $passkey"
+                            "Email: $email, Код дружбы: $passkey"
                         )
 
                         if (email.isBlank() || passkey.isBlank()) {
-                            localError = "Пожалуйста, заполните все поля"
+                                localError = "Пожалуйста, заполните все поля"
                             Log.d(
                                 "AddFriendDialog",
                                 "Validation failed - empty fields"
@@ -652,7 +672,7 @@ private fun AddFriendDialog(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Добавить", fontWeight = FontWeight.SemiBold)
+                                    Text("Добавить друга", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

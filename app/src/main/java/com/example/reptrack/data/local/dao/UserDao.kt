@@ -43,7 +43,7 @@ interface UserDao {
     @Query("UPDATE users SET username = :username, updatedAt = (strftime('%s','now') * 1000) WHERE id = :userId")
     suspend fun updateUsername(username: String, userId: String)
 
-    @Query("UPDATE users SET passkey = :passkey, updatedAt = (strftime('%s','now') * 1000) WHERE id = :userId")
+    @Query("UPDATE users SET friendCode = :passkey, updatedAt = (strftime('%s','now') * 1000) WHERE id = :userId")
     suspend fun updatePasskey(passkey: String, userId: String)
 
     

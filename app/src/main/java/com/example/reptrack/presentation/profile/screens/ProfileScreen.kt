@@ -39,7 +39,6 @@ import com.example.reptrack.presentation.profile.components.SettingsSection
 import com.example.reptrack.presentation.profile.components.StatisticsSection
 import com.example.reptrack.presentation.profile.stores.FriendsStore
 import com.example.reptrack.presentation.profile.stores.ProfileStore
-import com.example.reptrack.presentation.statistics.components.WeightCounter
 
 @Composable
 fun ProfileScreen(
@@ -89,7 +88,7 @@ fun ProfileScreen(
                     Text("Выход...")
                 }
             }
-            false -> {
+            state.value.isLoading -> {
                 android.util.Log.d("ProfileScreen", "Showing loading")
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -101,7 +100,7 @@ fun ProfileScreen(
                     Text("Загрузка профиля...")
                 }
             }
-            null != null -> {
+            state.value.error != null -> {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -110,7 +109,7 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Error: ${null}",
+                        text = "Error: ${state.value.error}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -186,7 +185,7 @@ private fun ProfileContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Retry",
+                            contentDescription = "Повторить",
                             tint = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }

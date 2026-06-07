@@ -36,6 +36,7 @@ fun AuthTextField(
     enabled: Boolean = true,
     error: String? = null,
     isError: Boolean = false,
+    shouldShowError: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     isPasswordField: Boolean = false,
     focusRequester: FocusRequester? = null
@@ -57,7 +58,7 @@ fun AuthTextField(
         else -> keyboardType
     }
 
-    val hasError = error != null || isError
+    val hasError = shouldShowError && (error != null || isError)
 
     // Отступы только при наличии ошибки
     val verticalPadding = if (hasError) 6.dp else 0.dp

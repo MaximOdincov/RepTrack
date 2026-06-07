@@ -83,32 +83,45 @@ fun SignInScreen(
     
     val context = LocalContext.current
     val idToken = stringResource(R.string.default_web_client_id)
+    android.util.Log.d("GoogleSignIn", "[Google] Web client ID: $idToken")
     // Google Sign-In
     val googleClient = remember {
-        GoogleSignIn.getClient(
-            context,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(idToken)
-                .requestEmail()
-                .build()
-        )
+        val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(idToken)
+            .requestEmail()
+            .build()
+        android.util.Log.d("GoogleSignIn", "[Google] Options: $options")
+        GoogleSignIn.getClient(context, options)
     }
 
     val googleLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                val token = account.idToken
-                if (token != null) {
-                    store.accept(SignInStore.Intent.GoogleSignedIn(token))
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                store.accept(SignInStore.Intent.GoogleSignInError("Google sign-in failed: ${e.message}"))
+        android.util.Log.d("GoogleSignIn", "[Google] Launcher callback: resultCode=${result.resultCode}, data=${result.data}")
+        
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        android.util.Log.d("GoogleSignIn", "[Google] isComplete=${task.isComplete}, isSuccessful=${task.isSuccessful}")
+        
+        if (task.isComplete && task.isSuccessful) {
+            val account = task.getResult(ApiException::class.java)
+            val token = account.idToken
+            android.util.Log.d("GoogleSignIn", "[Google] Token received (length: ${token?.length})")
+            if (token != null) {
+                store.accept(SignInStore.Intent.GoogleSignedIn(token))
+            } else {
+                store.accept(SignInStore.Intent.GoogleSignInError("idToken is null"))
             }
+        } else if (task.isComplete) {
+            val ex = task.exception
+            android.util.Log.e("GoogleSignIn", "[Google] Task complete but not successful", ex)
+            if (ex is ApiException) {
+                android.util.Log.e("GoogleSignIn", "[Google] StatusCode: ${ex.statusCode}, Status: ${ex.status}, Message: ${ex.message}")
+                android.util.Log.e("GoogleSignIn", "[Google] Details: ${ex.status.toString()}")
+            }
+            store.accept(SignInStore.Intent.GoogleSignInError("Google sign-in failed: ${ex?.message ?: "unknown error"}"))
+        } else {
+            android.util.Log.w("GoogleSignIn", "[Google] Task not complete yet")
+            store.accept(SignInStore.Intent.GoogleSignInError("Google sign-in task not complete"))
         }
     }
 
@@ -232,6 +245,7 @@ fun SignInScreen(
                             enabled = !state.isLoading,
                             error = emailValidator.emailError,
                             isError = !emailValidator.isEmailValid,
+                            shouldShowError = state.email.isNotEmpty(),
                             focusRequester = emailFocusRequester
                         )
 
@@ -253,6 +267,7 @@ fun SignInScreen(
                             enabled = !state.isLoading,
                             error = passwordValidator.passwordError,
                             isError = !passwordValidator.isPasswordValid,
+                            shouldShowError = state.password.isNotEmpty(),
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     focusManager.clearFocus()

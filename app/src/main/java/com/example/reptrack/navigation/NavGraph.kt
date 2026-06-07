@@ -205,7 +205,7 @@ fun AppNavGraph(
                                         username = it.username,
                                         email = it.email,
                                         avatarUrl = it.avatarUrl,
-                                        passkey = it.passkey
+                                        passkey = it.friendCode
                                     )
                                     return@collect
                                 }

@@ -40,10 +40,10 @@ class FirebaseFriendsDataSource(
                 username = document.getString("username"),
                 email = document.getString("email"),
                 avatarUrl = document.getString("avatarUrl"),
-                passkey = document.getString("passkey")
-            )
+                 passkey = document.getString("friendCode")
+             )
 
-            android.util.Log.d("FirebaseFriendsDataSource", "User info: username=${userInfo.username}, hasPasskey=${userInfo.passkey != null}")
+             android.util.Log.d("FirebaseFriendsDataSource", "User info: username=${userInfo.username}, hasPasskey=${userInfo.passkey != null}")
             Result.success(userInfo)
         } catch (e: Exception) {
             android.util.Log.e("FirebaseFriendsDataSource", "Error finding user by email: ${e.message}", e)
@@ -66,8 +66,8 @@ class FirebaseFriendsDataSource(
                 return Result.failure(Exception("User not found"))
             }
 
-            val storedPasskey = document.getString("passkey")
-            android.util.Log.d("FirebaseFriendsDataSource", "Stored passkey: $storedPasskey, provided: $passkey")
+             val storedPasskey = document.getString("friendCode")
+             android.util.Log.d("FirebaseFriendsDataSource", "Stored passkey: $storedPasskey, provided: $passkey")
             val isValid = storedPasskey == passkey
 
             Result.success(isValid)

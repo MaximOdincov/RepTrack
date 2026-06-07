@@ -20,7 +20,7 @@ class SignUpUseCase(
                     val passkey = PasskeyService.generatePasskey()
                     val baseUser = authUser.toDomain().copy(
                         username = username,
-                        passkey = passkey
+                        friendCode = passkey
                     )
                     val userWithConsent = if (dataConsent) {
                         baseUser.copy(

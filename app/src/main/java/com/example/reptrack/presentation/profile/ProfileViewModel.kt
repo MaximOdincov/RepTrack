@@ -55,6 +55,6 @@ class ProfileViewModel(
     }
 
     fun getPasskey(): String {
-        return user.value?.passkey ?: "Not set"
+        return user.value?.friendCode ?: "Не указано"
     }
 }

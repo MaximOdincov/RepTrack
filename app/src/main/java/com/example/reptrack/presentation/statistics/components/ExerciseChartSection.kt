@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -96,7 +98,9 @@ fun ExerciseChartSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Exercise selector dropdown
-                Box {
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Surface(
                         modifier = Modifier,
                         shape = RoundedCornerShape(12.dp),
@@ -113,13 +117,21 @@ fun ExerciseChartSection(
                                 .padding(horizontal = 16.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = selectedExerciseId?.let { id ->
-                                    exercises.find { it.id == id }?.name ?: "Упражнение"
-                                } ?: "Упражнение",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Text(
+                                    text = selectedExerciseId?.let { id ->
+                                        exercises.find { it.id == id }?.name ?: "Упражнение"
+                                    } ?: "Упражнение",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
                             Spacer(modifier = Modifier.width(8.dp))
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
@@ -148,7 +160,11 @@ fun ExerciseChartSection(
                                     ) {
                                         Text(
                                             text = exercise.name,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f)
                                         )
                                         if (exercise.id == selectedExerciseId) {
                                             Icon(
@@ -181,9 +197,13 @@ fun ExerciseChartSection(
                     }
                 }
 
-                OutlinedButton(onClick = onChangeDateRange) {
+                OutlinedButton(
+                    onClick = onChangeDateRange,
+                    modifier = Modifier.wrapContentWidth().wrapContentHeight()
+                ) {
                     Text(dateRange)
                 }
+                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))

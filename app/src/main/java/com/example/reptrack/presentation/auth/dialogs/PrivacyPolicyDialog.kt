@@ -176,7 +176,7 @@ fun PrivacyPolicyDialog(
                         )
                     ) {
                         Text(
-                            text = "Отмена" + if (selectedLanguage == "en") "/Cancel" else "",
+                            text = if (selectedLanguage == "ru") "Отмена" else "Cancel",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -192,7 +192,7 @@ fun PrivacyPolicyDialog(
                         )
                     ) {
                         Text(
-                            text = "Принимаю" + if (selectedLanguage == "en") "/I Accept" else "",
+                            text = if (selectedLanguage == "ru") "Принимаю" else "I Accept",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )

@@ -258,21 +258,6 @@
     <string name="icon_lower_body">lower_body_icon</string>
 
     <!-- ==================== TIMER ==================== -->
-    <string name="timer_title_running">⏰ Таймер запущен</string>
-    <string name="timer_title_paused">⏸ Таймер на паузе</string>
-    <string name="timer_remaining">Осталось: %s</string>
-    <string name="timer_action_resume">Продолжить</string>
-    <string name="timer_action_pause">Пауза</string>
-    <string name="timer_action_stop">Стоп</string>
-
-    <!-- ==================== WORKOUT SETS ==================== -->
-    <string name="set_label">Подход</string>
-    <string name="set_weight">Вес</string>
-    <string name="set_reps">Повторения</string>
-    <string name="set_empty">Пусто</string>
-    <string name="sets_list_title">Подходы</string>
-    <string name="no_sets_yet">Ещё нет подходов</string>
-    <string name="no_sets_yet_hint">Нажмите + чтобы добавить первый подход</string>
 
     <!-- ==================== AUTHENTICATION ==================== -->
 

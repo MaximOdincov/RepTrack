@@ -5,6 +5,7 @@ import com.example.reptrack.domain.auth.AuthUser
 import com.google.firebase.auth.FirebaseUser
 
 fun FirebaseUser.toAuthUser(): AuthUser {
+    android.util.Log.d("AuthMapper", "[Google] toAuthUser: uid=$uid, email=$email, isAnonymous=$isAnonymous")
     return AuthUser(
         id = uid,
         email = email,
