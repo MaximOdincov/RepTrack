@@ -136,16 +136,6 @@ fun SettingsSection(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Divider
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             // Passkey Section - only show if not guest
@@ -198,30 +188,9 @@ fun SettingsSection(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Divider
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Divider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
 
             // Sign Out Button
             Button(
@@ -240,18 +209,6 @@ fun SettingsSection(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Выйти", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onError)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Divider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 

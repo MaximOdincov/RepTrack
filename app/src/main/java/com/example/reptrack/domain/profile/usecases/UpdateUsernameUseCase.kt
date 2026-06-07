@@ -11,4 +11,10 @@ class UpdateUsernameUseCase(
         repository.updateUsername(username, userId)
         Log.d("UpdateUsernameUseCase", "Username updated successfully")
     }
+
+    suspend fun updateFirebaseOnly(username: String, userId: String) {
+        Log.d("UpdateUsernameUseCase", "Updating username in Firebase to: $username for user: $userId")
+        repository.updateUsernameInFirebase(username, userId)
+        Log.d("UpdateUsernameUseCase", "Username updated successfully in Firebase")
+    }
 }

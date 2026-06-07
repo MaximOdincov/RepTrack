@@ -47,6 +47,21 @@ class ProfileRepositoryImpl(
         android.util.Log.d("ProfileRepository", "Username updated for user $userId")
     }
 
+    override suspend fun updateUsernameInFirebase(username: String, userId: String) {
+        val user = userDao.observeUser(userId).firstOrNull()
+        user?.let {
+            val firebaseUser = it.toDomain()
+            firebaseUserDataSource.saveUser(
+                userId = userId,
+                username = username,
+                email = firebaseUser.email,
+                avatarUrl = firebaseUser.avatarUrl,
+                passkey = firebaseUser.friendCode
+            )
+        }
+        android.util.Log.d("ProfileRepository", "Username updated in Firebase for user $userId")
+    }
+
     override suspend fun updatePasskey(passkey: String, userId: String) {
         userDao.updatePasskey(passkey, userId)
         

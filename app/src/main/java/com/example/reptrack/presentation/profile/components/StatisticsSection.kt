@@ -42,7 +42,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.statistics.entities.WeightDataPoint
-import com.example.reptrack.presentation.statistics.components.charts.LineChartView
 import com.example.reptrack.presentation.statistics.stores.StatisticsStore
 
 @Composable
@@ -54,14 +53,30 @@ fun StatisticsSection(
 ) {
     val state = store.states.collectAsState((StatisticsStore.State())).value
 
-    // Load data on first show
+    // Load data on first show (both when component mounts and when store changes)
+    LaunchedEffect(Unit) {
+        android.util.Log.d("StatisticsSection", "Loading data (Unit)...")
+        store.accept(StatisticsStore.Intent.LoadData)
+    }
     LaunchedEffect(store) {
+        android.util.Log.d("StatisticsSection", "Loading data (store)...")
         store.accept(StatisticsStore.Intent.LoadData)
     }
 
-    // Get the latest weight from data (same logic as WeightChartSection)
+    // Get the latest weight from data (same logic as in last working commit d480c21~1)
     val latestWeightFromData = state.weightData.lastOrNull()?.value
     val displayWeight = state.currentWeight ?: latestWeightFromData
+
+    var editingWeight by remember { mutableStateOf((displayWeight ?: 50f).coerceAtLeast(10f)) }
+
+    // Update editingWeight when state changes
+    LaunchedEffect(state.currentWeight, state.weightData) {
+        val latestWeightFromData = state.weightData.lastOrNull()?.value
+        val newWeight = (state.currentWeight ?: latestWeightFromData ?: 50f).coerceAtLeast(10f)
+        if (editingWeight != newWeight) {
+            editingWeight = newWeight
+        }
+    }
 
     Card(
         modifier = modifier
@@ -92,18 +107,7 @@ fun StatisticsSection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Compact weight controller (from WeightChartSection)
-            var editingWeight by remember { mutableStateOf(displayWeight ?: 0f) }
             var showSaveButton by remember { mutableStateOf(false) }
-
-            // Update editingWeight when state changes
-            LaunchedEffect(state.currentWeight, state.weightData) {
-                val latestWeightFromData = state.weightData.lastOrNull()?.value
-                val newWeight = state.currentWeight ?: latestWeightFromData ?: 0f
-                if (editingWeight != newWeight) {
-                    editingWeight = newWeight
-                }
-            }
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -124,7 +128,7 @@ fun StatisticsSection(
                                 shape = CircleShape
                             )
                             .clickable {
-                                editingWeight = (editingWeight - 0.5f).coerceAtLeast(0f)
+                                editingWeight = (editingWeight - 0.5f).coerceAtLeast(10f)
                                 showSaveButton = true
                             },
                         contentAlignment = Alignment.Center

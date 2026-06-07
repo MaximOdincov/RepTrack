@@ -590,25 +590,20 @@ fun AppNavGraph(
                         store = store,
                         friendsStore = friendsStore,
                         statisticsStore = statisticsStore,
-                        onSignedOut = {
-                            // 1. Reset the flag so modules can be loaded again for new user
-                            authenticatedModulesLoaded = false
-
-                            // 2. Navigate to Sign In screen
-                            navController.navigate(Screen.SignIn.route) {
-                                popUpTo(Screen.Main.route) { inclusive = true }
-                                launchSingleTop = true
-                            }
-
-                            // 3. Unload modules after navigation has started
-                            // Use a coroutine to give navigation time to start
-                            coroutineScope.launch {
-                                kotlinx.coroutines.delay(100) // Small delay for navigation to start
-                                App.unloadAuthenticatedModules()
-                            }
-                        },
+                         onSignedOut = {
+                             navController.navigate(Screen.SignIn.route) {
+                                 popUpTo(Screen.Main.route) { inclusive = true }
+                                 launchSingleTop = true
+                             }
+                         },
                         onNavigateToStatistics = {
                             navController.navigate(Screen.Statistics.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onNavigateToSignIn = {
+                            navController.navigate(Screen.SignIn.route) {
+                                popUpTo(Screen.Main.route) { inclusive = true }
                                 launchSingleTop = true
                             }
                         }

@@ -34,6 +34,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.profile.User
 import com.example.reptrack.presentation.profile.components.FriendsSection
+import com.example.reptrack.presentation.profile.components.GuestFeaturesCard
 import com.example.reptrack.presentation.profile.components.ProfileHeader
 import com.example.reptrack.presentation.profile.components.SettingsSection
 import com.example.reptrack.presentation.profile.components.StatisticsSection
@@ -46,7 +47,8 @@ fun ProfileScreen(
     friendsStore: FriendsStore,
     statisticsStore: com.example.reptrack.presentation.statistics.stores.StatisticsStore,
     onSignedOut: () -> Unit = {},
-    onNavigateToStatistics: () -> Unit = {}
+    onNavigateToStatistics: () -> Unit = {},
+    onNavigateToSignIn: () -> Unit = {}
 ) {
     LaunchedEffect(store) {
         store.labels.collect { label ->
@@ -132,7 +134,8 @@ fun ProfileScreen(
                     store = store,
                     onSignOut = { store.accept(ProfileStore.Intent.SignOut) },
                     onSync = { store.accept(ProfileStore.Intent.SyncData) },
-                    onNavigateToStatistics = onNavigateToStatistics
+                    onNavigateToStatistics = onNavigateToStatistics,
+                    onNavigateToSignIn = onNavigateToSignIn
                 )
             }
         }
@@ -152,7 +155,8 @@ private fun ProfileContent(
     onSignOut: () -> Unit,
     onSync: () -> Unit,
     onNavigateToCrashlyticsTest: () -> Unit = {},
-    onNavigateToStatistics: () -> Unit = {}
+    onNavigateToStatistics: () -> Unit = {},
+    onNavigateToSignIn: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -209,6 +213,14 @@ private fun ProfileContent(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Guest Features Card - only show for guests
+        if (user.isGuest) {
+            GuestFeaturesCard(
+                onRegisterClick = onNavigateToSignIn
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
         // Friends Section - only show if not guest
         if (!user.isGuest) {

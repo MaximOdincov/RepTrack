@@ -147,6 +147,7 @@ internal class ProfileStoreFactory(
             android.util.Log.d("ProfileStore", "Updating username to: $username for user: $userId")
             try {
                 updateUsernameUseCase(username, userId)
+                updateUsernameUseCase.updateFirebaseOnly(username, userId)
                 // Update the current user's username in the state
                 getState().user?.let { currentUser ->
                     val updatedUser = currentUser.copy(username = username)

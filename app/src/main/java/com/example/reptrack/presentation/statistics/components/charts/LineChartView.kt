@@ -82,7 +82,7 @@ fun LineChartView(
                                 distance
                             }
 
-                            val screenPos = mapToScreenFn(closest!!.first, closest.second-10000)
+                            val screenPos = mapToScreenFn(closest!!.first, closest.second - 10000)
                             val dx = screenPos.x - offset.x
                             val dy = screenPos.y - offset.y
                             val distance = sqrt((dx * dx + dy * dy).toDouble())
@@ -114,29 +114,14 @@ fun LineChartView(
 
             val minX = allXValues.minOrNull() ?: 0f
             val maxX = allXValues.maxOrNull() ?: 1f
-            val minY = allYValues.minOrNull() ?: 50f
-            val maxY = allYValues.maxOrNull() ?: 50f
+            val minY = allYValues.minOrNull() ?: 0f
+            val maxY = allYValues.maxOrNull() ?: 1f
 
             // Ensure at least 1 day range for X axis to avoid flat charts
             val effectiveMaxX = if (maxX - minX < 1f) minX + 1f else maxX
-            
             // Add small padding to Y axis
-            val initialYRange = maxY - minY
-            val effectiveYRange = if (initialYRange < 15f) 15f else initialYRange
-            
-            // For very low weights (< 30kg), ensure Y starts from 10kg and has at least 20kg range
-            val isLowWeight = maxY < 30f
-            val effectiveMaxY = if (isLowWeight) {
-                (maxY + 10f).coerceAtMost(50f)
-            } else {
-                maxY + effectiveYRange * 0.05f
-            }
-            
-            val effectiveMinY = if (isLowWeight) {
-                10f.coerceAtMost(minY)
-            } else {
-                (minY - effectiveYRange * 0.05f).coerceAtLeast(10f)
-            }
+            val effectiveMaxY = maxY + (maxY - minY) * 0.1f
+            val effectiveMinY = (minY - (maxY - minY) * 0.1f).coerceAtLeast(0f)
 
             val xPadding = 45.dp.toPx()
             val yPadding = 30.dp.toPx()
@@ -258,7 +243,6 @@ fun LineChartView(
                 val x = xPadding + normalizedX * chartWidth
                 val value = minX + (effectiveMaxX - minX) * normalizedX
 
-                // Convert epoch days to date string with leading zeros
                 val date = java.time.LocalDate.ofEpochDay(value.toLong())
                 val day = date.dayOfMonth.toString().padStart(2, '0')
                 val month = date.monthValue.toString().padStart(2, '0')

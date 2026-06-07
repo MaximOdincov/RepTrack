@@ -71,9 +71,115 @@ import androidx.compose.ui.window.DialogProperties
 import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.reptrack.domain.friends.Friend
 import com.example.reptrack.presentation.profile.stores.FriendsStore
-
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+@Composable
+fun GuestFeaturesCard(
+    onRegisterClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Разблокируйте расширенные функции",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FeatureItem(
+                icon = Icons.Default.Refresh,
+                title = "Синхронизация между устройствами",
+                description = "Ваши данные всегда под рукой — на любом устройстве"
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            FeatureItem(
+                icon = Icons.Default.Person,
+                title = "Статистика с друзьями",
+                description = "Сравнивайте прогресс, соревнуйтесь и мотивируйте друг друга"
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = onRegisterClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    "Зарегистрироваться",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeatureItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
 
 @Composable
 fun ProfileHeader(
@@ -116,7 +222,7 @@ fun ProfileHeader(
             } else {
                 Icon(
                     imageVector = Icons.Default.Person,
-                                            contentDescription = "Аватар профиля",
+                    contentDescription = "Profile Avatar",
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(40.dp)
                 )
@@ -130,10 +236,10 @@ fun ProfileHeader(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                    text = username ?: "Неизвестно",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                text = if (username != null) username else (if (isGuest) "Гость" else "Неизвестно"),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
             Text(
                 text = email ?: "",
                 style = MaterialTheme.typography.bodyMedium,
@@ -143,12 +249,11 @@ fun ProfileHeader(
             )
         }
 
-        // Sync and Settings Icons
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Sync Icon with text - only show if not guest
-            if (!isGuest) {
+        // Sync and Settings Icons - only show if not guest
+        if (!isGuest) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 // Sync button with status indicators inside
                 Box(
                     modifier = Modifier.padding(end = 8.dp)
@@ -210,22 +315,6 @@ fun ProfileHeader(
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
-            } else {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Для синхронизации нужна авторизация",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        text = "и друзья",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
             }
         }
     }
