@@ -60,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -183,141 +184,174 @@ private fun FeatureItem(
 
 @Composable
 fun ProfileHeader(
-    username: String?,
-    email: String?,
+    username: String,
+    email: String,
     avatarUrl: String?,
-    isGuest: Boolean = false,
-    isSyncing: Boolean = false,
-    syncError: String? = null,
-    lastSyncTime: Long = 0,
+    isGuest: Boolean,
+    isSyncing: Boolean,
+    syncError: String?,
+    lastSyncTime: Long,
     onAvatarClick: () -> Unit,
-    onSyncClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onSyncClick: () -> Unit
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        // Avatar
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .clickable(onClick = onAvatarClick)
-                .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (avatarUrl != null) {
-                // TODO: Load image from URL (need Coil implementation)
-                Text(
-                    text = username?.firstOrNull()?.toString() ?: "?",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile Avatar",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-        }
+        if (isGuest) {
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Username and Email
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = if (username != null) username else (if (isGuest) "Гость" else "Неизвестно"),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = email ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        // Sync and Settings Icons - only show if not guest
-        if (!isGuest) {
+        } else {
+            // Registered user mode - full view with avatar and sync
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Sync button with status indicators inside
+                // Avatar with MaterialTheme.primary background and black person icon
                 Box(
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(CircleShape)
+                        .clickable { onAvatarClick() }
+                        .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    IconButton(
-                        onClick = onSyncClick,
-                        enabled = !isSyncing
-                    ) {
-                        if (isSyncing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Синхронизация",
-                                tint = if (syncError != null) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface
-                                },
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                    // Sync status indicator
-                    if (syncError != null) {
+                    if (avatarUrl != null && avatarUrl.isNotBlank()) {
+                        //Todo
+                    } else {
                         Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Ошибка синхронизации",
-                            tint = MaterialTheme.colorScheme.error,
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Default avatar",
                             modifier = Modifier
-                                .size(16.dp)
-                                .offset(x = 12.dp, y = (-6).dp)
-                        )
-                    } else if (lastSyncTime > 0) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Синхронизировано",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .offset(x = 16.dp, y = (-6).dp)
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            tint = Color.Black
                         )
                     }
                 }
 
-                // Sync text - bigger and centered next to icon
-                Text(
-                    text = if (isSyncing) "Синхронизация..." else "Синхронизация",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (syncError != null) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
-                    }
-                )
-
                 Spacer(modifier = Modifier.width(16.dp))
+
+                // User info
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Spacer(Modifier.size(28.dp))
+
+                    // Username with truncation
+                    Text(
+                        text = username,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Email with truncation
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    // Sync info - только для зарегистрированных пользователей
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(vertical = 8.dp)
+                    ) {
+                        if (isSyncing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.5.dp
+                            )
+                            Text(
+                                text = "Синхронизация...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            IconButton(
+                                onClick = onSyncClick,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Синхронизировать",
+                                    tint = if (syncError != null)
+                                        MaterialTheme.colorScheme.error
+                                    else
+                                        MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = if (lastSyncTime > 0) {
+                                        "Последняя синхронизация"
+                                    } else {
+                                        "Синхронизация данных"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = if (lastSyncTime > 0) {
+                                        formatTime(lastSyncTime)
+                                    } else {
+                                        "Нажмите для синхронизации"
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (syncError != null)
+                                        MaterialTheme.colorScheme.error
+                                    else
+                                        MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            if (syncError != null) {
+                                Text(
+                                    text = "Ошибка!",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+private fun formatTime(timestamp: Long): String {
+    val date = java.util.Date(timestamp)
+    val format = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+    return format.format(date)
 }
 
 @Composable

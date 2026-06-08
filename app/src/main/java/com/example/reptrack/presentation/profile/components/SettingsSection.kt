@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,17 +56,21 @@ import com.example.reptrack.presentation.profile.stores.ProfileStore
 fun SettingsSection(
     user: User,
     isGuest: Boolean = false,
+    usernameInput: String = "",
+    passkeyInput: String = "",
+    isEditingUsername: Boolean = false,
+    isEditingPasskey: Boolean = false,
+    onUsernameInputChange: (String) -> Unit = {},
+    onPasskeyInputChange: (String) -> Unit = {},
+    onEditingUsernameChange: (Boolean) -> Unit = {},
+    onEditingPasskeyChange: (Boolean) -> Unit = {},
     onSignOut: () -> Unit,
     onChangeUsername: (String) -> Unit,
     onChangePasskey: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showPasskeyEditDialog by remember { mutableStateOf(false) }
-    var showPasskeyDialog by remember { mutableStateOf(false) }
-    var showThemeInfo by remember { mutableStateOf(false) }
-    var showUsernameDialog by remember { mutableStateOf(false) }
-    var newUsername by remember { mutableStateOf(user.username ?: "") }
-    var newPasskey by remember { mutableStateOf(user.friendCode ?: "") }
+    var showPasskeyDialog by rememberSaveable { mutableStateOf(false) }
+    var showUsernameDialog by rememberSaveable { mutableStateOf(false) }
     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
     Card(
@@ -82,7 +87,7 @@ fun SettingsSection(
         ) {
             // Header
             Text(
-                        text = "Настройки",
+                text = "Настройки",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -94,12 +99,16 @@ fun SettingsSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showUsernameDialog = true },
+                        .clickable {
+                            onUsernameInputChange(user.username ?: "")
+                            onEditingUsernameChange(true)
+                        },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
@@ -112,20 +121,22 @@ fun SettingsSection(
                             Text(
                                 text = "Имя пользователя",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = when {
-                                    false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                }.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                             Text(
                                 text = user.username ?: "Не указано",
                                 style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
                     }
                     IconButton(
-                        onClick = { showUsernameDialog = true }
+                        onClick = {
+                            onUsernameInputChange(user.username ?: "")
+                            onEditingUsernameChange(true)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
@@ -148,7 +159,8 @@ fun SettingsSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
@@ -161,18 +173,14 @@ fun SettingsSection(
                             Text(
                                 text = "Код дружбы",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = when {
-                                    false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                }.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
                             Text(
-                                text = "Нажмите, чтобы просмотреть и управлять",
+                                text = if (user.friendCode.isNullOrBlank()) "Не установлен" else "Нажмите, чтобы просмотреть и управлять",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = when {
-                                    false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                }.copy(alpha = 0.5f)
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -181,13 +189,97 @@ fun SettingsSection(
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "View passkey",
+                            contentDescription = "Просмотр кода",
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Inline Username Editor
+            if (isEditingUsername && !isGuest) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = usernameInput,
+                        onValueChange = onUsernameInputChange,
+                        label = { Text("Новое имя пользователя") },
+                        placeholder = { Text("Введите новое имя") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                onEditingUsernameChange(false)
+                                onUsernameInputChange("")
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Отмена")
+                        }
+                        Button(
+                            onClick = {
+                                if (usernameInput.isNotBlank()) {
+                                    onChangeUsername(usernameInput)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = usernameInput.isNotBlank() && usernameInput != user.username
+                        ) {
+                            Text("Сохранить")
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            // Inline Passkey Editor
+            if (isEditingPasskey && !isGuest) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = passkeyInput,
+                        onValueChange = onPasskeyInputChange,
+                        label = { Text("Новый код дружбы") },
+                        placeholder = { Text("Введите новый код") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                onEditingPasskeyChange(false)
+                                onPasskeyInputChange("")
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Отмена")
+                        }
+                        Button(
+                            onClick = {
+                                if (passkeyInput.isNotBlank()) {
+                                    onChangePasskey(passkeyInput)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = passkeyInput.isNotBlank()
+                        ) {
+                            Text("Сохранить")
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -215,67 +307,17 @@ fun SettingsSection(
     // Passkey Dialog
     if (showPasskeyDialog) {
         PasskeyDialog(
-            passkey = user.friendCode ?: "Not set",
+            passkey = user.friendCode ?: "Не установлен",
             onDismiss = { showPasskeyDialog = false },
-            onCopy = { clipboardManager.setText(AnnotatedString(user.friendCode ?: "")) },
-            onEdit = { showPasskeyEditDialog = true }
-        )
-    }
-
-    // Passkey Edit Dialog
-    if (showPasskeyEditDialog) {
-        AlertDialog(
-            onDismissRequest = { showPasskeyEditDialog = false },
-            title = { Text("Редактировать код дружбы") },
-            text = {
-                Column {
-                    Text(
-                        text = "Введите новый код дружбы:",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = newPasskey,
-                        onValueChange = { newPasskey = it },
-                        label = { Text("Код дружбы") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+            onCopy = {
+                user.friendCode?.let {
+                    clipboardManager.setText(AnnotatedString(it))
                 }
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newPasskey.isNotBlank()) {
-                            onChangePasskey(newPasskey)
-                            showPasskeyEditDialog = false
-                        }
-                    },
-                    enabled = newPasskey.isNotBlank()
-                ) {
-                    Text("Сохранить")
-                }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { showPasskeyEditDialog = false }
-                ) {
-                    Text("Отмена")
-                }
-            }
-        )
-    }
-
-    // Username Dialog
-    if (showUsernameDialog) {
-        UsernameDialog(
-            currentUsername = user.username ?: "",
-            onDismiss = { showUsernameDialog = false },
-            onConfirm = { newUsername ->
-                if (newUsername.isNotBlank()) {
-                    onChangeUsername(newUsername)
-                    // TODO: Update username in database
-                }
+            onEdit = {
+                showPasskeyDialog = false
+                onPasskeyInputChange(user.friendCode ?: "")
+                onEditingPasskeyChange(true)
             }
         )
     }
@@ -292,14 +334,13 @@ private fun PasskeyDialog(
         onDismissRequest = onDismiss,
         title = { Text("Ваш код дружбы") },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = "Поделитесь этим кодом с друзьями, чтобы добавить их:",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = when {
-                                false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                else -> MaterialTheme.colorScheme.onSurface
-                            }.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(
@@ -316,17 +357,18 @@ private fun PasskeyDialog(
                         text = passkey,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = when {
-                                false -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                else -> MaterialTheme.colorScheme.onSurface
-                            }
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Нажмите \"Копировать\" для сохранения в буфер обмена",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center
                 )
             }
         },
@@ -359,70 +401,5 @@ private fun PasskeyDialog(
                 }
             }
         }
-    )
-}
-
-
-@Composable
-private fun UsernameDialog(
-    currentUsername: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    var newUsername by remember { mutableStateOf(currentUsername) }
-    var localError by remember { mutableStateOf<String?>(null) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-                title = { Text("Редактировать имя пользователя") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = newUsername,
-                    onValueChange = {
-                        newUsername = it
-                        localError = null
-                    },
-                        label = { Text("Имя пользователя") },
-                        singleLine = true,
-                        isError = localError != null,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (localError != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = localError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Отмена")
-                    }
-                    Button(
-                        onClick = {
-                            if (newUsername.isNotBlank()) {
-                                onConfirm(newUsername)
-                            } else {
-                                    localError = "Имя пользователя не может быть пустым"
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = newUsername.isNotBlank()
-                    ) {
-                        Text("Сохранить")
-                    }
-                }
-            }
     )
 }
