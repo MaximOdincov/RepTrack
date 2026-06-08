@@ -22,11 +22,11 @@ fun getMuscleGroupIcon(muscleGroup: MuscleGroup): Int {
  */
 fun getMuscleGroupName(muscleGroup: MuscleGroup): String {
     return when (muscleGroup) {
-        MuscleGroup.CHEST -> "Chest"
-        MuscleGroup.BACK -> "Back"
-        MuscleGroup.LEGS -> "Legs"
-        MuscleGroup.ARMS -> "Arms"
-        MuscleGroup.ABS -> "Abs"
-        MuscleGroup.CARDIO -> "Cardio"
+        MuscleGroup.CHEST -> "Грудь"
+        MuscleGroup.BACK -> "Спина"
+        MuscleGroup.LEGS -> "Ноги"
+        MuscleGroup.ARMS -> "Руки"
+        MuscleGroup.ABS -> "Пресс"
+        MuscleGroup.CARDIO -> "Кардио"
     }
 }

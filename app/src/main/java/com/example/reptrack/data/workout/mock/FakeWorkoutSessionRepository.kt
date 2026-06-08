@@ -42,6 +42,10 @@ class FakeWorkoutSessionRepository(
         return flowOf(session)
     }
 
+    override fun observeSessionsByTemplateId(templateId: String): Flow<List<WorkoutSession>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getSessionByDate(date: LocalDate): WorkoutSession? {
         return mockSessions.find { session ->
             session.date.toLocalDate() == date
@@ -59,6 +63,11 @@ class FakeWorkoutSessionRepository(
     }
 
     override suspend fun updateSessionStatus(sessionId: String, status: WorkoutStatus): Result<Unit> {
+        // For mock, just return success
+        return Result.success(Unit)
+    }
+
+    override suspend fun updateSessionTimestamp(sessionId: String, updatedAt: java.time.LocalDateTime): Result<Unit> {
         // For mock, just return success
         return Result.success(Unit)
     }

@@ -13,9 +13,14 @@ import com.example.reptrack.domain.workout.repositories.WorkoutSessionRepository
 import com.example.reptrack.domain.workout.repositories.WorkoutTemplateRepository
 import com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase
 import com.example.reptrack.domain.workout.usecases.exercises.*
+import com.example.reptrack.domain.workout.usecases.sessions.CompleteWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.CreateWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.ShouldUpdateSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.UnlinkSessionFromTemplateUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.UpdateLinkedSessionsUseCase
 import com.example.reptrack.domain.workout.usecases.sessions.UpdateSessionStatusOnFirstSetUseCase
+import com.example.reptrack.domain.workout.usecases.sessions.UpdateWorkoutSessionUseCase
 import com.example.reptrack.domain.workout.usecases.templates.*
 import com.example.reptrack.domain.workout.usecases.workout_exercises.CreateWorkoutExerciseUseCase
 import com.example.reptrack.domain.workout.usecases.workout_exercises.DeleteWorkoutExerciseUseCase
@@ -74,9 +79,9 @@ val workoutModule = module {
     factory { DeleteExerciseUseCase(get(), get()) }
 
     factory { ObserveWorkoutExerciseByIdUseCase(get(), get()) }
-    factory { CreateWorkoutExerciseUseCase(get(), get()) }
-    factory { UpdateWorkoutExerciseUseCase(get(), get()) }
-    factory { DeleteWorkoutExerciseUseCase(get(), get()) }
+     factory { CreateWorkoutExerciseUseCase(get(), get()) }
+     factory { UpdateWorkoutExerciseUseCase(get(), get()) }
+     factory { DeleteWorkoutExerciseUseCase(get(), get()) }
 
     factory { ObserveWorkoutExercisesBySessionUseCase(get(), get()) }
     factory { ObserveBestSetFromLastWorkoutUseCase(get(), get()) }
@@ -85,30 +90,56 @@ val workoutModule = module {
     factory { CalendarUseCase(get(), get()) }
 
     // Session use cases
-    factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get()) }
+    factory { CreateWorkoutSessionUseCase(get()) }
+    factory { CreateWorkoutSessionFromTemplateUseCase(get(), get(), get(), get()) }
+    factory { UpdateWorkoutSessionUseCase(get()) }
+    factory { CompleteWorkoutSessionUseCase(get()) }
+    factory { UnlinkSessionFromTemplateUseCase(get()) }
+    factory { UpdateLinkedSessionsUseCase(get(), get(), get()) }
     factory { ShouldUpdateSessionFromTemplateUseCase() }
-    factory { UpdateSessionStatusOnFirstSetUseCase(get()) }
+    factory { UpdateSessionStatusOnFirstSetUseCase(get(), get()) }
 
     // Template use cases
     factory { ObserveAllWorkoutTemplatesUseCase(get(), get()) }
     factory { ObserveWorkoutTemplateByIdUseCase(get(), get()) }
     factory { CreateWorkoutTemplateUseCase(get(), get()) }
-    factory { UpdateWorkoutTemplateUseCase(get(), get()) }
+    factory { UpdateWorkoutTemplateUseCase(get(), get(), get()) }
     factory { DeleteWorkoutTemplateUseCase(get(), get()) }
     factory { ObserveWorkoutCalendarUseCase(get(), get()) }
 
-    factory<MainScreenStore> {
+    single<MainScreenStore> {
         MainScreenStoreFactory(
             storeFactory = get<StoreFactory>(),
             calendarUseCase = get(),
             observeExerciseByIdUseCase = get(),
             observeBestSetFromLastWorkoutUseCase = get(),
+            observeWorkoutExerciseByIdUseCase = get(),
             createSessionFromTemplateUseCase = get(),
             shouldUpdateSessionFromTemplateUseCase = get(),
             deleteWorkoutExerciseUseCase = get(),
+            completeWorkoutSessionUseCase = get(),
+            unlinkSessionFromTemplateUseCase = get(),
+            updateWorkoutSessionUseCase = get(),
             authRepository = get()
         ).create()
     }
+
+    factory<MainScreenStoreFactory> {
+        MainScreenStoreFactory(
+            storeFactory = get<StoreFactory>(),
+            calendarUseCase = get(),
+            observeExerciseByIdUseCase = get(),
+            observeBestSetFromLastWorkoutUseCase = get(),
+            observeWorkoutExerciseByIdUseCase = get(),
+            createSessionFromTemplateUseCase = get(),
+            shouldUpdateSessionFromTemplateUseCase = get(),
+            deleteWorkoutExerciseUseCase = get(),
+            completeWorkoutSessionUseCase = get(),
+             unlinkSessionFromTemplateUseCase = get(),
+             updateWorkoutSessionUseCase = get(),
+             authRepository = get()
+         )
+     }
 
     factory {
         WorkoutExerciseDetailStoreFactory(

@@ -25,9 +25,14 @@ class FirebaseAuthDataSource(
     }
 
     suspend fun signInWithGoogle(idToken: String): FirebaseUser{
+        android.util.Log.d("FirebaseAuthDataSource", "[Google] Creating credential")
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        return firebaseAuth.signInWithCredential(credential)
-            .await().user?: throw IllegalStateException("Sign in error - user is null")
+        android.util.Log.d("FirebaseAuthDataSource", "[Google] Credential created: ${credential != null}")
+        android.util.Log.d("FirebaseAuthDataSource", "[Google] Calling signInWithCredential...")
+        val user = firebaseAuth.signInWithCredential(credential)
+            .await().user
+        android.util.Log.d("FirebaseAuthDataSource", "[Google] Result user: ${user?.uid}")
+        return user ?: throw IllegalStateException("Sign in error - user is null")
     }
 
     fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser

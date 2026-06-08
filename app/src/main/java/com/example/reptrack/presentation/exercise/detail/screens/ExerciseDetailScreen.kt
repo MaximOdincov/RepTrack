@@ -82,7 +82,7 @@ fun ExerciseDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Exercise Details",
+                        text = "Упражнение",
                         fontSize = 20.sp
                     )
                 },
@@ -94,7 +94,7 @@ fun ExerciseDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = "Назад"
                         )
                     }
                 },
@@ -103,7 +103,7 @@ fun ExerciseDetailScreen(
                     titleContentColor = Color.Black,
                     navigationIconContentColor = Color.Black
                 ),
-                windowInsets = WindowInsets(0) // Remove system insets
+                windowInsets = WindowInsets(0)
             )
         },
         containerColor = Color(0xFFF5F5F5)

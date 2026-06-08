@@ -15,6 +15,7 @@ object FirestoreConstants {
     const val TEMPLATE_EXERCISES_COLLECTION = "template_exercises"
     const val USERS_ENTITY_COLLECTION = "user_profiles"
     const val GDPR_CONSENTS_COLLECTION = "gdpr_consents"
+    const val FRIENDS_COLLECTION = "friends"
 
     const val CHART_TEMPLATES_COLLECTION = "chart_templates"
     const val FRIEND_CONFIGS_COLLECTION = "friend_configs"

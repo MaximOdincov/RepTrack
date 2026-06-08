@@ -12,13 +12,14 @@ interface WorkoutSessionRepository {
 
     fun observeSessionByDate(date: LocalDate): Flow<WorkoutSession?>
 
+    fun observeSessionsByTemplateId(templateId: String): Flow<List<WorkoutSession>>
+
     suspend fun getSessionByDate(date: LocalDate): WorkoutSession?
 
     suspend fun createSession(session: WorkoutSession): Result<Unit>
-
     suspend fun updateSession(session: WorkoutSession): Result<Unit>
-
     suspend fun updateSessionStatus(sessionId: String, status: WorkoutStatus): Result<Unit>
+    suspend fun updateSessionTimestamp(sessionId: String, updatedAt: java.time.LocalDateTime = java.time.LocalDateTime.now()): Result<Unit>
 
     suspend fun deleteSession(sessionId: String): Result<Unit>
 }

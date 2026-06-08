@@ -152,13 +152,13 @@ fun TemplateCard(
 
                 // Информация о количестве упражнений и группах мышц
                 Row(
-                    modifier = Modifier.padding(top = 6.dp),
+                    modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Количество упражнений
                     Text(
                         text = "${template.exerciseIds.size} упр.",
-                        fontSize = 14.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = iconTint
                     )
@@ -166,9 +166,9 @@ fun TemplateCard(
                     // Разделитель
                     Box(
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 6.dp)
                             .width(1.dp)
-                            .height(14.dp)
+                            .height(12.dp)
                             .background(Color.Gray.copy(alpha = 0.5f))
                     )
 
@@ -178,7 +178,7 @@ fun TemplateCard(
                             .take(3)
                             .joinToString(", ") { it.getDisplayName() }
                             .let { if (template.muscleGroups.size > 3) "$it..." else it },
-                        fontSize = 13.sp,
+                        fontSize = 11.sp,
                         color = Color.Gray,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

@@ -70,7 +70,11 @@ class App: Application() {
             com.example.reptrack.di.profileModule,
             com.example.reptrack.di.workoutModule,
             com.example.reptrack.di.exerciseModule,
-            com.example.reptrack.di.databaseModule
+            com.example.reptrack.di.databaseModule,
+            com.example.reptrack.di.friendsModule,
+            com.example.reptrack.di.backupModule,
+            com.example.reptrack.di.statisticsModule,
+            com.example.reptrack.di.timerModule
         )
 
         /**

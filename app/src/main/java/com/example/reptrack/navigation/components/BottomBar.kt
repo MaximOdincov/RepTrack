@@ -38,7 +38,7 @@ sealed class BottomNavItem(
     val title: String
 ) {
     data object Main : BottomNavItem("main", R.drawable.main_screen_icon, "Main")
-    data object Library : BottomNavItem("exercises/view", R.drawable.library_icon, "Library")
+    data object Library : BottomNavItem("library", R.drawable.library_icon, "Library")
     data object Timer : BottomNavItem("timer", R.drawable.timer_icon, "Timer")
     data object Profile : BottomNavItem("profile", R.drawable.profile_icon, "Profile")
 
@@ -81,10 +81,9 @@ fun BottomBar(
                     onClick = {
                         if (!isCurrentlySelected) {
                             navController.navigate(item.route) {
-                                // TODO: Check if popUpTo causes issues with Profile
-                                // popUpTo(navController.graph.startDestinationId) {
-                                //     saveState = true
-                                // }
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }

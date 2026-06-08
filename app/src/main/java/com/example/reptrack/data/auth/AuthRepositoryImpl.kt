@@ -74,9 +74,17 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signInWithGoogle(idToken: String): Result<AuthUser>{
+        android.util.Log.d("AuthRepositoryImpl", "[Google] Starting")
         return runCatching {
             withContext(Dispatchers.IO){
+                android.util.Log.d("AuthRepositoryImpl", "[Google] In IO context")
                 dataSource.signInWithGoogle(idToken).toAuthUser()
+            }
+        }.also { result ->
+            if (result.isSuccess) {
+                android.util.Log.d("AuthRepositoryImpl", "[Google] SUCCESS")
+            } else {
+                android.util.Log.e("AuthRepositoryImpl", "[Google] FAILED: ${result.exceptionOrNull()?.message}", result.exceptionOrNull())
             }
         }
     }

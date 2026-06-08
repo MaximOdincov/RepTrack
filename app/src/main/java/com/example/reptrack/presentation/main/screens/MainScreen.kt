@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,16 +39,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -84,9 +78,20 @@ internal fun MainScreen(
     store: MainScreenStore,
     calendarUseCase: com.example.reptrack.domain.workout.usecases.calendar.CalendarUseCase,
     onNavigateToExerciseDetail: (String) -> Unit = {},
-    onNavigateToTemplates: () -> Unit = {}
+    onNavigateToLibrary: () -> Unit = {}
 ) {
     val state by store.states.collectAsState(MainScreenStore.State())
+    android.util.Log.d("SessionDB", "MainScreen render: state.workoutSession=${state.workoutSession?.id}, exercises=${state.workoutSession?.exercises?.size}, exerciseDataSize=${state.exerciseData.size}")
+
+    // Сохраняем выбранную дату между навигациями
+    val selectedDate by rememberSaveable(state.currentDate) { mutableStateOf(state.currentDate) }
+
+    // Инициализация при входе на экран
+    LaunchedEffect(selectedDate) {
+        store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
+    }
+
+
 
     // Handle navigation labels
     LaunchedEffect(store) {
@@ -103,34 +108,15 @@ internal fun MainScreen(
         }
     }
 
-    // Save selected date locally to survive screen rotation
-    var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
-        mutableStateOf(state.currentDate)
-    }
-
-    // Update store when selected date changes - use LaunchedEffect to avoid recomposition loop
-    LaunchedEffect(selectedDate) {
-        if (selectedDate != state.currentDate) {
-            store.accept(MainScreenStore.Intent.SelectDate(selectedDate))
-        }
-    }
-
-    // Sync selectedDate with state.currentDate when state changes externally
-    LaunchedEffect(state.currentDate) {
-        if (selectedDate != state.currentDate) {
-            selectedDate = state.currentDate
-        }
-    }
-
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToTemplates,
-                containerColor = Color(0xFFFF9800)
+                onClick = onNavigateToLibrary,
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Workout",
+                    contentDescription = "Добавить в тренировку",
                     tint = Color.White
                 )
             }
@@ -146,7 +132,7 @@ internal fun MainScreen(
                 initialDate = selectedDate,
                 selectedDate = selectedDate,
                 onDateSelected = { newDate ->
-                    selectedDate = newDate
+                    store.accept(MainScreenStore.Intent.SelectDate(newDate))
                 },
                 calendarUseCase = calendarUseCase
             )
@@ -154,7 +140,7 @@ internal fun MainScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             when {
-                state.isLoading -> {
+                state.isLoading || state.isInitializing -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -167,6 +153,7 @@ internal fun MainScreen(
                 state.workoutSession != null -> {
                     WorkoutDetails(
                         workout = state.workoutSession!!,
+                        store = store,
                         exerciseData = state.exerciseData,
                         onExerciseClick = { workoutExerciseId ->
                             store.accept(MainScreenStore.Intent.ExerciseClicked(workoutExerciseId))
@@ -287,21 +274,9 @@ private fun TemplateStatusCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    "$exerciseCount ${if (exerciseCount == 1) "exercise" else "exercises"}",
+                    formatExerciseCount(exerciseCount),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            // Muscle Groups
-            if (muscleGroups.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    "Muscle Groups",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -339,7 +314,7 @@ private fun NoWorkoutPlaceholder() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            "No workout planned for this day",
+            "Нет тренировки на этот день",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
@@ -348,7 +323,7 @@ private fun NoWorkoutPlaceholder() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            "Add a template or start a new workout",
+            "Добавьте шаблон или начните новую тренировку",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -358,6 +333,7 @@ private fun NoWorkoutPlaceholder() {
 @Composable
 private fun WorkoutDetails(
     workout: WorkoutSession,
+    store: MainScreenStore,
     exerciseData: Map<String, MainScreenStore.ExerciseData>,
     onExerciseClick: (String) -> Unit = {},
     onExerciseDelete: (String) -> Unit = {},
@@ -391,7 +367,9 @@ private fun WorkoutDetails(
             }
 
             // Combined White Card with Exercises
+            android.util.Log.d("SessionDB", "WorkoutDetails: workout.exercises.size=${workout.exercises.size}, exerciseData.size=${exerciseData.size}")
             if (workout.exercises.isNotEmpty()) {
+                android.util.Log.d("SessionDB", "WorkoutDetails: rendering exercises")
                 item {
                     Box(
                         modifier = Modifier
@@ -410,7 +388,7 @@ private fun WorkoutDetails(
                         Column {
                             // Exercises Header
                             Text(
-                                "Exercises",
+                                "Упражнения",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -471,6 +449,17 @@ private fun WorkoutDetails(
                 }
             }
 
+            // Complete workout button (only show if IN_PROGRESS)
+            if (workout.status == WorkoutStatus.IN_PROGRESS) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CompleteWorkoutButton(
+                        onClick = { store.accept(MainScreenStore.Intent.CompleteWorkout) }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
             // Bottom spacer
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -507,42 +496,10 @@ private fun SwipeableExerciseCard(
     var offsetX by remember { mutableFloatStateOf(0f) }
     val deleteThreshold = -600f
 
-    val swipeProgress = (kotlin.math.abs(offsetX) / kotlin.math.abs(deleteThreshold)).coerceIn(0f, 1f)
-    val iconScale by animateFloatAsState(
-        targetValue = if (swipeProgress > 0.01f) 0.3f + (swipeProgress * 0.7f) else 0f,
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-        label = "icon_scale"
-    )
-    val iconAlpha by animateFloatAsState(
-        targetValue = swipeProgress,
-        animationSpec = tween(durationMillis = 100),
-        label = "icon_alpha"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        // Delete background
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alpha(iconAlpha)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEF5350)),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Delete",
-                tint = Color.White,
-                modifier = Modifier
-                    .padding(end = 24.dp)
-                    .size(32.dp)
-                    .scale(iconScale)
-            )
-        }
-
         // Exercise card
         Box(
             modifier = Modifier
@@ -571,6 +528,7 @@ private fun SwipeableExerciseCard(
         ) {
             Box(
                 modifier = Modifier
+                    .padding(bottom = 12.dp)
                     .clickable { if (offsetX == 0f) onClick() }
             ) {
                 WorkoutExerciseCard(
@@ -629,15 +587,15 @@ private fun SessionStatusCard(
     muscleGroups: List<MuscleGroup>
 ) {
     val statusColor = when (status) {
-        WorkoutStatus.PLANNED -> Color(0xFF9E9E9E)
-        WorkoutStatus.IN_PROGRESS -> Color(0xFFFF9800)
-        WorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
+        WorkoutStatus.PLANNED -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        WorkoutStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
+        WorkoutStatus.COMPLETED -> MaterialTheme.colorScheme.tertiary
     }
 
     val statusText = when (status) {
-        WorkoutStatus.PLANNED -> "Planned"
-        WorkoutStatus.IN_PROGRESS -> "In Progress"
-        WorkoutStatus.COMPLETED -> "Completed"
+        WorkoutStatus.PLANNED -> "Запланировано"
+        WorkoutStatus.IN_PROGRESS -> "В процессе"
+        WorkoutStatus.COMPLETED -> "Завершено"
     }
 
     val statusIcon = when (status) {
@@ -687,21 +645,21 @@ private fun SessionStatusCard(
             }
 
             // Exercise Count (without badge, larger font)
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                "$exerciseCount ${if (exerciseCount == 1) "exercise" else "exercises"}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                Text(
+                    formatExerciseCount(exerciseCount),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
             // Muscle Groups
             if (muscleGroups.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    "Muscle Groups",
+                    "Группы мышц",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -727,6 +685,16 @@ private fun MuscleGroupChip(muscleGroup: MuscleGroup) {
     val backgroundColor = MuscleGroupColors.getBackgroundColor(muscleGroup)
     val textColor = MuscleGroupColors.getPrimaryColor(muscleGroup)
 
+    val names = mapOf(
+        MuscleGroup.CHEST to "Грудь",
+        MuscleGroup.BACK to "Спина",
+        MuscleGroup.LEGS to "Ноги",
+        MuscleGroup.ARMS to "Руки",
+        MuscleGroup.ABS to "Пресс",
+        MuscleGroup.CARDIO to "Кардио"
+    )
+    val groupName = names[muscleGroup] ?: muscleGroup.name.lowercase().replace("_", " ")
+
     Box(
         modifier = Modifier
             .background(
@@ -741,10 +709,48 @@ private fun MuscleGroupChip(muscleGroup: MuscleGroup) {
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
-            text = muscleGroup.name.lowercase().replace("_", " "),
+            text = groupName,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
             color = textColor
         )
     }
 }
+
+@Composable
+private fun CompleteWorkoutButton(
+    onClick: () -> Unit
+) {
+    androidx.compose.material3.Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+    ) {
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.Default.CheckCircle,
+            contentDescription = "Завершить тренировку",
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text(
+            "Завершить тренировку",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+private fun formatExerciseCount(count: Int): String {
+    val lastDigit = count % 10
+    val lastTwoDigits = count % 100
+
+    val suffix = when {
+        lastTwoDigits in 11..14 -> "упражнений"
+        lastDigit == 1 -> "упражнение"
+        lastDigit in 2..4 -> "упражнения"
+        else -> "упражнений"
+    }
+
+    return "$count $suffix"
+}
+    

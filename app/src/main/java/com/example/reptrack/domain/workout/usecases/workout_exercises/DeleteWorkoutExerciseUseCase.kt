@@ -10,7 +10,8 @@ class DeleteWorkoutExerciseUseCase(
     private val errorHandler: ErrorHandler
 ) {
     suspend operator fun invoke(exerciseId: String): Result<Unit> {
-        return workoutExerciseRepository.delete(exerciseId)
+        val result = workoutExerciseRepository.delete(exerciseId)
+        return result
             .logOnFailure(
                 errorHandler = errorHandler,
                 context = ErrorContext(

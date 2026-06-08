@@ -7,10 +7,20 @@ class SyncUseCase(
     private val backupRepository: BackupRepository,
     private val syncPreferences: SyncPreferences
 ) {
+    
     suspend operator fun invoke(userId: String): Boolean {
         return try {
             backupRepository.syncForUser(userId)
             syncPreferences.saveLastSync(System.currentTimeMillis())
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun syncUserOnly(userId: String): Boolean {
+        return try {
+            backupRepository.syncUserOnly(userId)
             true
         } catch (e: Exception) {
             false

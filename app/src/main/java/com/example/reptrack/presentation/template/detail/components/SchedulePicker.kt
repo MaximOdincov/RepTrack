@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.reptrack.domain.workout.entities.TemplateSchedule
 
-private val DAYS = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
+private val DAYS = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
 
 /**
  * Schedule picker component for selecting workout days by week
@@ -88,10 +88,10 @@ private fun ScheduleWeekRow(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            DAYS.forEachIndexed { index, day ->
+            DAYS.forEachIndexed { index, dayLabel ->
                 DayPicker(
-                    day = day,
-                    dayNumber = index + 1, // Display 1-7 instead of 0-6
+                    dayIndex = index,
+                    dayNumber = index + 1,
                     isSelected = index in selectedDays,
                     onClick = { onDayToggle(index) }
                 )
@@ -102,7 +102,7 @@ private fun ScheduleWeekRow(
 
 @Composable
 private fun DayPicker(
-    day: String,
+    dayIndex: Int,
     dayNumber: Int,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -142,7 +142,7 @@ private fun DayPicker(
 
         // Day label
         Text(
-            text = day,
+            text = DAYS[dayIndex],
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
             color = Color.Gray,

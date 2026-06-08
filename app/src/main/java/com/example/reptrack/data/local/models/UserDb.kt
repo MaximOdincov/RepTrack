@@ -13,6 +13,8 @@ data class UserDb(
     val avatarUrl: String?,
     val currentWeight: Float?,
     val height: Float?,
+    val friendCode: String?,
+    val isDarkTheme: Boolean?,
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val deletedAt: LocalDateTime? = null
 )

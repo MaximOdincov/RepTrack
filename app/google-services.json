@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1039455213076-vrkh6hfh5oae14tun61db97l7jlclont.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.reptrack",
+            "certificate_hash": "34da4621da36968aabe531ee4fff5a46bb7d2683"
+          }
+        },
+        {
           "client_id": "1039455213076-paodgppat2epferpmkk30ve4emck7pl9.apps.googleusercontent.com",
           "client_type": 3
         }

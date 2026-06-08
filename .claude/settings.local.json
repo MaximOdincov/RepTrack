@@ -13,7 +13,8 @@
       "mcp__word-document-server__get_document_outline",
       "mcp__word-document-server__create_document",
       "mcp__word-document-server__add_paragraph",
-      "mcp__word-document-server__format_table"
+      "mcp__word-document-server__format_table",
+      "Bash(find:*)"
     ]
   }
 }

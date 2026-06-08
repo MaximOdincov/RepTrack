@@ -2,6 +2,7 @@ package com.example.reptrack.di
 
 import com.example.reptrack.data.auth.AuthRepositoryImpl
 import com.example.reptrack.data.auth.FirebaseAuthDataSource
+import com.example.reptrack.data.auth.FirebaseUserDataSource
 import com.example.reptrack.domain.auth.AuthRepository
 import com.example.reptrack.domain.auth.usecases.SignOutUseCase
 import com.google.firebase.auth.FirebaseAuth
@@ -19,6 +20,12 @@ val authModule = module {
     single {
         FirebaseAuthDataSource(
             firebaseAuth = get()
+        )
+    }
+
+    single {
+        FirebaseUserDataSource(
+            firestore = get()
         )
     }
 

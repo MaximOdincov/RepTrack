@@ -10,5 +10,6 @@ data class WorkoutSession(
     val name: String,
     val durationSeconds: Long,
     val exercises: List<WorkoutExercise>,
-    val comment: String?
+    val comment: String?,
+    val templateId: String? = null
 )

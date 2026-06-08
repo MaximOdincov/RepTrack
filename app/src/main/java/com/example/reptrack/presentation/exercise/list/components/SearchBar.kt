@@ -48,7 +48,7 @@ fun ExerciseSearchBar(
             .padding(horizontal = 4.dp, vertical = 0.dp),
         placeholder = {
             Text(
-                text = "Search",
+                text = "Поиск",
                 fontSize = 20.sp,
                 color = LightTextSecondary
             )
@@ -56,7 +56,7 @@ fun ExerciseSearchBar(
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.search_icon),
-                contentDescription = "Search",
+                contentDescription = "Поиск",
                 tint = LightTextSecondary,
                 modifier = Modifier.size(28.dp)
             )
@@ -68,7 +68,7 @@ fun ExerciseSearchBar(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.cancle_icon),
-                        contentDescription = "Clear search",
+                        contentDescription = "Очистить поиск",
                         tint = LightTextSecondary,
                         modifier = Modifier.size(26.dp)
                     )

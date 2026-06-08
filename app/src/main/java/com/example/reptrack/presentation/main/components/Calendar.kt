@@ -114,23 +114,23 @@ private fun WeekView(
             initial = null
         )
 
-        val calendar = weekCalendar
-        if (calendar != null) {
-            Column(
+    val calendar = weekCalendar
+    if (calendar != null) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    calendar.days.forEach { calendarDay ->
-                        DayNameHeader(
-                            dayName = calendarDay.date.dayOfWeek.name.take(3),
-                            modifier = Modifier.width(52.dp)
-                        )
-                    }
+                calendar.days.forEach { calendarDay ->
+                    DayNameHeader(
+                        dayName = getDayOfWeekName(calendarDay.date.dayOfWeek),
+                        modifier = Modifier.width(52.dp)
+                    )
                 }
+            }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -188,7 +188,7 @@ private fun NumberCell(
     )
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) Color(0xFFFF9800) else Color.Transparent,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
         label = "background_color"
     )
@@ -218,11 +218,12 @@ private fun NumberCell(
                 .clip(CircleShape)
                 .background(
                     when {
-                        isToday && calendarDay.status == null -> Color(0xFFFF9800) // Orange for today without workout
-                        calendarDay.status == DayWorkoutStatus.COMPLETED -> Color(0xFF4CAF50)
-                        calendarDay.status == DayWorkoutStatus.PLANNED -> Color(0xFFBDBDBD)
-                        calendarDay.status == DayWorkoutStatus.OVERDUE -> Color(0xFFF44336)
-                        calendarDay.status == DayWorkoutStatus.SKIPPED -> Color(0xFF9E9E9E)
+                        isToday && calendarDay.status == null -> MaterialTheme.colorScheme.primary
+                        calendarDay.status == DayWorkoutStatus.COMPLETED -> MaterialTheme.colorScheme.tertiary
+                        calendarDay.status == DayWorkoutStatus.IN_PROGRESS -> MaterialTheme.colorScheme.primary
+                        calendarDay.status == DayWorkoutStatus.PLANNED -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        calendarDay.status == DayWorkoutStatus.OVERDUE -> MaterialTheme.colorScheme.error
+                        calendarDay.status == DayWorkoutStatus.SKIPPED -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                         else -> Color.Transparent
                     }
                 )
@@ -257,6 +258,36 @@ private fun NumberCell(
  * Get month display name from date
  */
 private fun getMonthDisplayName(date: LocalDate): String {
-    val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
+    val monthNames = mapOf(
+        1 to "Январь",
+        2 to "Февраль",
+        3 to "Март",
+        4 to "Апрель",
+        5 to "Май",
+        6 to "Июнь",
+        7 to "Июль",
+        8 to "Август",
+        9 to "Сентябрь",
+        10 to "Октябрь",
+        11 to "Ноябрь",
+        12 to "Декабрь"
+    )
+    val monthName = monthNames[date.monthValue] ?: date.month.name.lowercase().replaceFirstChar { it.uppercase() }
     return "$monthName ${date.year}"
+}
+
+/**
+ * Get day of week name in Russian (3 letters)
+ */
+private fun getDayOfWeekName(dayOfWeek: java.time.DayOfWeek): String {
+    val dayNames = mapOf(
+        java.time.DayOfWeek.MONDAY to "Пн",
+        java.time.DayOfWeek.TUESDAY to "Вт",
+        java.time.DayOfWeek.WEDNESDAY to "Ср",
+        java.time.DayOfWeek.THURSDAY to "Чт",
+        java.time.DayOfWeek.FRIDAY to "Пт",
+        java.time.DayOfWeek.SATURDAY to "Сб",
+        java.time.DayOfWeek.SUNDAY to "Вс"
+    )
+    return dayNames[dayOfWeek] ?: dayOfWeek.name.take(3)
 }

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.firebase.crashlytics)
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -90,6 +91,8 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.ui)
     testImplementation(libs.junit)
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
@@ -123,6 +126,10 @@ dependencies {
 
     // Napier для логирования
     implementation(libs.napier)
+
+    // Vico Charts
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.core)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

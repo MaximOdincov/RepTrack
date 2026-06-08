@@ -50,45 +50,45 @@ object MuscleGroupColors {
         }
     }
 
-    // Chest - Soft coral/rose tones
+    // Chest - Bright coral (matches DefaultExercises.kt)
     private object ChestColors {
-        val primary = Color(0xFFE57373) // Soft coral red
-        val background = Color(0x1AE57373) // 10% opacity
-        val iconBackground = Color(0x26E57373) // 15% opacity
+        val primary = Color(0xFFFF6B6B) // Bright coral red
+        val background = Color(0x1AFF6B6B) // 10% opacity
+        val iconBackground = Color(0x26FF6B6B) // 15% opacity
     }
 
-    // Back - Calming blue tones
+    // Back - Bright turquoise (matches DefaultExercises.kt)
     private object BackColors {
-        val primary = Color(0xFF64B5F6) // Soft blue
-        val background = Color(0x1A64B5F6) // 10% opacity
-        val iconBackground = Color(0x2664B5F6) // 15% opacity
+        val primary = Color(0xFF4ECDC4) // Bright turquoise
+        val background = Color(0x1A4ECDC4) // 10% opacity
+        val iconBackground = Color(0x264ECDC4) // 15% opacity
     }
 
-    // Legs - Fresh green tones
+    // Legs - Bright blue (matches DefaultExercises.kt)
     private object LegsColors {
-        val primary = Color(0xFF81C784) // Soft green
-        val background = Color(0x1A81C784) // 10% opacity
-        val iconBackground = Color(0x2681C784) // 15% opacity
+        val primary = Color(0xFF45B7D1) // Bright blue
+        val background = Color(0x1A45B7D1) // 10% opacity
+        val iconBackground = Color(0x2645B7D1) // 15% opacity
     }
 
-    // Arms - Warm orange/peach tones
+    // Arms - Bright purple (matches DefaultExercises.kt)
     private object ArmsColors {
-        val primary = Color(0xFFFFB74D) // Soft orange
-        val background = Color(0x1AFFB74D) // 10% opacity
-        val iconBackground = Color(0x26FFB74D) // 15% opacity
+        val primary = Color(0xFF9B59B6) // Bright purple
+        val background = Color(0x1A9B59B6) // 10% opacity
+        val iconBackground = Color(0x269B59B6) // 15% opacity
     }
 
-    // Abs - Soft warm pink/rose tones
+    // Abs - Bright orange (matches DefaultExercises.kt)
     private object AbsColors {
-        val primary = Color(0xFFF06292) // Soft warm pink
-        val background = Color(0x1AF06292) // 10% opacity
-        val iconBackground = Color(0x26F06292) // 15% opacity
+        val primary = Color(0xFFF39C12) // Bright orange
+        val background = Color(0x1AF39C12) // 10% opacity
+        val iconBackground = Color(0x26F39C12) // 15% opacity
     }
 
-    // Cardio - Energetic purple tones
+    // Cardio - Bright green (matches DefaultExercises.kt)
     private object CardioColors {
-        val primary = Color(0xFFBA68C8) // Soft purple
-        val background = Color(0x1ABA68C8) // 10% opacity
-        val iconBackground = Color(0x26BA68C8) // 15% opacity
+        val primary = Color(0xFF2ECC71) // Bright green
+        val background = Color(0x1A2ECC71) // 10% opacity
+        val iconBackground = Color(0x262ECC71) // 15% opacity
     }
 }

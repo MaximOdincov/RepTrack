@@ -33,11 +33,19 @@ interface WorkoutTemplateDao {
     fun getExercisesForTemplateOrdered(templateId: String): Flow<List<ExerciseDb>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(template: WorkoutTemplateDb)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTemplate(template: WorkoutTemplateDb)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTemplateExercises(
         refs: List<TemplateExerciseDb>
+    )
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExerciseToTemplate(
+        ref: TemplateExerciseDb
     )
 
     @Transaction
